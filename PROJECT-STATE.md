@@ -73,7 +73,7 @@
 
 | # | Секция | Компонент | Описание |
 |---|---|---|---|
-| 1 | Шапка | `Header.jsx` | Логотип ГСИ, навигация (lg+), телефон, CTA, фиксированная с blur. Ссылки "Галерея" и "Где купить" ведут на главную с прокруткой к якорям |
+| 1 | Шапка | `Header.jsx` | Логотип ГСИ, навигация (lg+), телефон, CTA, фиксированная с blur. Ссылки "Галерея" и "Где купить" ведут на главную с прокруткой к якорям. На десктопе исчезает (slide-up + fade) при попадании подвала в viewport (IntersectionObserver на `#main-footer`) |
 | 2 | Hero | `HeroHome.jsx` | Fullscreen видео + тёмный оверлей + заголовок + 2 кнопки. Логотипы Курс и Россия — в правом верхнем углу (крупные, opacity-70) |
 | 3 | Каталог | `ProductsPreview.jsx` | 3 карточки. Hover: zoom 1.08 + grayscale→color + акцентная полоса. Поддержка `cardImageColor` |
 | 4 | Почему мы | `WhyChooseUs.jsx` | 6 карточек преимуществ с SVG-иконками (3×2 сетка) |
@@ -95,7 +95,7 @@
 | 1 | Шапка | `Header.jsx` | Общая шапка |
 | 2 | Hero → Схема | `HeroRingSection.jsx` | Scroll-pinned (280vh): машина из hero (слева) плавно перемещается в центр схемы при скролле, компоненты появляются вокруг с SVG линиями. Заголовок «Схема» — top-32/36 от шапки |
 | 3–4 | О системе → Компоненты | `DescriptionCardsSection.jsx` | Горизонтальный скролл (200vh): блок "О системе" скроллится вправо на "Компоненты системы", затем вертикальный скролл продолжается |
-| 5 | Видео | `VideoSection.jsx` | Fluid.glass-стиль: контейнер 200vh, sticky видео. Текст «Система в действии» поверх, исчезает при зуме. Видео muted+loop, кнопка «Смотреть видео» — рестарт со звуком. Тёмный фон #111318, градиенты сверху/снизу чтобы не сливался с соседними блоками |
+| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины (синий/янтарь/зелёный), без градиентов. Заголовок «Система в действии» слева, описание справа — оба наезжают на рамку видео и уходят по scroll. Cinematic zoom 0.55→1→0.55. Кнопка «Смотреть видео» рестартит со звуком, тексты исчезают. В watch-режиме доступны пауза/закрыть (правый нижний угол). Видео паузится при скролле вне секции (IntersectionObserver). **Mobile**: статичный горизонтальный плеер (aspect-video), заголовок и описание над видео, кнопки play/pause/fullscreen. Кастомный fullscreen-оверлей с X-кнопкой для возврата |
 
 ---
 
@@ -134,7 +134,8 @@
 | Scroll reveal | Карточки | `useScrollReveal` (useInView, once: true) |
 | Zoom-out | Изображения | `RevealImage` — scale 1.15→1, 1.2s |
 | Staggered appear | Hero-элементы | delay 0.2, 0.4, 0.6... |
-| Cinematic zoom (fluid.glass) | Видео продуктовых | 200vh sticky, useMotionValue + manual scroll. scale 0.55→1→0.55, borderRadius 24→0→24. Текст opacity 1→0 (progress 0.15→0.4). Кнопка «Смотреть видео» — рестарт со звуком |
+| Cinematic zoom (fluid.glass) | Видео продуктовых (desktop) | 200vh sticky, useMotionValue + manual scroll. scale 0.55→1→0.55, borderRadius 24→0→24. Левый заголовок и правое описание уезжают по X с fade. В watch-режиме тексты исчезают, появляются пауза/закрыть. Авто-пауза при скролле вне секции (IntersectionObserver) |
+| Header hide at footer | Все страницы (desktop) | IntersectionObserver на `#main-footer`, при `isIntersecting` шапка получает `lg:-translate-y-full lg:opacity-0 lg:pointer-events-none` |
 | **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll, машина left:25%→50%, scale 1→ringMachineScale (0.6 default / 0.75 экскаватор), компоненты stagger. Размер в hero: heroImgVW (32vw default / 44vw бульдозер+грейдер) |
 | **Horizontal scroll** | О системе → Компоненты | sticky 200vh, vertical scroll → horizontal translateX -100vw |
 | Ring appear | Компоненты схемы | Staggered opacity + scale по scroll progress |
