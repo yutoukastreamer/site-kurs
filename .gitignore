@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# macOS junk files
+.DS_Store
+**/.DS_Store
+._*
+**/_.*
+
+# Claude AI folder
+.claude
+
+# Windows junk
+Thumbs.db
