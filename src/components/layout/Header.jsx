@@ -1,0 +1,175 @@
+import { useState, useEffect } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import logoGsi from '../../assets/images/logos/logo-gsi.png'
+
+const navLinks = [
+  { to: '/bulldozer', label: 'Бульдозер' },
+  { to: '/excavator', label: 'Экскаватор' },
+  { to: '/grader', label: 'Грейдер' },
+  { to: '/#gallery', label: 'Галерея' },
+  { to: '/#where-to-buy', label: 'Где купить' },
+]
+
+export default function Header() {
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  /* Scroll to hash after navigation to / */
+  useEffect(() => {
+    const hash = window.location.hash
+    if (pathname === '/' && hash) {
+      const id = hash.slice(1)
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [pathname])
+
+  const handleAnchorClick = (e, to) => {
+    if (to.startsWith('/#')) {
+      e.preventDefault()
+      const id = to.slice(2)
+      if (pathname === '/') {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        navigate('/', { state: { scrollTo: id } })
+        setTimeout(() => {
+          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+        }, 300)
+      }
+    }
+  }
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? 'bg-white/90 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.04)]'
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="container-luxury flex items-center justify-between h-20">
+        {/* Logo GSI */}
+        <Link to="/" className="flex items-center shrink-0">
+          <img src={logoGsi} alt="ГСИ" className="h-9 w-auto" />
+        </Link>
+
+        {/* Desktop Nav */}
+        <nav className="hidden lg:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              onClick={(e) => handleAnchorClick(e, link.to)}
+              className={({ isActive }) =>
+                `text-[12px] font-medium tracking-[0.14em] uppercase transition-colors duration-300 ${
+                  isActive && !link.to.startsWith('/#')
+                    ? 'text-text'
+                    : 'text-text-secondary hover:text-text'
+                }`
+              }
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Right side */}
+        <div className="hidden lg:flex items-center gap-6">
+          <a
+            href="tel:+78001234567"
+            className="text-[12px] font-medium tracking-wide text-text-secondary hover:text-text transition-colors"
+          >
+            8 800 123-45-67
+          </a>
+          <Link
+            to="/#contact"
+            onClick={(e) => handleAnchorClick(e, '/#contact')}
+            className="px-6 py-2.5 border border-text text-text text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-text hover:text-text-light transition-all duration-300"
+          >
+            Получить предложение
+          </Link>
+        </div>
+
+        {/* Mobile burger */}
+        <button
+          className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Меню"
+        >
+          <motion.span
+            className="block w-6 h-px bg-text origin-center"
+            animate={mobileOpen ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+          <motion.span
+            className="block w-6 h-px bg-text"
+            animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          />
+          <motion.span
+            className="block w-6 h-px bg-text origin-center"
+            animate={mobileOpen ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }}
+            transition={{ duration: 0.3 }}
+          />
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            className="lg:hidden bg-white/95 backdrop-blur-md border-t border-border overflow-hidden"
+          >
+            <nav className="container-luxury py-8 flex flex-col gap-6">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={(e) => handleAnchorClick(e, link.to)}
+                  className={({ isActive }) =>
+                    `text-sm font-medium tracking-[0.12em] uppercase ${
+                      isActive && !link.to.startsWith('/#')
+                        ? 'text-text'
+                        : 'text-text-secondary'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+              <div className="divider-accent mt-2" />
+              <a href="tel:+78001234567" className="text-sm text-text-secondary">
+                8 800 123-45-67
+              </a>
+              <Link
+                to="/#contact"
+                onClick={(e) => handleAnchorClick(e, '/#contact')}
+                className="self-start px-6 py-3 border border-text text-text text-[11px] font-medium tracking-[0.15em] uppercase"
+              >
+                Получить предложение
+              </Link>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  )
+}

@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* ─── Arctic Precision Palette ─── */
+@theme {
+  --color-bg: #F7F8FA;
+  --color-bg-alt: #EDEEF2;
+  --color-bg-dark: #1A1D23;
+  --color-text: #1A1D23;
+  --color-text-secondary: #6B7080;
+  --color-text-light: #F7F8FA;
+  --color-border: #D8DAE0;
+  --color-bulldozer: #3B6B9C;
+  --color-excavator: #9C7B3B;
+  --color-grader: #3B8C6E;
+
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+/* ─── Base styles ─── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip; /* clip не ломает position:sticky в отличие от hidden */
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+}
+
+/* ─── Custom utilities ─── */
+@utility container-luxury {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility divider-accent {
+  width: 60px;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* ─── Hero enter animation ─── */
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-enter {
+  animation: hero-enter 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) 0.4s both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 1s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s both;
+}

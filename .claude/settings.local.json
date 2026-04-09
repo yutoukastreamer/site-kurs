@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Read(//opt/homebrew/**)",
+      "Read(//opt/homebrew/lib/**)",
+      "Bash(brew list:*)",
+      "Bash(source ~/.zshrc)",
+      "Read(//Users/Sativa/Library/**)",
+      "Read(//usr/**)",
+      "Read(//opt/**)",
+      "Bash(mdfind \"kMDItemFSName == ''''node''''\")",
+      "Bash(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)",
+      "Bash(bash)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
+      "Bash(npm --version)",
+      "Read(//private/tmp/**)",
+      "Bash(rm -rf vite-init)",
+      "Bash(npm install:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx vite:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker build:*)",
+      "WebFetch(domain:fluid.glass)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
