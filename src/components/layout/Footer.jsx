@@ -63,7 +63,7 @@ const menuLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-bg-dark text-text-light">
+    <footer id="main-footer" className="bg-bg-dark text-text-light">
       <div className="container-luxury py-16 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
 

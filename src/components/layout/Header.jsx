@@ -14,6 +14,7 @@ const navLinks = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [footerInView, setFooterInView] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
@@ -26,6 +27,18 @@ export default function Header() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  /* Hide header on desktop when footer scrolls into view */
+  useEffect(() => {
+    const footer = document.getElementById('main-footer')
+    if (!footer) return
+    const io = new IntersectionObserver(
+      ([entry]) => setFooterInView(entry.isIntersecting),
+      { rootMargin: '0px 0px 0px 0px', threshold: 0 }
+    )
+    io.observe(footer)
+    return () => io.disconnect()
+  }, [pathname])
 
   /* Scroll to hash after navigation to / */
   useEffect(() => {
@@ -63,7 +76,7 @@ export default function Header() {
         isScrolled
           ? 'bg-white/90 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.04)]'
           : 'bg-transparent'
-      }`}
+      } ${footerInView ? 'lg:-translate-y-full lg:opacity-0 lg:pointer-events-none' : ''}`}
     >
       <div className="container-luxury flex items-center justify-between h-20">
         {/* Logo GSI */}
