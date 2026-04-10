@@ -36,9 +36,9 @@ export default function HeroHome() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <img src={logoKurs} alt="Курс" className="h-10 lg:h-14 w-auto opacity-70" />
-        <div className="w-px h-8 bg-white/20" />
-        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto opacity-70" />
+        <img src={logoKurs} alt="Курс" className="h-10 lg:h-14 w-auto brightness-0 invert opacity-90" />
+        <div className="w-px h-8 bg-white/30" />
+        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto brightness-0 invert opacity-70" />
       </motion.div>
 
       {/* Content */}
@@ -59,7 +59,7 @@ export default function HeroHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            Первые отечественные{' '}
+            Инновационные отечественные{' '}
             <span className="text-white/50">3D системы нивелирования</span>
           </motion.h1>
 

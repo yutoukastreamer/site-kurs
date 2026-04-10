@@ -262,7 +262,7 @@ export const products = {
     name: 'Грейдер',
     systemName: 'Двухмачтовая 3D система нивелирования',
     heroImgVW: 44,        // ширина машины в hero (vw), default 32
-    // ringMachineScale не указан → будет 0.6 (default)
+    ringMachineScale: 0.75, // машина крупнее в центре схемы (default 0.6)
     heroTitle: 'Двухмачтовая\n3D система\nнивелирования',
     heroSubtitle: 'Абсолютная точность в каждом проходе',
     accentColor: 'grader',

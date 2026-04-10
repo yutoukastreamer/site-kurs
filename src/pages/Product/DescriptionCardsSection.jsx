@@ -83,7 +83,7 @@ export default function DescriptionCardsSection({ product }) {
 
             {/* Panel 2 — Компоненты системы */}
             <div className="w-screen h-full shrink-0 flex items-start pt-28 bg-bg">
-              <div className="container-luxury py-8">
+              <div className="container-luxury py-8 pb-20">
                 <div className="mb-8">
                   <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3">
                     Оборудование
@@ -140,7 +140,7 @@ export default function DescriptionCardsSection({ product }) {
         </div>
       </section>
 
-      <section className="lg:hidden py-20 bg-bg">
+      <section className="lg:hidden py-20 pb-28 bg-bg">
         <div className="container-luxury">
           <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
             Оборудование

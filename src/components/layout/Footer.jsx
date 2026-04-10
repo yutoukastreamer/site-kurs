@@ -76,7 +76,7 @@ export default function Footer() {
               Группа Строительных Инноваций — первые отечественные 3D системы нивелирования для спецтехники
             </p>
             <div className="flex items-center gap-4">
-              <img src={logoKurs} alt="Курс" className="h-7 w-auto opacity-50" />
+              <img src={logoKurs} alt="Курс" className="h-7 w-auto brightness-0 invert opacity-70" />
               <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto opacity-50" />
             </div>
           </div>
