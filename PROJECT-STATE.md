@@ -95,7 +95,7 @@
 | 1 | Шапка | `Header.jsx` | Общая шапка |
 | 2 | Hero → Схема | `HeroRingSection.jsx` | Scroll-pinned (280vh): машина из hero (слева) плавно перемещается в центр схемы при скролле, компоненты появляются вокруг с SVG линиями. Заголовок «Схема» — top-32/36 от шапки |
 | 3–4 | О системе → Компоненты | `DescriptionCardsSection.jsx` | Горизонтальный скролл (200vh): блок "О системе" скроллится вправо на "Компоненты системы", затем вертикальный скролл продолжается |
-| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины (синий/янтарь/зелёный), без градиентов. Заголовок «Система в действии» слева, описание справа — оба наезжают на рамку видео и уходят по scroll. Cinematic zoom 0.55→1→0.55. Кнопка «Смотреть видео» рестартит со звуком, тексты исчезают. В watch-режиме доступны пауза/закрыть (правый нижний угол). Видео паузится при скролле вне секции (IntersectionObserver). **Mobile**: статичный горизонтальный плеер (aspect-video), заголовок и описание над видео, кнопки play/pause/fullscreen. Кастомный fullscreen-оверлей с X-кнопкой для возврата |
+| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины (синий/янтарь/зелёный), без градиентов. Заголовок «Система в действии» слева, описание справа — наезжают на рамку видео, остаются видимыми при скролле. Scroll-zoom: scale 0.55→1 (достигает 1 на 60% прогресса и удерживается). Тексты исчезают ТОЛЬКО при нажатии «Смотреть видео». В watch-режиме: крестик закрытия справа вверху, нижняя панель управления (пауза/play + текущее время + ползунок перемотки + длительность). Блокировка скролла страницы в режиме плеера. Видео паузится при скролле вне секции (IntersectionObserver). **Mobile**: статичный горизонтальный плеер (aspect-video), заголовок и описание над видео, кнопки play/pause/fullscreen. Кастомный fullscreen-оверлей с X-кнопкой для возврата |
 
 ---
 
@@ -134,7 +134,7 @@
 | Scroll reveal | Карточки | `useScrollReveal` (useInView, once: true) |
 | Zoom-out | Изображения | `RevealImage` — scale 1.15→1, 1.2s |
 | Staggered appear | Hero-элементы | delay 0.2, 0.4, 0.6... |
-| Cinematic zoom (fluid.glass) | Видео продуктовых (desktop) | 200vh sticky, useMotionValue + manual scroll. scale 0.55→1→0.55, borderRadius 24→0→24. Левый заголовок и правое описание уезжают по X с fade. В watch-режиме тексты исчезают, появляются пауза/закрыть. Авто-пауза при скролле вне секции (IntersectionObserver) |
+| Cinematic zoom (fluid.glass) | Видео продуктовых (desktop) | 200vh sticky, useMotionValue + animate (framer-motion). scale 0.55→1 (до 60% scroll, держится на 1), borderRadius 24→0. Текст остаётся видимым при скролле, исчезает только по клику play. Watch-режим: scale/border твинятся через animate(), body scroll lock, крестик вверху + панель с ползунком внизу. Авто-пауза при скролле вне секции (IntersectionObserver) |
 | Header hide at footer | Все страницы (desktop) | IntersectionObserver на `#main-footer`, при `isIntersecting` шапка получает `lg:-translate-y-full lg:opacity-0 lg:pointer-events-none` |
 | **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll, машина left:25%→50%, scale 1→ringMachineScale (0.6 default / 0.75 экскаватор), компоненты stagger. Размер в hero: heroImgVW (32vw default / 44vw бульдозер+грейдер) |
 | **Horizontal scroll** | О системе → Компоненты | sticky 200vh, vertical scroll → horizontal translateX -100vw |

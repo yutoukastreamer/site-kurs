@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useMotionValue, animate, AnimatePresence } from 'framer-motion'
 import heroVideo from '../../assets/videos/hero-video.mp4'
 
 /* ─── Accent color map by product ─── */
@@ -8,6 +8,16 @@ const ACCENT_COLORS = {
   excavator: '#9C7B3B',
   grader:    '#3B8C6E',
 }
+
+/* ─── Time formatter mm:ss ─── */
+function fmt(sec) {
+  if (!sec || !isFinite(sec)) return '0:00'
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+const EASE = [0.25, 0.1, 0.25, 1]
 
 export default function VideoSection({ product }) {
   const accentColor = ACCENT_COLORS[product.accentColor] || '#111318'
@@ -31,26 +41,38 @@ export default function VideoSection({ product }) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   DESKTOP — fluid.glass-style zoom, side-overlapping texts,
-   accent background, pause/close controls, auto-pause on scroll-out.
+   DESKTOP — scroll-driven zoom to fullscreen, texts visible until
+   play click, player mode with seek slider + close/pause controls.
    ════════════════════════════════════════════════════════════════════ */
 function DesktopVideo({ product, accentColor }) {
-  const sectionRef = useRef(null)
-  const videoRef   = useRef(null)
-  const [watchMode, setWatchMode] = useState(false)
-  const [isPaused,  setIsPaused]  = useState(false)
-  const scrollProgress = useMotionValue(0)
+  const sectionRef   = useRef(null)
+  const videoRef     = useRef(null)
+  const watchModeRef = useRef(false)
 
-  /* Manual scroll listener — matches HeroRingSection approach */
+  const [watchMode,   setWatchMode]   = useState(false)
+  const [isPaused,    setIsPaused]    = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration,    setDuration]    = useState(0)
+
+  /* Motion values driven manually (scroll + tween on watchMode) */
+  const scaleMV      = useMotionValue(0.55)
+  const borderMV     = useMotionValue(24)
+  const progressRef  = useRef(0)
+
+  /* ── Scroll listener: zoom 0.55→1 over first 60% of progress, hold at 1 ── */
   useEffect(() => {
     const update = () => {
+      if (watchModeRef.current) return
       const el = sectionRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
       const scrollRange = el.offsetHeight - window.innerHeight
       if (scrollRange <= 0) return
-      const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
-      scrollProgress.set(progress)
+      const p = Math.max(0, Math.min(1, -rect.top / scrollRange))
+      progressRef.current = p
+      const zp = Math.min(p / 0.6, 1)
+      scaleMV.set(0.55 + 0.45 * zp)
+      borderMV.set(24 * (1 - zp))
     }
     update()
     window.addEventListener('scroll', update, { passive: true })
@@ -59,16 +81,28 @@ function DesktopVideo({ product, accentColor }) {
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
-  }, [scrollProgress])
+  }, [scaleMV, borderMV])
+
+  /* ── Tween scale/border on watchMode toggle ── */
+  useEffect(() => {
+    watchModeRef.current = watchMode
+    if (watchMode) {
+      animate(scaleMV, 1,  { duration: 0.55, ease: EASE })
+      animate(borderMV, 0, { duration: 0.55, ease: EASE })
+    } else {
+      const zp = Math.min(progressRef.current / 0.6, 1)
+      animate(scaleMV, 0.55 + 0.45 * zp, { duration: 0.55, ease: EASE })
+      animate(borderMV, 24 * (1 - zp),   { duration: 0.55, ease: EASE })
+    }
+  }, [watchMode, scaleMV, borderMV])
+
+  /* ── Lock body scroll in watch mode ── */
+  useEffect(() => {
+    document.body.style.overflow = watchMode ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [watchMode])
 
   const videoSrc = product.video || heroVideo
-
-  /* Scroll-driven transforms (fluid.glass cinematic zoom) */
-  const scale            = useTransform(scrollProgress, [0, 0.15, 0.5, 0.85, 1], [0.55, 0.65, 1, 0.65, 0.55])
-  const borderRadius     = useTransform(scrollProgress, [0, 0.5, 1], [24, 0, 24])
-  const scrollTextOpacity = useTransform(scrollProgress, [0.15, 0.4], [1, 0])
-  const leftTextX        = useTransform(scrollProgress, [0, 0.4], [0, -60])
-  const rightTextX       = useTransform(scrollProgress, [0, 0.4], [0, 60])
 
   /* ─── Control handlers ─── */
   const handleWatch = useCallback(() => {
@@ -114,6 +148,24 @@ function DesktopVideo({ product, accentColor }) {
     v.play().catch(() => {})
   }, [])
 
+  const handleTimeUpdate = useCallback(() => {
+    const v = videoRef.current
+    if (v) setCurrentTime(v.currentTime)
+  }, [])
+
+  const handleLoadedMetadata = useCallback(() => {
+    const v = videoRef.current
+    if (v) setDuration(v.duration)
+  }, [])
+
+  const handleSeek = useCallback((e) => {
+    const v = videoRef.current
+    if (!v) return
+    const t = parseFloat(e.target.value)
+    v.currentTime = t
+    setCurrentTime(t)
+  }, [])
+
   /* Auto-pause when user scrolls far away from section */
   useEffect(() => {
     const v = videoRef.current
@@ -143,41 +195,33 @@ function DesktopVideo({ product, accentColor }) {
         {/* ── Left text — "Система в действии" ── */}
         <motion.div
           className="absolute left-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-md pointer-events-none"
-          style={{ opacity: scrollTextOpacity, x: leftTextX }}
+          animate={{ opacity: watchMode ? 0 : 1 }}
+          transition={{ duration: 0.4, ease: EASE }}
         >
-          <motion.div
-            animate={{ opacity: watchMode ? 0 : 1 }}
-            transition={{ duration: 0.4 }}
-          >
-            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-5">
-              Видео
-            </p>
-            <h2 className="text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-[1.05]">
-              Система
-              <br />в действии
-            </h2>
-          </motion.div>
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-5">
+            Видео
+          </p>
+          <h2 className="text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-[1.05]">
+            Система
+            <br />в действии
+          </h2>
         </motion.div>
 
         {/* ── Right text — description ── */}
         <motion.div
           className="absolute right-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-[18rem] pointer-events-none"
-          style={{ opacity: scrollTextOpacity, x: rightTextX }}
+          animate={{ opacity: watchMode ? 0 : 1 }}
+          transition={{ duration: 0.4, ease: EASE }}
         >
-          <motion.div
-            animate={{ opacity: watchMode ? 0 : 1 }}
-            transition={{ duration: 0.4 }}
-          >
-            <p className="text-white/80 text-sm lg:text-base leading-relaxed text-right">
-              Посмотрите, как 3D система нивелирования работает в реальных условиях
-            </p>
-          </motion.div>
+          <p className="text-white/80 text-sm lg:text-base leading-relaxed text-right">
+            Посмотрите, как 3D система нивелирования работает в реальных условиях
+          </p>
         </motion.div>
 
         {/* ── Video container — scales with scroll ── */}
         <motion.div
           className="relative w-full h-full overflow-hidden"
-          style={{ scale, borderRadius }}
+          style={{ scale: scaleMV, borderRadius: borderMV }}
         >
           <video
             ref={videoRef}
@@ -187,79 +231,120 @@ function DesktopVideo({ product, accentColor }) {
             loop={!watchMode}
             muted
             onEnded={handleVideoEnd}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
           />
           {/* Dark overlay when not in watch mode */}
           <motion.div
-            className="absolute inset-0 bg-black/30 transition-opacity duration-500"
-            style={{ opacity: watchMode ? 0 : 1 }}
+            className="absolute inset-0 bg-black/30"
+            animate={{ opacity: watchMode ? 0 : 1 }}
+            transition={{ duration: 0.5 }}
           />
         </motion.div>
 
         {/* ── Center play button ── */}
-        {!watchMode && (
-          <motion.button
-            onClick={handleWatch}
-            className="absolute z-30 flex flex-col items-center gap-4 cursor-pointer group"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full flex items-center justify-center
-                            group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="ml-1">
-                <path
-                  d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z"
-                  fill="white"
-                  fillOpacity="0.95"
-                />
-              </svg>
-            </div>
-            <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80 group-hover:text-white transition-colors">
-              Смотреть видео
-            </span>
-          </motion.button>
-        )}
-
-        {/* ── Controls during watch mode ── */}
         <AnimatePresence>
-          {watchMode && (
-            <motion.div
-              className="absolute bottom-8 right-8 z-30 flex items-center gap-3"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
+          {!watchMode && (
+            <motion.button
+              onClick={handleWatch}
+              className="absolute z-30 flex flex-col items-center gap-4 cursor-pointer group"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <button
-                onClick={handleTogglePause}
-                className="w-12 h-12 border border-white/30 rounded-full flex items-center justify-center
-                           text-white/70 hover:text-white hover:border-white/60 transition-all duration-300
-                           cursor-pointer backdrop-blur-sm bg-black/20"
-                aria-label={isPaused ? 'Воспроизвести' : 'Пауза'}
-              >
-                {isPaused ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="5" width="4" height="14" rx="1" />
-                    <rect x="14" y="5" width="4" height="14" rx="1" />
-                  </svg>
-                )}
-              </button>
-              <button
+              <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full flex items-center justify-center
+                              group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="ml-1">
+                  <path
+                    d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z"
+                    fill="white"
+                    fillOpacity="0.95"
+                  />
+                </svg>
+              </div>
+              <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80 group-hover:text-white transition-colors">
+                Смотреть видео
+              </span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* ── Player controls in watch mode ── */}
+        <AnimatePresence>
+          {watchMode && (
+            <>
+              {/* Close button — top right */}
+              <motion.button
                 onClick={handleClose}
-                className="w-12 h-12 border border-white/30 rounded-full flex items-center justify-center
-                           text-white/70 hover:text-white hover:border-white/60 transition-all duration-300
-                           cursor-pointer backdrop-blur-sm bg-black/20"
+                className="absolute top-6 right-6 z-30 w-12 h-12 border border-white/30 rounded-full
+                           flex items-center justify-center text-white/70 hover:text-white
+                           hover:border-white/60 transition-all duration-300 cursor-pointer
+                           backdrop-blur-sm bg-black/20"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
                 aria-label="Закрыть"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
-              </button>
-            </motion.div>
+              </motion.button>
+
+              {/* Bottom control bar — pause + time + seek + duration */}
+              <motion.div
+                className="absolute bottom-6 left-6 right-6 z-30 flex items-center gap-4
+                           backdrop-blur-sm bg-black/30 rounded-full px-5 py-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.35, ease: EASE }}
+              >
+                {/* Pause / Play */}
+                <button
+                  onClick={handleTogglePause}
+                  className="shrink-0 w-10 h-10 flex items-center justify-center text-white/80
+                             hover:text-white transition-colors cursor-pointer"
+                  aria-label={isPaused ? 'Воспроизвести' : 'Пауза'}
+                >
+                  {isPaused ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="5" width="4" height="14" rx="1" />
+                      <rect x="14" y="5" width="4" height="14" rx="1" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Current time */}
+                <span className="text-white/60 text-xs font-medium tabular-nums shrink-0 w-10 text-right">
+                  {fmt(currentTime)}
+                </span>
+
+                {/* Seek slider */}
+                <input
+                  type="range"
+                  min={0}
+                  max={duration || 0}
+                  step={0.1}
+                  value={currentTime}
+                  onChange={handleSeek}
+                  className="flex-1 h-1 appearance-none bg-white/20 rounded-full cursor-pointer
+                             accent-white [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
+                             [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                             [&::-webkit-slider-thumb]:appearance-none"
+                />
+
+                {/* Duration */}
+                <span className="text-white/60 text-xs font-medium tabular-nums shrink-0 w-10">
+                  {fmt(duration)}
+                </span>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
