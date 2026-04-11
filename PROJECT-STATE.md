@@ -95,7 +95,7 @@
 | 1 | Шапка | `Header.jsx` | Общая шапка |
 | 2 | Hero → Схема | `HeroRingSection.jsx` | Scroll-pinned (280vh): машина из hero (слева) плавно перемещается в центр схемы при скролле, компоненты появляются вокруг с SVG линиями. Заголовок «Схема» — top-32/36 от шапки |
 | 3–4 | О системе → Компоненты | `DescriptionCardsSection.jsx` | Горизонтальный скролл (200vh): блок "О системе" скроллится вправо на "Компоненты системы", затем вертикальный скролл продолжается |
-| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины. Scroll-zoom: scale 0.55→1 (60%). Тексты исчезают по клику play. Watch-режим: крестик + панель с ползунком + body scroll lock. **Mobile**: статичный плеер + fullscreen-оверлей |
+| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины. Scroll-zoom: scale 0.55→1 (60%), текст слева/справа. Play → fixed overlay (z-200) поверх всего контента с отдельным видео, кастомными контролами (play/pause + seek + время), крестик закрытия, body scroll lock, Escape для выхода. Scroll-анимация секции не затрагивается. **Mobile**: статичный плеер + fullscreen-оверлей |
 
 ---
 
@@ -134,7 +134,7 @@
 | Scroll reveal | Карточки | `useScrollReveal` (useInView, once: true) |
 | Zoom-out | Изображения | `RevealImage` — scale 1.15→1, 1.2s |
 | Staggered appear | Hero-элементы | delay 0.2, 0.4, 0.6... |
-| Cinematic zoom (fluid.glass) | Видео продуктовых (desktop) | 200vh sticky, useMotionValue + animate (framer-motion). scale 0.55→1 (до 60% scroll, держится на 1), borderRadius 24→0. Текст остаётся видимым при скролле, исчезает только по клику play. Watch-режим: scale/border твинятся через animate(), body scroll lock, крестик вверху + панель с ползунком внизу. Авто-пауза при скролле вне секции (IntersectionObserver) |
+| Cinematic zoom (fluid.glass) | Видео продуктовых (desktop) | 200vh sticky, useMotionValue (scroll-driven). scale 0.55→1 (до 60% scroll, держится на 1), borderRadius 24→0. Текст слева/справа всегда видим при скролле. Play → fixed overlay (z-200) с отдельным video-элементом, кастомные контролы (play/pause + seek slider + время), крестик (top-right) + Escape для закрытия, body scroll lock. Секционное видео muted+loop, overlay видео unmuted. Авто-пауза секционного видео при скролле вне viewport (IntersectionObserver) |
 | Header hide at footer | Все страницы (desktop) | IntersectionObserver на `#main-footer`, при `isIntersecting` шапка получает `lg:-translate-y-full lg:opacity-0 lg:pointer-events-none` |
 | **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll, машина left:25%→50%, scale 1→ringMachineScale (0.6 default / 0.75 экскаватор), компоненты stagger. Размер в hero: heroImgVW (32vw default / 44vw бульдозер+грейдер) |
 | **Horizontal scroll** | О системе → Компоненты | sticky 200vh, vertical scroll → horizontal translateX -100vw |

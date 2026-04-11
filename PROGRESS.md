@@ -1,6 +1,6 @@
 # PROGRESS — Курс / 3D системы нивелирования
 
-> Последнее обновление: 2026-04-10 (шапка светлая тема, заголовок «Инновационные», белые логотипы, грейдер крупнее, VideoSection v3 с плеером, Яндекс Карта)
+> Последнее обновление: 2026-04-11 (VideoSection v4: fullscreen overlay player при клике Play)
 
 ---
 
@@ -63,7 +63,7 @@
 | 1 | Шапка | `Header.jsx` | Та же шапка, что на главной |
 | 2 | Hero → Схема | `HeroRingSection.jsx` | **Scroll-pinned секция (280vh)**. Desktop: машина из hero (слева, 25%) плавно перемещается в центр (50%) и уменьшается (scale 1→0.6). Текст hero исчезает, фон меняется, появляется заголовок "Схема расположения компонентов". Компоненты появляются вокруг по clockHour (часовая метафора) с SVG линиями. Hover на компоненты — увеличение. Mobile: hero без картинки, затем стандартная схема. |
 | 3–4 | О системе → Компоненты | `DescriptionCardsSection.jsx` | **Горизонтальный скролл (200vh)**. Desktop: два full-width панели рядом. При вертикальном скролле секция пинится (sticky) и первая панель "О системе" уезжает влево, открывая панель "Компоненты системы" (сетка карточек + popup модалка). Mobile: обычный вертикальный стек. |
-| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины (синий/янтарь/зелёный). Scroll-zoom: scale 0.55→1 (достигает fullscreen на 60% прогресса, удерживается без zoom-out). Заголовок слева, описание справа — видимы при скролле, исчезают только по клику play. Watch-режим: крестик вверху справа, нижняя панель (play/pause + время + ползунок перемотки + длительность), body scroll lock. Авто-пауза при скролле вне секции. **Mobile**: статичный горизонтальный плеер (aspect-video), заголовок над видео, кнопки play/pause/fullscreen, кастомный fullscreen-оверлей с X-кнопкой. |
+| 5 | Видео | `VideoSection.jsx` | **Desktop**: 200vh sticky, фон = акцентный цвет машины (синий/янтарь/зелёный). Scroll-zoom: scale 0.55→1 (достигает fullscreen на 60% прогресса, удерживается без zoom-out). Заголовок слева, описание справа — всегда видимы при скролле. Play → fixed overlay (z-200) поверх всего контента с отдельным видео-элементом, кастомными контролами (play/pause + время + seek slider + длительность), крестик закрытия + Escape, body scroll lock. Секционное видео всегда muted+loop. Авто-пауза при скролле вне секции. **Mobile**: статичный горизонтальный плеер (aspect-video), заголовок над видео, кнопки play/pause/fullscreen, кастомный fullscreen-оверлей с X-кнопкой. |
 | 6 | Форма + Подвал | `Footer.jsx` | Тот же футер |
 
 ### Акцентные цвета на продуктовых страницах
@@ -181,7 +181,7 @@ KURS2.0/
 | Burger → X | Мобильное меню | rotate + opacity линий |
 | Pulse scroll line | Scroll indicator | scaleY [0,1,0] repeat infinite |
 | Slide gallery | Фото галереи | AnimatePresence, x: ±100%, popLayout |
-| Cinematic zoom (fluid.glass) | Видео на продуктовых (desktop) | 200vh sticky, useMotionValue + animate(). scale 0.55→1 (до 60% scroll, удерживается), borderRadius 24→0. Текст видим при скролле, скрывается только по клику play. Watch-режим: animate() для плавного перехода scale/border, body scroll lock, крестик + панель с ползунком. Авто-пауза при скролле вне секции (IntersectionObserver) |
+| Cinematic zoom (fluid.glass) | Видео на продуктовых (desktop) | 200vh sticky, useMotionValue (scroll-driven only). scale 0.55→1 (до 60% scroll, удерживается), borderRadius 24→0. Текст слева/справа всегда видим при скролле. Play → fixed overlay (z-200) с отдельным video-элементом, кастомные контролы (play/pause + seek + время), крестик + Escape. body scroll lock. Авто-пауза секционного видео при скролле вне секции (IntersectionObserver) |
 | Header hide-on-footer | Все страницы (desktop) | IntersectionObserver на `#main-footer` — при входе в viewport шапка уезжает вверх (`lg:-translate-y-full lg:opacity-0`) |
 | **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll listener, машина left:25%→50%, top:46%→56%, scale 1→0.6. Три вложенных div: outer (left/top), middle (CSS centering), inner (FM scale) |
 | Hero text fade | При scroll-переходе | opacity 1→0 (progress 0.18→0.38) |
@@ -264,6 +264,7 @@ KURS2.0/
 - [x] **Отступ между блоками 4 и 5** — увеличен pb-20 в панели компонентов (desktop), pb-28 в мобильной секции
 - [x] **Яндекс Карта подключена** — iframe конструктора Яндекс Карт вместо placeholder
 - [x] **Филиалы кликабельные** — список филиалов с подсветкой активного города
+- [x] **VideoSection v4 — fullscreen overlay player** — Play открывает fixed overlay (z-200) поверх всего контента с отдельным video-элементом, кастомными контролами и крестиком. body scroll lock + Escape. Scroll-zoom анимация секции не затрагивается
 
 ### Нужно от заказчика
 - [x] ~~Видео: hero-video.mp4~~ — добавлено!
