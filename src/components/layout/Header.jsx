@@ -14,6 +14,7 @@ const navLinks = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [footerInView, setFooterInView] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
@@ -26,6 +27,18 @@ export default function Header() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  /* Hide header on desktop when footer scrolls into view */
+  useEffect(() => {
+    const footer = document.getElementById('main-footer')
+    if (!footer) return
+    const io = new IntersectionObserver(
+      ([entry]) => setFooterInView(entry.isIntersecting),
+      { rootMargin: '0px 0px 0px 0px', threshold: 0 }
+    )
+    io.observe(footer)
+    return () => io.disconnect()
+  }, [pathname])
 
   /* Scroll to hash after navigation to / */
   useEffect(() => {
@@ -53,18 +66,28 @@ export default function Header() {
     }
   }
 
+  /* Light mode: on homepage, before scroll — white text/logos over video */
+  const isHome = pathname === '/'
+  const isLight = isHome && !isScrolled
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
           ? 'bg-white/90 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.04)]'
           : 'bg-transparent'
-      }`}
+      } ${footerInView ? 'lg:-translate-y-full lg:opacity-0 lg:pointer-events-none' : ''}`}
     >
       <div className="container-luxury flex items-center justify-between h-20">
         {/* Logo GSI */}
         <Link to="/" className="flex items-center shrink-0">
-          <img src={logoGsi} alt="ГСИ" className="h-9 w-auto" />
+          <img
+            src={logoGsi}
+            alt="ГСИ"
+            className={`h-9 w-auto transition-all duration-500 ${
+              isLight ? 'brightness-0 invert' : ''
+            }`}
+          />
         </Link>
 
         {/* Desktop Nav */}
@@ -76,9 +99,13 @@ export default function Header() {
               onClick={(e) => handleAnchorClick(e, link.to)}
               className={({ isActive }) =>
                 `text-[12px] font-medium tracking-[0.14em] uppercase transition-colors duration-300 ${
-                  isActive && !link.to.startsWith('/#')
-                    ? 'text-text'
-                    : 'text-text-secondary hover:text-text'
+                  isLight
+                    ? isActive && !link.to.startsWith('/#')
+                      ? 'text-white'
+                      : 'text-white/60 hover:text-white'
+                    : isActive && !link.to.startsWith('/#')
+                      ? 'text-text'
+                      : 'text-text-secondary hover:text-text'
                 }`
               }
             >
@@ -91,14 +118,22 @@ export default function Header() {
         <div className="hidden lg:flex items-center gap-6">
           <a
             href="tel:+78001234567"
-            className="text-[12px] font-medium tracking-wide text-text-secondary hover:text-text transition-colors"
+            className={`text-[12px] font-medium tracking-wide transition-colors ${
+              isLight
+                ? 'text-white/60 hover:text-white'
+                : 'text-text-secondary hover:text-text'
+            }`}
           >
             8 800 123-45-67
           </a>
           <Link
             to="/#contact"
             onClick={(e) => handleAnchorClick(e, '/#contact')}
-            className="px-6 py-2.5 border border-text text-text text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-text hover:text-text-light transition-all duration-300"
+            className={`px-6 py-2.5 text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+              isLight
+                ? 'border-white/40 text-white hover:bg-white hover:text-bg-dark'
+                : 'border-text text-text hover:bg-text hover:text-text-light'
+            }`}
           >
             Получить предложение
           </Link>
@@ -111,17 +146,17 @@ export default function Header() {
           aria-label="Меню"
         >
           <motion.span
-            className="block w-6 h-px bg-text origin-center"
+            className={`block w-6 h-px origin-center ${isLight ? 'bg-white' : 'bg-text'}`}
             animate={mobileOpen ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.3 }}
           />
           <motion.span
-            className="block w-6 h-px bg-text"
+            className={`block w-6 h-px ${isLight ? 'bg-white' : 'bg-text'}`}
             animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
             transition={{ duration: 0.2 }}
           />
           <motion.span
-            className="block w-6 h-px bg-text origin-center"
+            className={`block w-6 h-px origin-center ${isLight ? 'bg-white' : 'bg-text'}`}
             animate={mobileOpen ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.3 }}
           />
