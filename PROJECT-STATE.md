@@ -73,12 +73,21 @@
 
 | # | Секция | Компонент | Описание |
 |---|---|---|---|
-| 1 | Шапка | `Header.jsx` | Логотип ГСИ, навигация (lg+), телефон, CTA, фиксированная с blur. На главной до скролла — светлая тема (белый текст, белый логотип, белая кнопка). На десктопе исчезает при попадании подвала в viewport. Ссылки "Галерея" и "Где купить" ведут на главную с прокруткой к якорям |
+| 1 | Шапка | `Header.jsx` | Логотип ГСИ, навигация (lg+): Бульдозер, Экскаватор, Грейдер, Новости, Галерея, Где купить. Телефон, CTA, фиксированная с blur. На главной до скролла — светлая тема. На десктопе исчезает при попадании подвала в viewport. Ссылки "Галерея" и "Где купить" ведут на главную с прокруткой к якорям |
 | 2 | Hero | `HeroHome.jsx` | Fullscreen видео + тёмный оверлей + заголовок «Инновационные отечественные...» + 2 кнопки. Логотипы Курс и Россия (белые, brightness-0 invert) — в правом верхнем углу |
 | 3 | Каталог | `ProductsPreview.jsx` | 3 карточки. Hover: zoom 1.08 + grayscale→color + акцентная полоса. Поддержка `cardImageColor` |
 | 4 | Почему мы | `WhyChooseUs.jsx` | 6 карточек преимуществ с SVG-иконками (3×2 сетка) |
 | 5 | Галерея | `GallerySection.jsx` | Fullscreen-слайдер, 6 миниатюр, автопроигрывание 5 сек |
 | 6 | Где купить | `WhereToBuy.jsx` | Кликабельный список филиалов + Яндекс Карта (конструктор iframe) |
+
+### Страница новостей (/news)
+
+| # | Секция | Компонент | Описание |
+|---|---|---|---|
+| 1 | Шапка | `Header.jsx` | Общая шапка, ссылка «Новости» в навигации |
+| 2 | Заголовок + Тикер | `NewsPage.jsx` | Заголовок «Новости», подзаголовок, бегущая строка заголовков (CSS animation, пауза при hover) |
+| 3 | Сетка новостей | `NewsPage.jsx` | 3 колонки (desktop), карточки с изображением, датой, превью. Hover: zoom + «Читать далее →» |
+| 4 | Pop-up модалка | `NewsPage.jsx` | Полный текст новости. Закрытие: overlay-click / кнопка X / Escape. Body scroll lock |
 
 ### Общие блоки на ВСЕХ страницах (через Layout.jsx)
 
@@ -145,6 +154,8 @@
 | Slide gallery | Смена фото | AnimatePresence, x: ±100% |
 | Burger → X | Мобильное меню | rotate + opacity |
 | Pulse scroll | Scroll indicator | scaleY [0,1,0] infinite |
+| News ticker | Бегущая строка заголовков | CSS translateX(-50%) 35s linear infinite, пауза при hover |
+| News modal | Pop-up новости | AnimatePresence, opacity + y + scale |
 
 **Общий ease:** `[0.25, 0.1, 0.25, 1]` — плавный premium-feel
 
@@ -165,22 +176,27 @@ KURS2.0/
 ├── src/
 │   ├── main.jsx              — точка входа, BrowserRouter
 │   ├── App.jsx               — scroll-to-top при смене маршрута
-│   ├── router.jsx            — Routes: /, /bulldozer, /excavator, /grader
+│   ├── router.jsx            — Routes: /, /bulldozer, /excavator, /grader, /news
 │   ├── styles/index.css      — Tailwind @theme, палитра, утилиты
 │   ├── data/products.config.js — конфиг всех 3 машин
+│   ├── data/newsData.js      — массив новостей (6 шт.)
 │   ├── hooks/useScrollReveal.js
 │   ├── components/
 │   │   ├── layout/ (Header, Footer, Layout)
 │   │   └── ui/ (Button, AnimatedHeading, SectionReveal, RevealImage)
 │   ├── pages/
 │   │   ├── Home/ (HomePage, HeroHome, ProductsPreview, GallerySection, WhereToBuy)
+│   │   ├── News/ (NewsPage — тикер + карточки + pop-up)
 │   │   └── Product/ (ProductPage, HeroRingSection, DescriptionCardsSection, VideoSection)
 │   └── assets/
 │       ├── images/ (logos/, components/, home/, machines/, systems/, gallery/)
 │       └── videos/ (пока пусто)
 │
 ├── dist/                     — собранная версия для production
-└── public/ (favicon.svg, icons.svg)
+└── public/
+    ├── favicon.svg
+    ├── icons.svg
+    └── assets/images/news/   — сюда класть фото новостей (1.jpg, 2.jpg, ...)
 ```
 
 ---

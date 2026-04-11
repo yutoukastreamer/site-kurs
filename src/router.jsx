@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import HomePage from './pages/Home/HomePage'
 import ProductPage from './pages/Product/ProductPage'
+import NewsPage from './pages/News/NewsPage'
 
 export default function AppRouter() {
   return (
@@ -11,6 +12,7 @@ export default function AppRouter() {
         <Route path="/bulldozer" element={<ProductPage productKey="bulldozer" />} />
         <Route path="/excavator" element={<ProductPage productKey="excavator" />} />
         <Route path="/grader" element={<ProductPage productKey="grader" />} />
+        <Route path="/news" element={<NewsPage />} />
       </Route>
     </Routes>
   )

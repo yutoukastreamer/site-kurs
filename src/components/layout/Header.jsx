@@ -7,6 +7,7 @@ const navLinks = [
   { to: '/bulldozer', label: 'Бульдозер' },
   { to: '/excavator', label: 'Экскаватор' },
   { to: '/grader', label: 'Грейдер' },
+  { to: '/news', label: 'Новости' },
   { to: '/#gallery', label: 'Галерея' },
   { to: '/#where-to-buy', label: 'Где купить' },
 ]

@@ -1,6 +1,6 @@
 # PROGRESS — Курс / 3D системы нивелирования
 
-> Последнее обновление: 2026-04-11 (VideoSection v4: fullscreen overlay player при клике Play)
+> Последнее обновление: 2026-04-11 (Страница новостей: NewsPage с тикером, карточками и pop-up)
 
 ---
 
@@ -112,13 +112,14 @@ KURS2.0/
 ├── src/
 │   ├── main.jsx                         — точка входа, BrowserRouter
 │   ├── App.jsx                          — scroll-to-top при смене маршрута
-│   ├── router.jsx                       — Routes: /, /bulldozer, /excavator, /grader
+│   ├── router.jsx                       — Routes: /, /bulldozer, /excavator, /grader, /news
 │   │
 │   ├── styles/
 │   │   └── index.css                    — Tailwind @theme, палитра, base styles, утилиты
 │   │
 │   ├── data/
-│   │   └── products.config.js           — конфиг всех 3 машин + импорты изображений
+│   │   ├── products.config.js           — конфиг всех 3 машин + импорты изображений
+│   │   └── newsData.js                  — массив новостей (id, title, date, image, preview, fullText)
 │   │
 │   ├── hooks/
 │   │   └── useScrollReveal.js           — framer-motion useInView хук
@@ -143,6 +144,8 @@ KURS2.0/
 │   │   │   ├── WhyChooseUs.jsx          — 6 карточек преимуществ с SVG-иконками
 │   │   │   ├── GallerySection.jsx       — fullscreen слайдер с миниатюрами
 │   │   │   └── WhereToBuy.jsx           — офисы + карта (placeholder)
+│   │   ├── News/
+│   │   │   └── NewsPage.jsx             — страница новостей: тикер + сетка карточек + pop-up модалка
 │   │   └── Product/
 │   │       ├── ProductPage.jsx          — сборка: HeroRing → DescriptionCards → Video
 │   │       ├── HeroRingSection.jsx      — scroll-pinned hero→схема (280vh)
@@ -265,6 +268,7 @@ KURS2.0/
 - [x] **Яндекс Карта подключена** — iframe конструктора Яндекс Карт вместо placeholder
 - [x] **Филиалы кликабельные** — список филиалов с подсветкой активного города
 - [x] **VideoSection v4 — fullscreen overlay player** — Play открывает fixed overlay (z-200) поверх всего контента с отдельным video-элементом, кастомными контролами и крестиком. body scroll lock + Escape. Scroll-zoom анимация секции не затрагивается
+- [x] **Страница новостей (/news)** — NewsPage.jsx с бегущей строкой (тикер заголовков), сеткой карточек (3 колонки desktop), pop-up модалкой с body scroll lock + Escape + overlay-close. newsData.js — отдельный файл данных для удобного редактирования. Ссылка «Новости» добавлена в Header
 
 ### Нужно от заказчика
 - [x] ~~Видео: hero-video.mp4~~ — добавлено!

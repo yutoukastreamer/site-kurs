@@ -90,3 +90,17 @@
 .animate-fade-in {
   animation: fade-in 1s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s both;
 }
+
+/* ─── News ticker ─── */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  animation: ticker-scroll 35s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
