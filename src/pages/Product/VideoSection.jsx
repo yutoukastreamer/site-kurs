@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { motion, useMotionValue, animate, AnimatePresence } from 'framer-motion'
+import { motion, useMotionValue, AnimatePresence } from 'framer-motion'
 import heroVideo from '../../assets/videos/hero-video.mp4'
 
 /* ─── Accent color map by product ─── */
@@ -41,35 +41,33 @@ export default function VideoSection({ product }) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   DESKTOP — scroll-driven zoom to fullscreen, texts visible until
-   play click, player mode with seek slider + close/pause controls.
+   DESKTOP — scroll-driven zoom, texts visible.
+   Play click → fullscreen fixed overlay with custom controls.
+   Section animation stays untouched underneath.
    ════════════════════════════════════════════════════════════════════ */
 function DesktopVideo({ product, accentColor }) {
-  const sectionRef   = useRef(null)
-  const videoRef     = useRef(null)
-  const watchModeRef = useRef(false)
+  const sectionRef      = useRef(null)
+  const videoRef        = useRef(null)
+  const overlayVideoRef = useRef(null)
 
-  const [watchMode,   setWatchMode]   = useState(false)
+  const [overlayOpen, setOverlayOpen] = useState(false)
   const [isPaused,    setIsPaused]    = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration,    setDuration]    = useState(0)
 
-  /* Motion values driven manually (scroll + tween on watchMode) */
-  const scaleMV      = useMotionValue(0.55)
-  const borderMV     = useMotionValue(24)
-  const progressRef  = useRef(0)
+  /* Motion values driven by scroll only */
+  const scaleMV  = useMotionValue(0.55)
+  const borderMV = useMotionValue(24)
 
   /* ── Scroll listener: zoom 0.55→1 over first 60% of progress, hold at 1 ── */
   useEffect(() => {
     const update = () => {
-      if (watchModeRef.current) return
       const el = sectionRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
       const scrollRange = el.offsetHeight - window.innerHeight
       if (scrollRange <= 0) return
       const p = Math.max(0, Math.min(1, -rect.top / scrollRange))
-      progressRef.current = p
       const zp = Math.min(p / 0.6, 1)
       scaleMV.set(0.55 + 0.45 * zp)
       borderMV.set(24 * (1 - zp))
@@ -83,51 +81,32 @@ function DesktopVideo({ product, accentColor }) {
     }
   }, [scaleMV, borderMV])
 
-  /* ── Tween scale/border on watchMode toggle ── */
+  /* ── Lock body scroll when overlay is open ── */
   useEffect(() => {
-    watchModeRef.current = watchMode
-    if (watchMode) {
-      animate(scaleMV, 1,  { duration: 0.55, ease: EASE })
-      animate(borderMV, 0, { duration: 0.55, ease: EASE })
-    } else {
-      const zp = Math.min(progressRef.current / 0.6, 1)
-      animate(scaleMV, 0.55 + 0.45 * zp, { duration: 0.55, ease: EASE })
-      animate(borderMV, 24 * (1 - zp),   { duration: 0.55, ease: EASE })
-    }
-  }, [watchMode, scaleMV, borderMV])
-
-  /* ── Lock body scroll in watch mode ── */
-  useEffect(() => {
-    document.body.style.overflow = watchMode ? 'hidden' : ''
+    document.body.style.overflow = overlayOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [watchMode])
+  }, [overlayOpen])
 
   const videoSrc = product.video || heroVideo
 
-  /* ─── Control handlers ─── */
+  /* ─── Open overlay player ─── */
   const handleWatch = useCallback(() => {
-    const v = videoRef.current
-    if (!v) return
-    setWatchMode(true)
+    setOverlayOpen(true)
     setIsPaused(false)
-    v.currentTime = 0
-    v.muted = false
-    v.play().catch(() => {})
+    setCurrentTime(0)
   }, [])
 
+  /* ─── Close overlay player ─── */
   const handleClose = useCallback(() => {
-    const v = videoRef.current
-    setWatchMode(false)
+    const v = overlayVideoRef.current
+    if (v) { v.pause(); v.muted = true }
+    setOverlayOpen(false)
     setIsPaused(false)
-    if (v) {
-      v.muted = true
-      v.currentTime = 0
-      v.play().catch(() => {})
-    }
   }, [])
 
+  /* ─── Overlay controls ─── */
   const handleTogglePause = useCallback(() => {
-    const v = videoRef.current
+    const v = overlayVideoRef.current
     if (!v) return
     if (v.paused) {
       v.play().catch(() => {})
@@ -139,50 +118,60 @@ function DesktopVideo({ product, accentColor }) {
   }, [])
 
   const handleVideoEnd = useCallback(() => {
-    const v = videoRef.current
-    if (!v) return
-    setWatchMode(false)
+    setOverlayOpen(false)
     setIsPaused(false)
-    v.muted = true
-    v.currentTime = 0
-    v.play().catch(() => {})
   }, [])
 
   const handleTimeUpdate = useCallback(() => {
-    const v = videoRef.current
+    const v = overlayVideoRef.current
     if (v) setCurrentTime(v.currentTime)
   }, [])
 
   const handleLoadedMetadata = useCallback(() => {
-    const v = videoRef.current
+    const v = overlayVideoRef.current
     if (v) setDuration(v.duration)
   }, [])
 
   const handleSeek = useCallback((e) => {
-    const v = videoRef.current
+    const v = overlayVideoRef.current
     if (!v) return
     const t = parseFloat(e.target.value)
     v.currentTime = t
     setCurrentTime(t)
   }, [])
 
-  /* Auto-pause when user scrolls far away from section */
+  /* ── Close overlay on Escape ── */
+  useEffect(() => {
+    if (!overlayOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') handleClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [overlayOpen, handleClose])
+
+  /* ── Autoplay overlay video when opened ── */
+  useEffect(() => {
+    if (!overlayOpen) return
+    const v = overlayVideoRef.current
+    if (!v) return
+    v.currentTime = 0
+    v.muted = false
+    v.play().catch(() => {})
+  }, [overlayOpen])
+
+  /* ── Auto-play/pause section background video based on visibility ── */
   useEffect(() => {
     const v = videoRef.current
     if (!v) return
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.intersectionRatio >= 0.3) {
-          if (!isPaused) v.play().catch(() => {})
-        } else {
-          v.pause()
-        }
+        if (entry.intersectionRatio >= 0.3) v.play().catch(() => {})
+        else v.pause()
       },
-      { threshold: [0, 0.15, 0.3, 0.5, 0.8, 1] }
+      { threshold: [0, 0.3] }
     )
     io.observe(v)
     return () => io.disconnect()
-  }, [isPaused])
+  }, [])
 
   return (
     <section
@@ -193,11 +182,7 @@ function DesktopVideo({ product, accentColor }) {
       <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
 
         {/* ── Left text — "Система в действии" ── */}
-        <motion.div
-          className="absolute left-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-md pointer-events-none"
-          animate={{ opacity: watchMode ? 0 : 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-        >
+        <div className="absolute left-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-md pointer-events-none">
           <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-5">
             Видео
           </p>
@@ -205,18 +190,14 @@ function DesktopVideo({ product, accentColor }) {
             Система
             <br />в действии
           </h2>
-        </motion.div>
+        </div>
 
         {/* ── Right text — description ── */}
-        <motion.div
-          className="absolute right-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-[18rem] pointer-events-none"
-          animate={{ opacity: watchMode ? 0 : 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-        >
+        <div className="absolute right-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-[18rem] pointer-events-none">
           <p className="text-white/80 text-sm lg:text-base leading-relaxed text-right">
             Посмотрите, как 3D система нивелирования работает в реальных условиях
           </p>
-        </motion.div>
+        </div>
 
         {/* ── Video container — scales with scroll ── */}
         <motion.div
@@ -228,126 +209,127 @@ function DesktopVideo({ product, accentColor }) {
             src={videoSrc}
             className="w-full h-full object-cover"
             playsInline
-            loop={!watchMode}
+            loop
             muted
-            onEnded={handleVideoEnd}
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={handleLoadedMetadata}
           />
-          {/* Dark overlay when not in watch mode */}
-          <motion.div
-            className="absolute inset-0 bg-black/30"
-            animate={{ opacity: watchMode ? 0 : 1 }}
-            transition={{ duration: 0.5 }}
-          />
+          {/* Permanent dark overlay on background video */}
+          <div className="absolute inset-0 bg-black/30" />
         </motion.div>
 
         {/* ── Center play button ── */}
-        <AnimatePresence>
-          {!watchMode && (
-            <motion.button
-              onClick={handleWatch}
-              className="absolute z-30 flex flex-col items-center gap-4 cursor-pointer group"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full flex items-center justify-center
-                              group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="ml-1">
-                  <path
-                    d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z"
-                    fill="white"
-                    fillOpacity="0.95"
-                  />
-                </svg>
-              </div>
-              <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80 group-hover:text-white transition-colors">
-                Смотреть видео
-              </span>
-            </motion.button>
-          )}
-        </AnimatePresence>
-
-        {/* ── Player controls in watch mode ── */}
-        <AnimatePresence>
-          {watchMode && (
-            <>
-              {/* Close button — top right */}
-              <motion.button
-                onClick={handleClose}
-                className="absolute top-6 right-6 z-30 w-12 h-12 border border-white/30 rounded-full
-                           flex items-center justify-center text-white/70 hover:text-white
-                           hover:border-white/60 transition-all duration-300 cursor-pointer
-                           backdrop-blur-sm bg-black/20"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-                aria-label="Закрыть"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </motion.button>
-
-              {/* Bottom control bar — pause + time + seek + duration */}
-              <motion.div
-                className="absolute bottom-6 left-6 right-6 z-30 flex items-center gap-4
-                           backdrop-blur-sm bg-black/30 rounded-full px-5 py-3"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.35, ease: EASE }}
-              >
-                {/* Pause / Play */}
-                <button
-                  onClick={handleTogglePause}
-                  className="shrink-0 w-10 h-10 flex items-center justify-center text-white/80
-                             hover:text-white transition-colors cursor-pointer"
-                  aria-label={isPaused ? 'Воспроизвести' : 'Пауза'}
-                >
-                  {isPaused ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
-                    </svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <rect x="6" y="5" width="4" height="14" rx="1" />
-                      <rect x="14" y="5" width="4" height="14" rx="1" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Current time */}
-                <span className="text-white/60 text-xs font-medium tabular-nums shrink-0 w-10 text-right">
-                  {fmt(currentTime)}
-                </span>
-
-                {/* Seek slider */}
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 0}
-                  step={0.1}
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="flex-1 h-1 appearance-none bg-white/20 rounded-full cursor-pointer
-                             accent-white [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
-                             [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
-                             [&::-webkit-slider-thumb]:appearance-none"
-                />
-
-                {/* Duration */}
-                <span className="text-white/60 text-xs font-medium tabular-nums shrink-0 w-10">
-                  {fmt(duration)}
-                </span>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+        <button
+          onClick={handleWatch}
+          className="absolute z-30 flex flex-col items-center gap-4 cursor-pointer group"
+        >
+          <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full flex items-center justify-center
+                          group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="ml-1">
+              <path
+                d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z"
+                fill="white"
+                fillOpacity="0.95"
+              />
+            </svg>
+          </div>
+          <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80 group-hover:text-white transition-colors">
+            Смотреть видео
+          </span>
+        </button>
       </div>
+
+      {/* ── Fullscreen overlay player ── */}
+      <AnimatePresence>
+        {overlayOpen && (
+          <motion.div
+            className="fixed inset-0 z-[200] bg-black flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: EASE }}
+          >
+            <video
+              ref={overlayVideoRef}
+              src={videoSrc}
+              className="w-full h-full object-contain"
+              playsInline
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onEnded={handleVideoEnd}
+            />
+
+            {/* Close button — top right */}
+            <motion.button
+              onClick={handleClose}
+              className="absolute top-6 right-6 z-30 w-12 h-12 border border-white/30 rounded-full
+                         flex items-center justify-center text-white/70 hover:text-white
+                         hover:border-white/60 transition-all duration-300 cursor-pointer
+                         backdrop-blur-sm bg-black/20"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+              aria-label="Закрыть"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </motion.button>
+
+            {/* Bottom control bar — pause + time + seek + duration */}
+            <motion.div
+              className="absolute bottom-6 left-6 right-6 z-30 flex items-center gap-4
+                         backdrop-blur-sm bg-black/30 rounded-full px-5 py-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.35, ease: EASE }}
+            >
+              {/* Pause / Play */}
+              <button
+                onClick={handleTogglePause}
+                className="shrink-0 w-10 h-10 flex items-center justify-center text-white/80
+                           hover:text-white transition-colors cursor-pointer"
+                aria-label={isPaused ? 'Воспроизвести' : 'Пауза'}
+              >
+                {isPaused ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="5" width="4" height="14" rx="1" />
+                    <rect x="14" y="5" width="4" height="14" rx="1" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Current time */}
+              <span className="text-white/60 text-xs font-medium tabular-nums shrink-0 w-10 text-right">
+                {fmt(currentTime)}
+              </span>
+
+              {/* Seek slider */}
+              <input
+                type="range"
+                min={0}
+                max={duration || 0}
+                step={0.1}
+                value={currentTime}
+                onChange={handleSeek}
+                className="flex-1 h-1 appearance-none bg-white/20 rounded-full cursor-pointer
+                           accent-white [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
+                           [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                           [&::-webkit-slider-thumb]:appearance-none"
+              />
+
+              {/* Duration */}
+              <span className="text-white/60 text-xs font-medium tabular-nums shrink-0 w-10">
+                {fmt(duration)}
+              </span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
