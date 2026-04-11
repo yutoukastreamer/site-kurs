@@ -1,6 +1,6 @@
 # PROGRESS — Курс / 3D системы нивелирования
 
-> Последнее обновление: 2026-04-11 (Страница новостей: NewsPage с тикером, карточками и pop-up)
+> Последнее обновление: 2026-04-11 (Схема бульдозера: точные позиции, L-образные пунктирные линии, ромбы-маркеры, hover-интерактив)
 
 ---
 
@@ -76,12 +76,14 @@
 ## 4. Компоненты по машинам
 
 ### Бульдозер — 8 точек на схеме, 6 уникальных карточек
-1. Панель управления с ПО «Курс» (panel-bulldozer.png)
-2. Призма режима ЛПС (опц.) (prism-lps.png)
-3. ГНСС антенна (gnss-antenna.png)
-4. Инерциальный датчик ×3 (inertial-sensor.png) — разные позиции
-5. Контроллер гидравлики (hydraulic-controller.png)
-6. Центральный контроллер (central-controller.png)
+1. ГНСС антенны (gnss-antenna.png)
+2. 10.1" консоль с ПО «КУРС» (panel-bulldozer.png)
+3. Призма режима ЛПС, опц. (prism-lps.png)
+4. Контроллер гидравлики (hydraulic-controller.png)
+5. Инерциальный датчик на отвале (inertial-sensor.png)
+6. Инерциальный датчик в кабине (inertial-sensor.png)
+7. Центральный контроллер (central-controller.png)
+8. Инерциальный датчик на штанге отвала, опц. (inertial-sensor.png)
 
 ### Экскаватор — 7 точек на схеме, 4 уникальных карточки
 1. Панель управления (panel-excavator.png)
@@ -186,12 +188,13 @@ KURS2.0/
 | Slide gallery | Фото галереи | AnimatePresence, x: ±100%, popLayout |
 | Cinematic zoom (fluid.glass) | Видео на продуктовых (desktop) | 200vh sticky, useMotionValue (scroll-driven only). scale 0.55→1 (до 60% scroll, удерживается), borderRadius 24→0. Текст слева/справа всегда видим при скролле. Play → fixed overlay (z-200) с отдельным video-элементом, кастомные контролы (play/pause + seek + время), крестик + Escape. body scroll lock. Авто-пауза секционного видео при скролле вне секции (IntersectionObserver) |
 | Header hide-on-footer | Все страницы (desktop) | IntersectionObserver на `#main-footer` — при входе в viewport шапка уезжает вверх (`lg:-translate-y-full lg:opacity-0`) |
-| **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll listener, машина left:25%→50%, top:46%→56%, scale 1→0.6. Три вложенных div: outer (left/top), middle (CSS centering), inner (FM scale) |
+| **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll listener, машина left:25%→50%, top:46%→56%, scale 1→ringMachineScale (0.7 бульдозер / 0.75 экскаватор+грейдер). Бульдозер: явное позиционирование через `ringPos`, остальные — `clockToPos()` |
 | Hero text fade | При scroll-переходе | opacity 1→0 (progress 0.18→0.38) |
 | Ring title + bg | Заголовок схемы | opacity 0→1 (progress 0.42→0.58), bg opacity (0.35→0.50) |
 | Ring stagger | Компоненты схемы | Staggered opacity по scroll, каждый с задержкой index*0.015 |
-| SVG line draw | Линии-указатели | pathLength 0→1, staggered по scroll |
-| Component hover | Компонент схемы | CSS scale 1→1.1, duration 300ms, без кружков фона |
+| SVG line draw | Линии-указатели | Dashed (strokeDasharray 8 5), L-shaped через computeWaypoint, staggered opacity |
+| Diamond markers | Точки на машине | HTML div rotate-45, staggered opacity по scroll |
+| Component hover | Компонент + ромб + линия | activeIndex state: пара подсвечивается (scale 1→1.1, линия утолщается, ромб увеличивается) |
 | **Horizontal scroll** | О системе → Компоненты | sticky 200vh, translateX: 0→-100vw по scroll progress |
 | Modal | Popup компонента | AnimatePresence, opacity + y + scale (в DescriptionCardsSection) |
 
@@ -269,6 +272,7 @@ KURS2.0/
 - [x] **Филиалы кликабельные** — список филиалов с подсветкой активного города
 - [x] **VideoSection v4 — fullscreen overlay player** — Play открывает fixed overlay (z-200) поверх всего контента с отдельным video-элементом, кастомными контролами и крестиком. body scroll lock + Escape. Scroll-zoom анимация секции не затрагивается
 - [x] **Страница новостей (/news)** — NewsPage.jsx с бегущей строкой (тикер заголовков), сеткой карточек (3 колонки desktop), pop-up модалкой с body scroll lock + Escape + overlay-close. newsData.js — отдельный файл данных для удобного редактирования. Ссылка «Новости» добавлена в Header
+- [x] **Схема бульдозера — точные позиции по референсу** — Компоненты расположены по эталонному изображению через `ringPos` (явные viewport %). L-образные пунктирные SVG-линии (computeWaypoint), ромбы-маркеры (rotate-45 div) на точках машины, hover-интерактив (activeIndex state) — при наведении на компонент или ромб пара подсвечивается (scale + утолщение линии). ringMachineScale: 0.7 для бульдозера. Обновлены подписи компонентов (ГНСС антенны, 10.1" консоль, Инерциальный датчик в кабине/на отвале/на штанге отвала)
 
 ### Нужно от заказчика
 - [x] ~~Видео: hero-video.mp4~~ — добавлено!

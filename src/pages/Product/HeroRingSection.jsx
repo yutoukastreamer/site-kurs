@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { motion, useTransform, useMotionValue } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
@@ -42,11 +42,28 @@ function machineToVP(mx, my, machineVW, machineVH) {
   }
 }
 
+/** Compute an L-shaped waypoint between component and machine dot.
+ *  Returns null if a straight line is more appropriate. */
+function computeWaypoint(fromX, fromY, toX, toY) {
+  const dx = Math.abs(fromX - toX)
+  const dy = Math.abs(fromY - toY)
+
+  if (dx > dy * 1.2) {
+    // Dominant horizontal → go horizontal first, then vertical
+    return { x: toX, y: fromY }
+  } else if (dy > dx * 1.2) {
+    // Dominant vertical → go vertical first, then horizontal
+    return { x: fromX, y: toY }
+  }
+  return null // roughly diagonal → straight line
+}
+
 /* ═══════════════════════════════════════════════════════
    Main component
    ═══════════════════════════════════════════════════════ */
 export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(null)
 
   /* ── Manual scroll progress (more reliable than useScroll target) ── */
   const scrollProgress = useMotionValue(0)
@@ -73,22 +90,18 @@ export default function HeroRingSection({ product }) {
   const components = product.diagramComponents
   const hours = defaultHours(components.length)
 
+  /* Use explicit ringPos when available, fallback to clockToPos */
   const ringPositions = components.map((comp, i) =>
-    clockToPos(comp.clockHour ?? hours[i])
+    comp.ringPos || clockToPos(comp.clockHour ?? hours[i])
   )
 
   /* ── Machine size config (per-product, with defaults) ── */
-  const imgVW = product.heroImgVW ?? 32          // hero image width in vw
-  const finalRingScale = product.ringMachineScale ?? 0.6  // scale in ring mode
-  // Visual size in ring = imgVW * finalRingScale (in vw)
-  const machineVW = imgVW * finalRingScale        // for SVG line endpoints (~19 default)
-  const machineVH = machineVW * (26 / 19)         // maintain original height ratio (~26 default)
+  const imgVW = product.heroImgVW ?? 32
+  const finalRingScale = product.ringMachineScale ?? 0.6
+  const machineVW = imgVW * finalRingScale
+  const machineVH = machineVW * (26 / 19)
 
-  /* ── Desktop scroll transforms ──
-     Phase 1  (0 – 0.30): Hero — machine left, text right
-     Phase 2  (0.30 – 0.60): Transition — machine moves to center, text fades
-     Phase 3  (0.60 – 1.0): Ring — components & lines draw in */
-
+  /* ── Desktop scroll transforms ── */
   const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
   const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
   const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
@@ -102,17 +115,13 @@ export default function HeroRingSection({ product }) {
       <div ref={containerRef} className="hidden lg:block relative" style={{ height: '280vh' }}>
         <div className="sticky top-0 h-screen overflow-hidden bg-bg">
 
-
-          {/* Background transition: bg → bg-alt */}
+          {/* Background transition: bg → bg-alt (light) */}
           <motion.div
             className="absolute inset-0 bg-bg-alt"
             style={{ opacity: bgOpacity }}
           />
 
-          {/* Machine image — scroll-linked position & scale
-               Outer: left/top positioning (no transforms)
-               Middle: CSS translate centering
-               Inner: FM scale around image center */}
+          {/* Machine image — scroll-linked position & scale */}
           <motion.div
             className="absolute z-10 pointer-events-none"
             style={{ left: machineLeft, top: machineTop }}
@@ -140,7 +149,7 @@ export default function HeroRingSection({ product }) {
 
           {/* Ring heading — fades in, pushed below header */}
           <motion.div
-            className="absolute top-20 lg:top-24 left-1/2 text-center z-30 pointer-events-none"
+            className="absolute top-32 lg:top-36 left-1/2 text-center z-30 pointer-events-none"
             style={{ opacity: titleOpacity, x: '-50%' }}
           >
             <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-2">
@@ -160,10 +169,12 @@ export default function HeroRingSection({ product }) {
               index={i}
               total={components.length}
               scrollYProgress={scrollProgress}
+              isActive={activeIndex === i}
+              onHover={(active) => setActiveIndex(active ? i : null)}
             />
           ))}
 
-          {/* SVG connector lines */}
+          {/* SVG connector lines (dashed, L-shaped) */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-[5]">
             {components.map((comp, i) => (
               <ConnectorLine
@@ -176,9 +187,26 @@ export default function HeroRingSection({ product }) {
                 color={color}
                 machineVW={machineVW}
                 machineVH={machineVH}
+                isActive={activeIndex === i}
               />
             ))}
           </svg>
+
+          {/* Diamond markers on machine body */}
+          {components.map((comp, i) => (
+            <DiamondMarker
+              key={`diamond-${i}`}
+              comp={comp}
+              machineVW={machineVW}
+              machineVH={machineVH}
+              index={i}
+              total={components.length}
+              scrollYProgress={scrollProgress}
+              color={color}
+              isActive={activeIndex === i}
+              onHover={(active) => setActiveIndex(active ? i : null)}
+            />
+          ))}
         </div>
       </div>
 
@@ -206,16 +234,16 @@ export default function HeroRingSection({ product }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   Desktop ring point (scroll-linked stagger)
+   Desktop ring point (scroll-linked stagger + hover)
    ═══════════════════════════════════════════════════════ */
-function RingPoint({ comp, position, index, total, scrollYProgress }) {
+function RingPoint({ comp, position, index, total, scrollYProgress, isActive, onHover }) {
   const stagger = index * (0.12 / total)
   const opacity = useTransform(scrollYProgress, [0.55 + stagger, 0.72 + stagger], [0, 1])
   const scale = useTransform(scrollYProgress, [0.55 + stagger, 0.70 + stagger], [0.4, 1])
 
   return (
     <motion.div
-      className="absolute z-20 flex flex-col items-center gap-1.5 cursor-pointer group"
+      className="absolute z-20 cursor-pointer"
       style={{
         left: `${position.left}%`,
         top: `${position.top}%`,
@@ -224,51 +252,102 @@ function RingPoint({ comp, position, index, total, scrollYProgress }) {
         opacity,
         scale,
       }}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
     >
-      <div className="w-20 h-20 flex items-center justify-center transition-transform duration-300 ease-out
-                      group-hover:scale-110">
-        <img src={comp.image} alt={comp.name} className="w-full h-full object-contain drop-shadow-sm" />
+      <div className={`flex flex-col items-center gap-1.5 origin-center
+                        transition-transform duration-300 ease-out
+                        ${isActive ? 'scale-110' : ''}`}>
+        <div className="w-20 h-20 flex items-center justify-center">
+          <img src={comp.image} alt={comp.name} className="w-full h-full object-contain drop-shadow-sm" />
+        </div>
+        <span className={`text-[10px] font-medium text-center max-w-[140px] leading-tight tracking-wide
+                          whitespace-pre-line transition-colors duration-300
+                          ${isActive ? 'text-text' : 'text-text-secondary'}`}>
+          {comp.label || comp.name}
+        </span>
       </div>
-      <span className="text-[10px] font-medium text-text-secondary text-center max-w-[110px] leading-tight tracking-wide
-                       transition-colors duration-300 group-hover:text-text">
-        {comp.label || comp.name}
-      </span>
     </motion.div>
   )
 }
 
 /* ═══════════════════════════════════════════════════════
-   Desktop SVG connector line (scroll-linked draw)
+   Desktop SVG connector line (dashed, L-shaped)
    ═══════════════════════════════════════════════════════ */
-function ConnectorLine({ comp, position, index, total, scrollYProgress, color, machineVW, machineVH }) {
+function ConnectorLine({ comp, position, index, total, scrollYProgress, color, machineVW, machineVH, isActive }) {
   const stagger = index * (0.12 / total)
-  const drawProgress = useTransform(scrollYProgress, [0.58 + stagger, 0.82 + stagger], [0, 1])
-  const dotOpacity = useTransform(scrollYProgress, [0.75 + stagger, 0.85 + stagger], [0, 1])
+  const lineOpacity = useTransform(scrollYProgress, [0.58 + stagger, 0.78 + stagger], [0, 1])
+
+  const mp = comp.machinePoint || [50, 50]
+  const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
+
+  // Compute L-shaped waypoint automatically
+  const waypoint = computeWaypoint(position.left, position.top, target.x, target.y)
+
+  const sw = isActive ? 1.5 : 1
+  const so = isActive ? 0.7 : 0.4
+
+  return (
+    <motion.g style={{ opacity: lineOpacity }}>
+      {waypoint ? (
+        <>
+          <motion.line
+            x1={`${position.left}%`} y1={`${position.top}%`}
+            x2={`${waypoint.x}%`} y2={`${waypoint.y}%`}
+            stroke={color} strokeDasharray="8 5"
+            animate={{ strokeWidth: sw, strokeOpacity: so }}
+            transition={{ duration: 0.3 }}
+          />
+          <motion.line
+            x1={`${waypoint.x}%`} y1={`${waypoint.y}%`}
+            x2={`${target.x}%`} y2={`${target.y}%`}
+            stroke={color} strokeDasharray="8 5"
+            animate={{ strokeWidth: sw, strokeOpacity: so }}
+            transition={{ duration: 0.3 }}
+          />
+        </>
+      ) : (
+        <motion.line
+          x1={`${position.left}%`} y1={`${position.top}%`}
+          x2={`${target.x}%`} y2={`${target.y}%`}
+          stroke={color} strokeDasharray="8 5"
+          animate={{ strokeWidth: sw, strokeOpacity: so }}
+          transition={{ duration: 0.3 }}
+        />
+      )}
+    </motion.g>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   Diamond marker at machine point
+   ═══════════════════════════════════════════════════════ */
+function DiamondMarker({ comp, machineVW, machineVH, index, total, scrollYProgress, color, isActive, onHover }) {
+  const stagger = index * (0.12 / total)
+  const opacity = useTransform(scrollYProgress, [0.70 + stagger, 0.85 + stagger], [0, 1])
 
   const mp = comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
 
   return (
-    <g>
-      <motion.line
-        x1={`${position.left}%`}
-        y1={`${position.top}%`}
-        x2={`${target.x}%`}
-        y2={`${target.y}%`}
-        stroke={color}
-        strokeWidth="0.5"
-        strokeOpacity="0.4"
-        pathLength="1"
-        style={{ pathLength: drawProgress }}
+    <motion.div
+      className={`absolute z-[15] cursor-pointer transition-transform duration-300
+                  ${isActive ? 'scale-[1.8]' : 'hover:scale-125'}`}
+      style={{
+        left: `${target.x}%`,
+        top: `${target.y}%`,
+        x: '-50%',
+        y: '-50%',
+        opacity,
+      }}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+    >
+      <div
+        className="w-2.5 h-2.5 rotate-45"
+        style={{ backgroundColor: color }}
       />
-      <motion.circle
-        cx={`${target.x}%`}
-        cy={`${target.y}%`}
-        r="3"
-        fill={color}
-        style={{ opacity: dotOpacity }}
-      />
-    </g>
+    </motion.div>
   )
 }
 
@@ -323,9 +402,7 @@ function HeroText({ product }) {
    ═══════════════════════════════════════════════════════ */
 function MobileRing({ product, color, imgVW }) {
   const components = product.diagramComponents
-  // Bigger machine in mobile ring when heroImgVW is larger than default
   const mobileImgPct = imgVW > 36 ? '55%' : '45%'
-  // SVG line targets scale with mobile img size
   const mobVW = imgVW > 36 ? 55 : 45
   const mobVH = imgVW > 36 ? 42 : 35
 
@@ -380,14 +457,14 @@ function MobileRing({ product, color, imgVW }) {
                 <div className="w-14 h-14 flex items-center justify-center">
                   <img src={comp.image} alt={comp.name} className="w-full h-full object-contain drop-shadow-sm" />
                 </div>
-                <span className="text-[8px] font-medium text-text-secondary text-center max-w-[70px] leading-tight">
+                <span className="text-[8px] font-medium text-text-secondary text-center max-w-[70px] leading-tight whitespace-pre-line">
                   {comp.label || comp.name}
                 </span>
               </motion.div>
             )
           })}
 
-          {/* SVG lines */}
+          {/* SVG lines (dashed) */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-[5]">
             {components.map((comp, i) => {
               const pos = ringPositions[i]
@@ -401,9 +478,9 @@ function MobileRing({ product, color, imgVW }) {
                   <motion.line
                     x1={`${pos.left}%`} y1={`${pos.top}%`}
                     x2={`${target.x}%`} y2={`${target.y}%`}
-                    stroke={color} strokeWidth="0.5" strokeOpacity="0.3"
-                    initial={{ pathLength: 0 }}
-                    whileInView={{ pathLength: 1 }}
+                    stroke={color} strokeWidth="0.5" strokeDasharray="6 4" strokeOpacity="0.4"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.3 + i * 0.08 }}
                   />

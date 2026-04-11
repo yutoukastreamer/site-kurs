@@ -160,7 +160,7 @@ export const products = {
     name: 'Бульдозер',
     systemName: 'Безмачтовая 3D система нивелирования',
     heroImgVW: 44,        // ширина машины в hero (vw), default 32
-    // ringMachineScale не указан → будет 0.6 (default)
+    ringMachineScale: 0.7, // машина крупнее в центре схемы
     heroTitle: 'Безмачтовая\n3D система\nнивелирования',
     heroSubtitle: 'Точность планировки без компромиссов',
     accentColor: 'bulldozer',
@@ -186,18 +186,22 @@ export const products = {
       { label: 'Интерфейсы', value: 'CAN, RS-232, Bluetooth' },
       { label: 'Рабочая температура', value: '−40°C … +65°C' },
     ],
-    /* 8 points on the diagram
+    /* 8 points on the diagram — positioned to match the reference schematic
+       ringPos: { left, top } — explicit viewport % for component label/image
        machinePoint: [x%, y%] — coordinates on the machine image (0-100)
-       clockHour: position around the ring (1–12, like a clock face) */
+       clockHour: fallback position for ring layout */
     diagramComponents: [
-      { ...COMPONENTS.panelBulldozer, x: 62, y: 35, machinePoint: [78, 22], clockHour: 1.5 },
-      { ...COMPONENTS.prismLps, x: 15, y: 20, machinePoint: [8, 45], clockHour: 10.5 },
-      { ...COMPONENTS.gnssAntenna, x: 50, y: 8, machinePoint: [55, 5], clockHour: 12 },
-      { ...COMPONENTS.inertialSensor, x: 25, y: 50, label: 'Инерциальный датчик #1', machinePoint: [22, 58], clockHour: 9 },
-      { ...COMPONENTS.inertialSensor, x: 45, y: 55, label: 'Инерциальный датчик #2', id: 'inertial-sensor-2', machinePoint: [42, 62], clockHour: 7.5 },
-      { ...COMPONENTS.inertialSensor, x: 70, y: 52, label: 'Инерциальный датчик #3', id: 'inertial-sensor-3', machinePoint: [82, 58], clockHour: 4.5 },
-      { ...COMPONENTS.hydraulicController, x: 55, y: 70, machinePoint: [50, 78], clockHour: 6 },
-      { ...COMPONENTS.centralController, x: 40, y: 40, machinePoint: [60, 38], clockHour: 3 },
+      /* Top row */
+      { ...COMPONENTS.gnssAntenna,         label: 'ГНСС антенны',                                    ringPos: { left: 15, top: 18 },  machinePoint: [32, 10],  clockHour: 11 },
+      { ...COMPONENTS.panelBulldozer,      label: '10.1" консоль\nс ПО "КУРС"',                      ringPos: { left: 38, top: 3 },   machinePoint: [42, 15],  clockHour: 12 },
+      { ...COMPONENTS.prismLps,            label: 'Призма режима ЛПС\n(опционально)',                 ringPos: { left: 68, top: 5 },   machinePoint: [55, 10],  clockHour: 1 },
+      /* Middle row */
+      { ...COMPONENTS.hydraulicController, label: 'Контроллер\nгидравлики',                           ringPos: { left: 10, top: 46 },  machinePoint: [32, 42],  clockHour: 9 },
+      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nна отвале', id: 'inertial-blade', ringPos: { left: 84, top: 38 }, machinePoint: [80, 40], clockHour: 3 },
+      /* Bottom row */
+      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nв кабине',  id: 'inertial-cabin', ringPos: { left: 12, top: 68 }, machinePoint: [35, 52], clockHour: 8 },
+      { ...COMPONENTS.centralController,   label: 'Центральный\nконтроллер',                          ringPos: { left: 40, top: 87 },  machinePoint: [48, 72],  clockHour: 6 },
+      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nна штанге отвала\n(опционально)', id: 'inertial-arm', ringPos: { left: 76, top: 73 }, machinePoint: [68, 58], clockHour: 4 },
     ],
     /* Cards section — unique components only */
     componentCards: [

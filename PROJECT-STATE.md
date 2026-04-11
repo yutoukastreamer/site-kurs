@@ -111,12 +111,14 @@
 ## 5. Компоненты по машинам
 
 ### Бульдозер — 8 точек на схеме, 6 уникальных карточек
-1. Панель управления с ПО «Курс»
-2. Призма режима ЛПС (опц.)
-3. ГНСС антенна
-4. Инерциальный датчик ×3 (разные позиции)
-5. Контроллер гидравлики
-6. Центральный контроллер
+1. ГНСС антенны
+2. 10.1" консоль с ПО «КУРС»
+3. Призма режима ЛПС (опционально)
+4. Контроллер гидравлики
+5. Инерциальный датчик на отвале
+6. Инерциальный датчик в кабине
+7. Центральный контроллер
+8. Инерциальный датчик на штанге отвала (опционально)
 
 ### Экскаватор — 7 точек на схеме, 4 уникальных карточки
 1. Панель управления
@@ -145,11 +147,12 @@
 | Staggered appear | Hero-элементы | delay 0.2, 0.4, 0.6... |
 | Cinematic zoom (fluid.glass) | Видео продуктовых (desktop) | 200vh sticky, useMotionValue (scroll-driven). scale 0.55→1 (до 60% scroll, держится на 1), borderRadius 24→0. Текст слева/справа всегда видим при скролле. Play → fixed overlay (z-200) с отдельным video-элементом, кастомные контролы (play/pause + seek slider + время), крестик (top-right) + Escape для закрытия, body scroll lock. Секционное видео muted+loop, overlay видео unmuted. Авто-пауза секционного видео при скролле вне viewport (IntersectionObserver) |
 | Header hide at footer | Все страницы (desktop) | IntersectionObserver на `#main-footer`, при `isIntersecting` шапка получает `lg:-translate-y-full lg:opacity-0 lg:pointer-events-none` |
-| **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll, машина left:25%→50%, scale 1→ringMachineScale (0.6 default / 0.75 экскаватор), компоненты stagger. Размер в hero: heroImgVW (32vw default / 44vw бульдозер+грейдер) |
+| **Hero→Ring scroll pin** | Продуктовые hero→схема | sticky 280vh, useMotionValue + manual scroll, машина left:25%→50%, scale 1→ringMachineScale (0.6 default / 0.7 бульдозер / 0.75 экскаватор+грейдер), компоненты stagger. Размер в hero: heroImgVW (32vw default / 44vw бульдозер+грейдер). Бульдозер: явное позиционирование компонентов через `ringPos`, L-образные пунктирные линии, ромбы-маркеры на машине |
 | **Horizontal scroll** | О системе → Компоненты | sticky 200vh, vertical scroll → horizontal translateX -100vw |
 | Ring appear | Компоненты схемы | Staggered opacity + scale по scroll progress |
-| SVG line draw | Линии-указатели | pathLength 0→1, staggered |
-| Component hover | Компонент схемы | CSS scale 1→1.1, duration 300ms |
+| SVG line draw | Линии-указатели | Dashed lines (strokeDasharray), L-shaped via computeWaypoint, staggered opacity |
+| Diamond markers | Точки на машине | HTML div rotate-45, staggered opacity по scroll |
+| Component hover | Компонент схемы + ромб + линия | activeIndex state: при наведении на компонент или ромб — пара подсвечивается (scale 1→1.1, линия утолщается) |
 | Modal popup | Карточка компонента | AnimatePresence, opacity + y + scale |
 | Slide gallery | Смена фото | AnimatePresence, x: ±100% |
 | Burger → X | Мобильное меню | rotate + opacity |
