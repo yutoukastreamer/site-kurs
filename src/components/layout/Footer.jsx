@@ -109,16 +109,16 @@ export default function Footer() {
                 href="tel:+78001234567"
                 className="text-sm text-white/50 hover:text-white transition-colors"
               >
-                8 800 123-45-67
+                8 800 777 57 14
               </a>
               <a
                 href="mailto:info@kurs3d.ru"
                 className="text-sm text-white/50 hover:text-white transition-colors"
               >
-                info@kurs3d.ru
+                zao@gsi.ru
               </a>
               <p className="text-sm text-white/35">
-                г. Москва, ул. Примерная, 1, стр. 2
+                г. Москва, ул. Малая Семеновская, 9, стр. 6
               </p>
             </div>
 

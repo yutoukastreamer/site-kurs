@@ -193,7 +193,7 @@ export default function Header() {
               ))}
               <div className="divider-accent mt-2" />
               <a href="tel:+78001234567" className="text-sm text-text-secondary">
-                8 800 123-45-67
+                8 800 777 57 14
               </a>
               <Link
                 to="/#contact"
