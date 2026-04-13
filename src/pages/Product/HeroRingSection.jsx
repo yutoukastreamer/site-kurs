@@ -174,7 +174,7 @@ export default function HeroRingSection({ product }) {
             />
           ))}
 
-          {/* SVG connector lines (dashed, L-shaped) */}
+          {/* SVG connector lines (solid, L-shaped) */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-[5]">
             {components.map((comp, i) => (
               <ConnectorLine
@@ -272,7 +272,7 @@ function RingPoint({ comp, position, index, total, scrollYProgress, isActive, on
 }
 
 /* ═══════════════════════════════════════════════════════
-   Desktop SVG connector line (dashed, L-shaped)
+   Desktop SVG connector line (solid, L-shaped, premium-thin)
    ═══════════════════════════════════════════════════════ */
 function ConnectorLine({ comp, position, index, total, scrollYProgress, color, machineVW, machineVH, isActive }) {
   const stagger = index * (0.12 / total)
@@ -284,8 +284,14 @@ function ConnectorLine({ comp, position, index, total, scrollYProgress, color, m
   // Compute L-shaped waypoint automatically
   const waypoint = computeWaypoint(position.left, position.top, target.x, target.y)
 
-  const sw = isActive ? 1.5 : 1
-  const so = isActive ? 0.7 : 0.4
+  // Solid premium lines: slightly thinner, soft transparency
+  const sw = isActive ? 1.6 : 1.1
+  const so = isActive ? 0.95 : 0.55
+
+  const commonProps = {
+    stroke: color,
+    strokeLinecap: 'round',
+  }
 
   return (
     <motion.g style={{ opacity: lineOpacity }}>
@@ -294,14 +300,14 @@ function ConnectorLine({ comp, position, index, total, scrollYProgress, color, m
           <motion.line
             x1={`${position.left}%`} y1={`${position.top}%`}
             x2={`${waypoint.x}%`} y2={`${waypoint.y}%`}
-            stroke={color} strokeDasharray="8 5"
+            {...commonProps}
             animate={{ strokeWidth: sw, strokeOpacity: so }}
             transition={{ duration: 0.3 }}
           />
           <motion.line
             x1={`${waypoint.x}%`} y1={`${waypoint.y}%`}
             x2={`${target.x}%`} y2={`${target.y}%`}
-            stroke={color} strokeDasharray="8 5"
+            {...commonProps}
             animate={{ strokeWidth: sw, strokeOpacity: so }}
             transition={{ duration: 0.3 }}
           />
@@ -310,7 +316,7 @@ function ConnectorLine({ comp, position, index, total, scrollYProgress, color, m
         <motion.line
           x1={`${position.left}%`} y1={`${position.top}%`}
           x2={`${target.x}%`} y2={`${target.y}%`}
-          stroke={color} strokeDasharray="8 5"
+          {...commonProps}
           animate={{ strokeWidth: sw, strokeOpacity: so }}
           transition={{ duration: 0.3 }}
         />
@@ -464,7 +470,7 @@ function MobileRing({ product, color, imgVW }) {
             )
           })}
 
-          {/* SVG lines (dashed) */}
+          {/* SVG lines (solid) */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-[5]">
             {components.map((comp, i) => {
               const pos = ringPositions[i]
@@ -478,7 +484,8 @@ function MobileRing({ product, color, imgVW }) {
                   <motion.line
                     x1={`${pos.left}%`} y1={`${pos.top}%`}
                     x2={`${target.x}%`} y2={`${target.y}%`}
-                    stroke={color} strokeWidth="0.5" strokeDasharray="6 4" strokeOpacity="0.4"
+                    stroke={color} strokeWidth="1" strokeOpacity="0.6"
+                    strokeLinecap="round"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
