@@ -125,7 +125,7 @@ export default function Header() {
                 : 'text-text-secondary hover:text-text'
             }`}
           >
-            8 800 123-45-67
+            8 800 777-57-14
           </a>
           <Link
             to="/#contact"
