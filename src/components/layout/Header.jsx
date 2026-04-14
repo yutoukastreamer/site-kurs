@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import logoGsi from '../../assets/images/logos/logo-gsi.png'
+import logoGsiWhite from '../../assets/images/logos/logo-gsi-white.png'
 
 const navLinks = [
   { to: '/bulldozer', label: 'Бульдозер' },
@@ -83,11 +84,9 @@ export default function Header() {
         {/* Logo GSI */}
         <Link to="/" className="flex items-center shrink-0">
           <img
-            src={logoGsi}
+            src={isLight ? logoGsiWhite : logoGsi}
             alt="ГСИ"
-            className={`h-9 w-auto transition-all duration-500 ${
-              isLight ? 'brightness-0 invert' : ''
-            }`}
+            className="h-9 w-auto transition-all duration-500"
           />
         </Link>
 

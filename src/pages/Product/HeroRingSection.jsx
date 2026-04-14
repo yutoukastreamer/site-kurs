@@ -396,8 +396,8 @@ function HeroText({ product }) {
 
       {/* Logos */}
       <div className="flex items-center gap-6">
-        <img src={logoKurs} alt="Курс" className="h-7 w-auto opacity-70" />
-        <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto opacity-70" />
+        <img src={logoKurs} alt="Курс" className="h-7 w-auto" />
+        <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto" />
       </div>
     </>
   )

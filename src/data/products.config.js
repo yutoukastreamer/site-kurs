@@ -22,8 +22,6 @@ import gnssAntenna from '../assets/images/components/gnss-antenna.png'
 import inertialSensor from '../assets/images/components/inertial-sensor.png'
 import hydraulicController from '../assets/images/components/hydraulic-controller.png'
 import centralController from '../assets/images/components/central-controller.png'
-import radioAntenna from '../assets/images/components/radio-antenna.png'
-import radioModem from '../assets/images/components/radio-modem.png'
 
 /* ─── Shared component definitions ─── */
 const COMPONENTS = {
@@ -305,8 +303,6 @@ export const products = {
       { ...COMPONENTS.inertialSensor, x: 35, y: 55, machinePoint: [32, 55], clockHour: 8 },
       { ...COMPONENTS.hydraulicController, x: 50, y: 65, machinePoint: [48, 72], clockHour: 6 },
       { ...COMPONENTS.centralController, x: 55, y: 40, machinePoint: [58, 35], clockHour: 3 },
-      { ...COMPONENTS.radioAntenna, x: 70, y: 10, machinePoint: [78, 8], clockHour: 12.5 },
-      { ...COMPONENTS.radioModem, x: 65, y: 50, machinePoint: [72, 48], clockHour: 4.5 },
     ],
     componentCards: [
       COMPONENTS.panelGrader,
@@ -314,8 +310,6 @@ export const products = {
       COMPONENTS.inertialSensor,
       COMPONENTS.hydraulicController,
       COMPONENTS.centralController,
-      COMPONENTS.radioAntenna,
-      COMPONENTS.radioModem,
     ],
   },
 }

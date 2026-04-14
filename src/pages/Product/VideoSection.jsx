@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useMotionValue, AnimatePresence } from 'framer-motion'
-import heroVideo from '../../assets/videos/hero-video.mp4'
+import kursVideo from '../../assets/videos/kurs-video.mp4'
 
 /* ─── Accent color map by product ─── */
 const ACCENT_COLORS = {
@@ -87,7 +87,7 @@ function DesktopVideo({ product, accentColor }) {
     return () => { document.body.style.overflow = '' }
   }, [overlayOpen])
 
-  const videoSrc = product.video || heroVideo
+  const videoSrc = product.video || kursVideo
 
   /* ─── Open overlay player ─── */
   const handleWatch = useCallback(() => {
@@ -343,7 +343,7 @@ function MobileVideo({ product, accentColor }) {
   const fsVideoRef = useRef(null)
   const [isPaused, setIsPaused] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const videoSrc = product.video || heroVideo
+  const videoSrc = product.video || kursVideo
 
   const handlePlay = () => {
     const v = videoRef.current

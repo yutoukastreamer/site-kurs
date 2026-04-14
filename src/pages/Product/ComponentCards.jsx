@@ -96,7 +96,7 @@ function ComponentModal({ comp, accent, onClose }) {
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text transition-colors cursor-pointer z-10"
+          className="absolute top-2 right-3 w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text transition-colors cursor-pointer z-10"
           aria-label="Закрыть"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

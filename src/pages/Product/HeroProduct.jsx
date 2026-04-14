@@ -93,8 +93,8 @@ export default function HeroProduct({ product }) {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 1.0 }}
             >
-              <img src={logoKurs} alt="Курс" className="h-7 w-auto opacity-30" />
-              <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto opacity-30" />
+              <img src={logoKurs} alt="Курс" className="h-7 w-auto" />
+              <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto" />
             </motion.div>
           </div>
         </div>

@@ -104,3 +104,19 @@
 .ticker-track:hover {
   animation-play-state: paused;
 }
+
+/* ─── Lightbox thumbnail strip ─── */
+.lightbox-thumbstrip {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+.lightbox-thumbstrip::-webkit-scrollbar {
+  height: 4px;
+}
+.lightbox-thumbstrip::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lightbox-thumbstrip::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+}

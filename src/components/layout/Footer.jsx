@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import logoGsi from '../../assets/images/logos/logo-gsi.png'
-import logoKurs from '../../assets/images/logos/logo-kurs.png'
+import logoGsi from '../../assets/images/logos/logo-gsi-white.png'
+import logoKurs from '../../assets/images/logos/logo-kurs-white.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
 
 /* ─── Social links ─── */
@@ -59,6 +59,7 @@ const menuLinks = [
   { to: '/grader', label: 'Грейдер' },
   { to: '/#gallery', label: 'Галерея' },
   { to: '/#where-to-buy', label: 'Где купить' },
+  { to: '/news', label: 'Новости' },
 ]
 
 export default function Footer() {
@@ -70,14 +71,14 @@ export default function Footer() {
           {/* ── Left column: Logo + slogan + brand logos ── */}
           <div className="lg:col-span-4">
             <Link to="/" className="inline-block mb-5">
-              <img src={logoGsi} alt="ГСИ" className="h-10 w-auto brightness-0 invert opacity-80" />
+              <img src={logoGsi} alt="ГСИ" className="h-10 w-auto" />
             </Link>
             <p className="text-white/35 text-sm leading-relaxed mb-6 max-w-xs">
               Группа Строительных Инноваций — первые отечественные 3D системы нивелирования для спецтехники
             </p>
             <div className="flex items-center gap-4">
-              <img src={logoKurs} alt="Курс" className="h-7 w-auto brightness-0 invert opacity-70" />
-              <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto opacity-50" />
+              <img src={logoKurs} alt="Курс" className="h-7 w-auto" />
+              <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto" />
             </div>
           </div>
 
@@ -119,6 +120,12 @@ export default function Footer() {
               </a>
               <p className="text-sm text-white/35">
                 г. Москва, ул. Малая Семеновская, 9, стр. 6
+              </p>
+              <p className="text-sm text-white/35">
+                ООО «ГЕОСТРОЙИЗЫСКАНИЯ»
+              </p>
+              <p className="text-sm text-white/35">
+                ИНН 9718053358
               </p>
             </div>
 

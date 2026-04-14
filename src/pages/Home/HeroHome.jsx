@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
-import logoKurs from '../../assets/images/logos/logo-kurs.png'
+import logoKurs from '../../assets/images/logos/logo-kurs-white.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
 import heroVideo from '../../assets/videos/hero-video.mp4'
 
@@ -36,9 +36,9 @@ export default function HeroHome() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <img src={logoKurs} alt="Курс" className="h-10 lg:h-14 w-auto brightness-0 invert opacity-90" />
+        <img src={logoKurs} alt="Курс" className="h-10 lg:h-14 w-auto" />
         <div className="w-px h-8 bg-white/30" />
-        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto brightness-0 invert opacity-70" />
+        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto" />
       </motion.div>
 
       {/* Content */}
@@ -59,8 +59,13 @@ export default function HeroHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            Инновационные отечественные{' '}
-            <span className="text-white/50">3D системы нивелирования</span>
+            Инновационные
+            <br />
+            отечественные
+            <br />
+            <span className="text-white/50">3D системы
+            <br />
+            нивелирования</span>
           </motion.h1>
 
           <motion.p
@@ -98,20 +103,31 @@ export default function HeroHome() {
 
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
       >
-        <span className="text-[10px] tracking-[0.3em] uppercase text-white/20">
-          Scroll
-        </span>
-        <motion.div
-          className="w-px h-8 bg-white/15"
-          animate={{ scaleY: [0, 1, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ transformOrigin: 'top' }}
-        />
+        <motion.svg
+          width="18"
+          height="28"
+          viewBox="0 0 18 28"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <line x1="9" y1="0" x2="9" y2="20" stroke="white" strokeOpacity="0.25" strokeWidth="0.75" />
+          <polyline
+            points="3,15 9,22 15,15"
+            fill="none"
+            stroke="white"
+            strokeOpacity="0.25"
+            strokeWidth="0.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </motion.svg>
       </motion.div>
     </section>
   )
