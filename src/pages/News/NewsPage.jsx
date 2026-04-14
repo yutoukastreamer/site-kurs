@@ -62,7 +62,7 @@ function NewsCard({ item, onClick }) {
           <p className="mt-3 text-sm text-text-secondary leading-relaxed line-clamp-3">
             {item.preview}
           </p>
-          <span className="inline-block mt-5 text-[11px] font-medium tracking-[0.14em] uppercase text-text-secondary group-hover:text-text transition-colors duration-300">
+          <span className="inline-block mt-5 text-[11px] font-medium tracking-[0.14em] uppercase text-text-secondary group-hover:text-text transition-colors duration-300 whitespace-nowrap">
             Читать далее
             <span className="inline-block ml-2 transition-transform duration-300 group-hover:translate-x-1">
               &rarr;
@@ -184,7 +184,8 @@ export default function NewsPage() {
         <div className="container-luxury">
           <AnimatedHeading
             as="h1"
-            className="text-4xl lg:text-6xl font-light tracking-tight text-text"
+            className="font-light tracking-tight text-text"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3.75rem)' }}
           >
             Новости
           </AnimatedHeading>

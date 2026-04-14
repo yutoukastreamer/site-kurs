@@ -91,14 +91,14 @@ export default function Header() {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-3 xl:gap-5 2xl:gap-8">
           {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               onClick={(e) => handleAnchorClick(e, link.to)}
               className={({ isActive }) =>
-                `text-[12px] font-medium tracking-[0.14em] uppercase transition-colors duration-300 ${
+                `whitespace-nowrap text-[11px] xl:text-[12px] font-medium tracking-[0.14em] uppercase transition-colors duration-300 ${
                   isLight
                     ? isActive && !link.to.startsWith('/#')
                       ? 'text-white'
@@ -115,10 +115,10 @@ export default function Header() {
         </nav>
 
         {/* Right side */}
-        <div className="hidden lg:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-3 xl:gap-6 shrink-0">
           <a
             href="tel:+78001234567"
-            className={`text-[12px] font-medium tracking-wide transition-colors ${
+            className={`whitespace-nowrap text-[11px] xl:text-[12px] font-medium tracking-wide transition-colors ${
               isLight
                 ? 'text-white/60 hover:text-white'
                 : 'text-text-secondary hover:text-text'
@@ -129,7 +129,7 @@ export default function Header() {
           <Link
             to="/#contact"
             onClick={(e) => handleAnchorClick(e, '/#contact')}
-            className={`px-6 py-2.5 text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
+            className={`whitespace-nowrap shrink-0 px-4 xl:px-6 py-2.5 text-[10px] xl:text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
               isLight
                 ? 'border-white/40 text-white hover:bg-white hover:text-bg-dark'
                 : 'border-text text-text hover:bg-text hover:text-text-light'
@@ -141,23 +141,23 @@ export default function Header() {
 
         {/* Mobile burger */}
         <button
-          className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+          className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-[5px]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Меню"
         >
           <motion.span
-            className={`block w-6 h-px origin-center ${isLight ? 'bg-white' : 'bg-text'}`}
-            animate={mobileOpen ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }}
+            className={`block w-6 h-[2px] origin-center ${isLight ? 'bg-white' : 'bg-text'}`}
+            animate={mobileOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.3 }}
           />
           <motion.span
-            className={`block w-6 h-px ${isLight ? 'bg-white' : 'bg-text'}`}
+            className={`block w-6 h-[2px] ${isLight ? 'bg-white' : 'bg-text'}`}
             animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
             transition={{ duration: 0.2 }}
           />
           <motion.span
-            className={`block w-6 h-px origin-center ${isLight ? 'bg-white' : 'bg-text'}`}
-            animate={mobileOpen ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }}
+            className={`block w-6 h-[2px] origin-center ${isLight ? 'bg-white' : 'bg-text'}`}
+            animate={mobileOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
             transition={{ duration: 0.3 }}
           />
         </button>

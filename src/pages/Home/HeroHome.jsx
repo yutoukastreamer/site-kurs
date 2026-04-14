@@ -38,14 +38,14 @@ export default function HeroHome() {
       >
         <img src={logoKurs} alt="Курс" className="h-10 lg:h-14 w-auto" />
         <div className="w-px h-8 bg-white/30" />
-        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto" />
+        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
       </motion.div>
 
       {/* Content */}
       <div className="container-luxury relative z-10 pt-32 pb-20">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl lg:-ml-52">
           <motion.p
-            className="text-[11px] font-medium tracking-[0.35em] uppercase text-white/40 mb-8"
+            className="text-[11px] font-medium tracking-[0.35em] uppercase text-white/40 mb-8 whitespace-nowrap"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -54,7 +54,8 @@ export default function HeroHome() {
           </motion.p>
 
           <motion.h1
-            className="text-4xl md:text-6xl lg:text-7xl font-light leading-[1.05] mb-6 text-white"
+            className="font-light leading-[1.05] mb-6 text-white"
+            style={{ fontSize: 'clamp(2rem, 5vw, 4.5rem)' }}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -86,14 +87,14 @@ export default function HeroHome() {
             <Link
               to="/#contact"
               onClick={(e) => handleAnchor(e, 'contact')}
-              className="px-8 py-3.5 border border-white/25 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 text-center"
+              className="whitespace-nowrap shrink-0 px-8 py-3.5 border border-white/25 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 text-center"
             >
               Получить предложение
             </Link>
             <Link
               to="/#products"
               onClick={(e) => handleAnchor(e, 'products')}
-              className="px-8 py-3.5 text-white/40 text-[11px] font-medium tracking-[0.15em] uppercase hover:text-white transition-colors duration-300 text-center"
+              className="whitespace-nowrap shrink-0 px-8 py-3.5 text-white/40 text-[11px] font-medium tracking-[0.15em] uppercase hover:text-white transition-colors duration-300 text-center"
             >
               Смотреть продукцию
             </Link>

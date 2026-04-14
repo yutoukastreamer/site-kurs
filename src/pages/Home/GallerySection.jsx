@@ -79,13 +79,13 @@ export default function GallerySection() {
         <div className="container-luxury">
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-10 gap-4">
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+            <div className="shrink-0">
+              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
                 Галерея
               </p>
-              <h2 className="text-3xl lg:text-5xl font-light">На объектах</h2>
+              <h2 className="font-light" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>На объектах</h2>
             </div>
-            <p className="text-text-secondary text-sm max-w-xs">
+            <p className="text-text-secondary text-sm max-w-xs whitespace-nowrap">
               {galleryImages.length} фотографий с реальных объектов
             </p>
           </div>
@@ -133,7 +133,7 @@ export default function GallerySection() {
             >
               <button
                 onClick={() => setShowAll((v) => !v)}
-                className="group flex items-center gap-3 px-8 py-3.5 border border-border hover:border-text transition-colors duration-300 text-[12px] font-medium tracking-[0.2em] uppercase cursor-pointer"
+                className="group flex items-center gap-3 px-8 py-3.5 border border-border hover:border-text transition-colors duration-300 text-[12px] font-medium tracking-[0.2em] uppercase cursor-pointer whitespace-nowrap"
               >
                 {showAll ? 'Скрыть' : `Показать все ${galleryImages.length} фото`}
                 <motion.svg

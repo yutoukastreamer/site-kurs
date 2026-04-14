@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import SectionReveal from '../../components/ui/SectionReveal'
@@ -16,10 +16,10 @@ export default function ComponentCards({ product }) {
     <section className="py-24 lg:py-36 bg-bg">
       <div className="container-luxury">
         <SectionReveal>
-          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
             Оборудование
           </p>
-          <h2 className="text-3xl lg:text-5xl font-light mb-16">
+          <h2 className="font-light mb-16" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>
             Компоненты системы
           </h2>
         </SectionReveal>
@@ -74,6 +74,23 @@ function Card({ comp, index, accent, onSelect }) {
 }
 
 function ComponentModal({ comp, accent, onClose }) {
+  useEffect(() => {
+    const html = document.documentElement
+    const scrollbarWidth = window.innerWidth - html.clientWidth
+    html.style.overflow = 'hidden'
+    html.style.paddingRight = `${scrollbarWidth}px`
+    return () => {
+      html.style.overflow = ''
+      html.style.paddingRight = ''
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onClose])
+
   return (
     <motion.div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
@@ -87,7 +104,7 @@ function ComponentModal({ comp, accent, onClose }) {
 
       {/* Modal */}
       <motion.div
-        className="relative bg-bg max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-border"
+        className="relative bg-bg max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-border modal-scroll"
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.97 }}

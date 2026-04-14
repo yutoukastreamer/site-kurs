@@ -15,6 +15,9 @@ dist-ssr
 # Heavy video files
 src/assets/videos/kurs-video.mp4
 
+# Heavy PDF files
+public/catalog.pdf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

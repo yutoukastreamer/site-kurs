@@ -33,10 +33,10 @@ export default function ContactFormSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left — heading + text */}
           <SectionReveal>
-            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/40 mb-4">
+            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/40 mb-4 whitespace-nowrap">
               Обратная связь
             </p>
-            <h2 className="text-3xl lg:text-4xl font-light mb-6 text-white leading-tight">
+            <h2 className="font-light mb-6 text-white leading-tight" style={{ fontSize: 'clamp(1.875rem, 3vw, 2.25rem)' }}>
               Оставьте заявку
             </h2>
             <p className="text-white/40 text-sm leading-relaxed max-w-md">
@@ -88,7 +88,7 @@ export default function ContactFormSection() {
                 </div>
                 <button
                   type="button"
-                  className="w-full px-8 py-3.5 border border-white/30 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 cursor-pointer"
+                  className="w-full px-8 py-3.5 border border-white/30 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 cursor-pointer whitespace-nowrap"
                 >
                   Отправить заявку
                 </button>

@@ -92,7 +92,7 @@ function AdvantageCard({ item, index }) {
       </div>
 
       {/* Text */}
-      <h3 className="text-base font-medium mb-2 leading-snug">{item.title}</h3>
+      <h3 className="text-base font-medium mb-2 leading-snug whitespace-nowrap">{item.title}</h3>
       <p className="text-sm text-text-secondary leading-relaxed">{item.description}</p>
     </motion.div>
   )
@@ -104,11 +104,11 @@ export default function WhyChooseUs() {
       <div className="container-luxury">
         <SectionReveal>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 lg:mb-20 gap-6">
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+            <div className="shrink-0">
+              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
                 Преимущества
               </p>
-              <h2 className="text-3xl lg:text-5xl font-light">
+              <h2 className="font-light" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>
                 Почему выбирают нас
               </h2>
             </div>

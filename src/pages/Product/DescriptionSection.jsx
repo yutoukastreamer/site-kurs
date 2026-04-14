@@ -7,10 +7,10 @@ export default function DescriptionSection({ product }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           {/* Text */}
           <SectionReveal>
-            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
               О системе
             </p>
-            <h2 className="text-3xl lg:text-4xl font-light mb-8 leading-tight">
+            <h2 className="font-light mb-8 leading-tight" style={{ fontSize: 'clamp(1.5rem, 2.8vw, 2.25rem)' }}>
               Инженерное совершенство в каждой детали
             </h2>
             <p className="text-text-secondary leading-relaxed text-base mb-8">

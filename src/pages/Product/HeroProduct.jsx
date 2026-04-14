@@ -31,7 +31,7 @@ export default function HeroProduct({ product }) {
           {/* Right — Text */}
           <div className={`order-1 lg:order-2 border-l-2 ${accentBorder[product.accentColor]} pl-8`}>
             <motion.p
-              className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-6"
+              className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-6 whitespace-nowrap"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -40,7 +40,8 @@ export default function HeroProduct({ product }) {
             </motion.p>
 
             <motion.h1
-              className="text-3xl md:text-5xl lg:text-6xl font-light leading-[1.05] mb-8"
+              className="font-light leading-[1.05] mb-8"
+              style={{ fontSize: 'clamp(1.75rem, 4vw, 3.75rem)' }}
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -61,16 +62,16 @@ export default function HeroProduct({ product }) {
 
             {/* Quick specs */}
             <motion.div
-              className="flex gap-8 mb-8"
+              className="flex gap-4 xl:gap-8 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
               {product.features.slice(0, 3).map((f) => (
-                <div key={f.title}>
-                  <span className={`text-2xl font-light text-${product.accentColor}`}>{f.value}</span>
-                  <span className="text-xs text-text-secondary ml-1">{f.unit}</span>
-                  <p className="text-[10px] text-text-secondary tracking-wide uppercase mt-1">{f.title}</p>
+                <div key={f.title} className="shrink-0">
+                  <span className={`text-2xl font-light text-${product.accentColor} whitespace-nowrap`}>{f.value}</span>
+                  <span className="text-xs text-text-secondary ml-1 whitespace-nowrap">{f.unit}</span>
+                  <p className="text-[10px] text-text-secondary tracking-wide uppercase mt-1 whitespace-nowrap">{f.title}</p>
                 </div>
               ))}
             </motion.div>
@@ -82,7 +83,7 @@ export default function HeroProduct({ product }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-              <Button href="#" variant="primary">Скачать буклет PDF</Button>
+              <Button href="/catalog.pdf" download variant="primary">Скачать буклет PDF</Button>
               <Button href="#contact" variant="outline">Получить предложение</Button>
             </motion.div>
 

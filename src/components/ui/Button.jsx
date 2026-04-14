@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 export default function Button({ children, to, href, variant = 'primary', className = '', ...props }) {
-  const base = 'inline-flex items-center justify-center px-8 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 cursor-pointer'
+  const base = 'inline-flex items-center justify-center whitespace-nowrap shrink-0 px-8 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 cursor-pointer'
 
   const variants = {
     primary: 'border border-text text-text hover:bg-text hover:text-text-light',

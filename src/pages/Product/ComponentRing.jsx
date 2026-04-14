@@ -43,10 +43,10 @@ export default function ComponentRing({ product }) {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
             Устройство
           </p>
-          <h2 className="text-3xl lg:text-5xl font-light">
+          <h2 className="font-light" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>
             Схема расположения компонентов
           </h2>
         </motion.div>
@@ -55,7 +55,7 @@ export default function ComponentRing({ product }) {
         <div className="relative w-full max-w-4xl mx-auto aspect-square">
           {/* Center machine image */}
           <motion.div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] z-10"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] z-[5]"
             style={{ scale: machineScale, opacity: machineOpacity }}
           >
             <img
@@ -81,7 +81,7 @@ export default function ComponentRing({ product }) {
           })}
 
           {/* SVG connector lines */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-[5]">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-[15]">
             {components.map((comp, i) => {
               const pos = ringPositions[i]
               return (

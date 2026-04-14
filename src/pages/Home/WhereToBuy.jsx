@@ -7,10 +7,10 @@ export default function WhereToBuy() {
       <div className="container-luxury">
         {/* Header */}
         <SectionReveal>
-          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
             Где купить
           </p>
-          <h2 className="text-3xl lg:text-5xl font-light mb-10">
+          <h2 className="font-light mb-10" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>
             Центральный офис
           </h2>
         </SectionReveal>
@@ -28,10 +28,10 @@ export default function WhereToBuy() {
               </div>
             </div>
             <div className="min-w-0">
-              <p className="text-base lg:text-lg leading-relaxed text-text">
+              <p className="text-base lg:text-lg leading-relaxed text-text whitespace-nowrap">
                 г.&nbsp;Москва, ул.&nbsp;Малая Семеновская, д.&nbsp;9, стр.&nbsp;1
               </p>
-              <p className="text-base lg:text-lg leading-relaxed text-text-secondary mt-1.5">
+              <p className="text-base lg:text-lg leading-relaxed text-text-secondary mt-1.5 whitespace-nowrap">
                 Телефон:{' '}
                 <a
                   href="tel:88007775714"
@@ -46,7 +46,7 @@ export default function WhereToBuy() {
 
         {/* Branches */}
         <SectionReveal delay={0.3}>
-          <h3 className="text-2xl lg:text-3xl font-light mb-8">
+          <h3 className="font-light mb-8" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 1.875rem)' }}>
             Наши филиалы
           </h3>
         </SectionReveal>

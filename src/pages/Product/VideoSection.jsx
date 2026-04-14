@@ -183,10 +183,10 @@ function DesktopVideo({ product, accentColor }) {
 
         {/* ── Left text — "Система в действии" ── */}
         <div className="absolute left-[3vw] top-1/2 -translate-y-1/2 z-20 max-w-md pointer-events-none">
-          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-5">
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-5 whitespace-nowrap">
             Видео
           </p>
-          <h2 className="text-5xl lg:text-6xl xl:text-7xl font-light text-white leading-[1.05]">
+          <h2 className="font-light text-white leading-[1.05]" style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)' }}>
             Система
             <br />в действии
           </h2>
@@ -221,9 +221,9 @@ function DesktopVideo({ product, accentColor }) {
           onClick={handleWatch}
           className="absolute z-30 flex flex-col items-center gap-4 cursor-pointer group"
         >
-          <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full flex items-center justify-center
-                          group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="ml-1">
+          <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full grid place-items-center
+                          group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm pl-[3px]">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
               <path
                 d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z"
                 fill="white"
@@ -231,7 +231,7 @@ function DesktopVideo({ product, accentColor }) {
               />
             </svg>
           </div>
-          <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80 group-hover:text-white transition-colors">
+          <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/80 group-hover:text-white transition-colors whitespace-nowrap">
             Смотреть видео
           </span>
         </button>
@@ -396,10 +396,10 @@ function MobileVideo({ product, accentColor }) {
         <div className="container-luxury">
           {/* ── Title + description above video ── */}
           <div className="mb-7">
-            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-3">
+            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-3 whitespace-nowrap">
               Видео
             </p>
-            <h2 className="text-3xl font-light text-white leading-tight mb-3">
+            <h2 className="text-3xl font-light text-white leading-tight mb-3 whitespace-nowrap">
               Система в действии
             </h2>
             <p className="text-white/80 text-sm leading-relaxed max-w-md">
@@ -427,8 +427,8 @@ function MobileVideo({ product, accentColor }) {
                 className="absolute inset-0 flex items-center justify-center z-10 bg-black/40"
                 aria-label="Воспроизвести"
               >
-                <div className="w-16 h-16 border border-white/70 rounded-full flex items-center justify-center backdrop-blur-sm bg-black/20">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="white" className="ml-1">
+                <div className="w-16 h-16 border border-white/70 rounded-full grid place-items-center backdrop-blur-sm bg-black/20 pl-[3px]">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
                     <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
                   </svg>
                 </div>

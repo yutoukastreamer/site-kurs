@@ -84,7 +84,7 @@ export default function Footer() {
 
           {/* ── Middle column: Menu ── */}
           <div className="lg:col-span-3">
-            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/40 mb-5">
+            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/40 mb-5 whitespace-nowrap">
               Навигация
             </p>
             <nav className="flex flex-col gap-3">
@@ -102,35 +102,35 @@ export default function Footer() {
 
           {/* ── Right column: Contacts ── */}
           <div className="lg:col-span-5">
-            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/40 mb-5">
+            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/40 mb-5 whitespace-nowrap">
               Контакты
             </p>
             <div className="flex flex-col gap-3 mb-8">
               <a
                 href="tel:+78001234567"
-                className="text-sm text-white/50 hover:text-white transition-colors"
+                className="text-sm text-white/50 hover:text-white transition-colors whitespace-nowrap"
               >
                 8 800 777 57 14
               </a>
               <a
                 href="mailto:info@kurs3d.ru"
-                className="text-sm text-white/50 hover:text-white transition-colors"
+                className="text-sm text-white/50 hover:text-white transition-colors whitespace-nowrap"
               >
                 zao@gsi.ru
               </a>
-              <p className="text-sm text-white/35">
+              <p className="text-sm text-white/35 whitespace-nowrap">
                 г. Москва, ул. Малая Семеновская, 9, стр. 6
               </p>
-              <p className="text-sm text-white/35">
+              <p className="text-sm text-white/35 whitespace-nowrap">
                 ООО «ГЕОСТРОЙИЗЫСКАНИЯ»
               </p>
-              <p className="text-sm text-white/35">
+              <p className="text-sm text-white/35 whitespace-nowrap">
                 ИНН 9718053358
               </p>
             </div>
 
             {/* Socials */}
-            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/40 mb-4">
+            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-white/40 mb-4 whitespace-nowrap">
               Мы в соцсетях
             </p>
             <div className="flex items-center gap-3">
@@ -154,8 +154,8 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/8">
         <div className="container-luxury py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-white/20 text-[11px] tracking-wider">
-          <p>&copy; {new Date().getFullYear()} ГСИ — Группа Строительных Инноваций. Все права защищены.</p>
-          <p>Сделано с точностью ±2 мм</p>
+          <p className="whitespace-nowrap">&copy; {new Date().getFullYear()} ГСИ — Группа Строительных Инноваций. Все права защищены.</p>
+          <p className="whitespace-nowrap">Сделано с точностью ±2 мм</p>
         </div>
       </div>
     </footer>

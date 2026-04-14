@@ -37,15 +37,18 @@ export default function DescriptionCardsSection({ product }) {
     }
   }, [scrollProgress])
 
-  /* Horizontal translate: 0 → -100vw */
-  const translateX = useTransform(scrollProgress, [0, 1], ['0vw', '-100vw'])
+  /* Horizontal translate:
+     0–25%: Panel 1 stays pinned (dwell)
+     25–55%: slide from Panel 1 → Panel 2
+     55–100%: Panel 2 stays pinned (dwell) */
+  const translateX = useTransform(scrollProgress, [0, 0.25, 0.55, 1], ['0vw', '0vw', '-100vw', '-100vw'])
 
   const [selected, setSelected] = useState(null)
 
   return (
     <>
       {/* ══════ DESKTOP — horizontal scroll ══════ */}
-      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '200vh' }}>
+      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '300vh' }}>
         <div className="sticky top-0 h-screen overflow-hidden">
           <motion.div
             className="flex h-full"
@@ -56,10 +59,10 @@ export default function DescriptionCardsSection({ product }) {
               <div className="container-luxury">
                 <div className="grid grid-cols-2 gap-24 items-center">
                   <SectionReveal>
-                    <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+                    <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
                       О системе
                     </p>
-                    <h2 className="text-3xl lg:text-4xl font-light mb-8 leading-tight">
+                    <h2 className="font-light mb-8 leading-tight" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)' }}>
                       Инженерное совершенство в каждой детали
                     </h2>
                     <p className="text-text-secondary leading-relaxed text-base mb-8">
@@ -82,13 +85,13 @@ export default function DescriptionCardsSection({ product }) {
             </div>
 
             {/* Panel 2 — Компоненты системы */}
-            <div className="w-screen h-full shrink-0 flex items-start pt-28 bg-bg">
-              <div className="container-luxury py-8 pb-20">
+            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
+              <div className="container-luxury">
                 <div className="mb-8">
-                  <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3">
+                  <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
                     Оборудование
                   </p>
-                  <h2 className="text-2xl lg:text-3xl font-light">
+                  <h2 className="font-light" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)' }}>
                     Компоненты системы
                   </h2>
                 </div>
@@ -115,7 +118,7 @@ export default function DescriptionCardsSection({ product }) {
         <div className="container-luxury">
           <div className="grid grid-cols-1 gap-12 items-center">
             <SectionReveal>
-              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
                 О системе
               </p>
               <h2 className="text-2xl font-light mb-6 leading-tight">
@@ -142,7 +145,7 @@ export default function DescriptionCardsSection({ product }) {
 
       <section className="lg:hidden py-20 pb-28 bg-bg">
         <div className="container-luxury">
-          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
             Оборудование
           </p>
           <h2 className="text-2xl font-light mb-10">
@@ -195,7 +198,17 @@ function CardDesktop({ comp, index, accent, onSelect }) {
 
 /* ─── Modal ─── */
 function ComponentModal({ comp, accent, onClose }) {
-  /* Close on Escape */
+  useEffect(() => {
+    const html = document.documentElement
+    const scrollbarWidth = window.innerWidth - html.clientWidth
+    html.style.overflow = 'hidden'
+    html.style.paddingRight = `${scrollbarWidth}px`
+    return () => {
+      html.style.overflow = ''
+      html.style.paddingRight = ''
+    }
+  }, [])
+
   useEffect(() => {
     const handleKey = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handleKey)
@@ -213,7 +226,7 @@ function ComponentModal({ comp, accent, onClose }) {
       <div className="absolute inset-0 bg-bg-dark/60 backdrop-blur-sm" onClick={onClose} />
 
       <motion.div
-        className="relative bg-bg max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-border"
+        className="relative bg-bg max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-border modal-scroll"
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -232,7 +245,7 @@ function ComponentModal({ comp, accent, onClose }) {
         <div className="p-8 lg:p-10">
           <div className="flex flex-col sm:flex-row gap-8">
             <div className="flex-1">
-              <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-text-secondary mb-2">
+              <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-text-secondary mb-2 whitespace-nowrap">
                 Характеристики
               </p>
               <h3 className="text-xl font-light mb-6">{comp.name}</h3>

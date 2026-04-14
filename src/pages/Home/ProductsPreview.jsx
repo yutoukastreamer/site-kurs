@@ -52,8 +52,8 @@ function ProductCard({ machine, index }) {
         {/* Text */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-light mb-1">{machine.system}</h3>
-            <p className="text-[12px] text-text-secondary tracking-wide uppercase">
+            <h3 className="text-lg font-light mb-1 whitespace-nowrap">{machine.system}</h3>
+            <p className="text-[12px] text-text-secondary tracking-wide uppercase whitespace-nowrap">
               {machine.name}
             </p>
           </div>
@@ -61,7 +61,7 @@ function ProductCard({ machine, index }) {
 
         {/* Arrow */}
         <div className="mt-4 flex items-center gap-2 text-text-secondary group-hover:text-text transition-colors">
-          <span className="text-[11px] tracking-[0.15em] uppercase font-medium">Подробнее</span>
+          <span className="text-[11px] tracking-[0.15em] uppercase font-medium whitespace-nowrap">Подробнее</span>
           <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
         </div>
       </Link>
@@ -75,11 +75,11 @@ export default function ProductsPreview() {
       <div className="container-luxury">
         <SectionReveal>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 lg:mb-20 gap-6">
-            <div>
-              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4">
+            <div className="shrink-0">
+              <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
                 Продукция
               </p>
-              <h2 className="text-3xl lg:text-5xl font-light">
+              <h2 className="font-light" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>
                 3D системы нивелирования
               </h2>
             </div>
