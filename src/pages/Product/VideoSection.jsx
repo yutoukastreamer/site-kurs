@@ -399,7 +399,7 @@ function MobileVideo({ product, accentColor }) {
             <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/60 mb-3 whitespace-nowrap">
               Видео
             </p>
-            <h2 className="text-3xl font-light text-white leading-tight mb-3 whitespace-nowrap">
+            <h2 className="text-3xl font-light text-white leading-tight mb-3">
               Система в действии
             </h2>
             <p className="text-white/80 text-sm leading-relaxed max-w-md">

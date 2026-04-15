@@ -78,7 +78,7 @@ export default function Header() {
         isScrolled
           ? 'bg-white/90 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.04)]'
           : 'bg-transparent'
-      } ${footerInView ? 'lg:-translate-y-full lg:opacity-0 lg:pointer-events-none' : ''}`}
+      } ${footerInView ? '-translate-y-full opacity-0 pointer-events-none' : ''}`}
     >
       <div className="container-luxury flex items-center justify-between h-20">
         {/* Logo GSI */}

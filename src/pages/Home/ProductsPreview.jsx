@@ -52,8 +52,8 @@ function ProductCard({ machine, index }) {
         {/* Text */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-light mb-1 whitespace-nowrap">{machine.system}</h3>
-            <p className="text-[12px] text-text-secondary tracking-wide uppercase whitespace-nowrap">
+            <h3 className="text-lg font-light mb-1">{machine.system}</h3>
+            <p className="text-[12px] text-text-secondary tracking-wide uppercase">
               {machine.name}
             </p>
           </div>

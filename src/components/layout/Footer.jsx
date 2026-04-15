@@ -80,13 +80,13 @@ export default function Footer() {
               >
                 zao@gsi.ru
               </a>
-              <p className="text-sm text-white/35 whitespace-nowrap">
+              <p className="text-sm text-white/35">
                 г. Москва, ул. Малая Семеновская, 9, стр. 6
               </p>
-              <p className="text-sm text-white/35 whitespace-nowrap">
+              <p className="text-sm text-white/35">
                 ООО «ГЕОСТРОЙИЗЫСКАНИЯ»
               </p>
-              <p className="text-sm text-white/35 whitespace-nowrap">
+              <p className="text-sm text-white/35">
                 ИНН 9718053358
               </p>
             </div>
@@ -116,8 +116,8 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/8">
         <div className="container-luxury py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-white/20 text-[11px] tracking-wider">
-          <p className="whitespace-nowrap">&copy; {new Date().getFullYear()} ГСИ — Группа Строительных Инноваций. Все права защищены.</p>
-          <p className="whitespace-nowrap">Сделано с точностью ±2 мм</p>
+          <p>&copy; {new Date().getFullYear()} ГСИ — Группа Строительных Инноваций. Все права защищены.</p>
+          <p>Сделано с точностью ±2 мм</p>
         </div>
       </div>
     </footer>

@@ -17,9 +17,9 @@ export default function WhereToBuy() {
 
         {/* Office card — accent bar left */}
         <SectionReveal delay={0.2}>
-          <div className="w-full bg-bg rounded-sm border border-border border-l-4 border-l-bulldozer px-8 py-8 lg:px-10 lg:py-9 mb-20 flex items-center gap-6 lg:gap-8">
+          <div className="w-full bg-bg rounded-sm border border-border border-l-4 border-l-bulldozer px-4 py-5 sm:px-6 sm:py-7 lg:px-10 lg:py-9 mb-20 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
             <div className="shrink-0">
-              <div className="w-[88px] h-[88px] lg:w-24 lg:h-24 rounded-full overflow-hidden shadow-md">
+              <div className="w-16 h-16 sm:w-[88px] sm:h-[88px] lg:w-24 lg:h-24 rounded-full overflow-hidden shadow-md">
                 <img
                   src={officeImg}
                   alt="Офис ГСИ"
@@ -27,11 +27,11 @@ export default function WhereToBuy() {
                 />
               </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-base lg:text-lg leading-relaxed text-text whitespace-nowrap">
+            <div className="min-w-0 text-center sm:text-left">
+              <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-text">
                 г.&nbsp;Москва, ул.&nbsp;Малая Семеновская, д.&nbsp;9, стр.&nbsp;1
               </p>
-              <p className="text-base lg:text-lg leading-relaxed text-text-secondary mt-1.5 whitespace-nowrap">
+              <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-text-secondary mt-1.5">
                 Телефон:{' '}
                 <a
                   href="tel:88007775714"

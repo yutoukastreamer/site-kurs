@@ -31,7 +31,7 @@ export default function HeroHome() {
 
       {/* Logos — top right corner, large & visible */}
       <motion.div
-        className="absolute top-28 right-8 lg:right-12 z-20 flex items-center gap-5"
+        className="absolute top-28 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 lg:right-12 z-20 flex items-center gap-5"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
@@ -43,9 +43,9 @@ export default function HeroHome() {
 
       {/* Content */}
       <div className="container-luxury relative z-10 pt-32 pb-20">
-        <div className="max-w-3xl lg:-ml-52">
+        <div className="max-w-3xl text-center md:text-left md:pl-0 lg:-ml-52">
           <motion.p
-            className="text-[11px] font-medium tracking-[0.35em] uppercase text-white/40 mb-8 whitespace-nowrap"
+            className="text-[11px] font-medium tracking-[0.35em] uppercase text-white/40 mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -70,7 +70,7 @@ export default function HeroHome() {
           </motion.h1>
 
           <motion.p
-            className="text-base lg:text-lg text-white/35 font-light max-w-lg mb-12 leading-relaxed"
+            className="text-base lg:text-lg text-white/35 font-light max-w-lg mb-12 leading-relaxed mx-auto md:mx-0"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
@@ -79,7 +79,7 @@ export default function HeroHome() {
           </motion.p>
 
           <motion.div
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-4 items-center md:items-start"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.9 }}
@@ -87,14 +87,14 @@ export default function HeroHome() {
             <Link
               to="/#contact"
               onClick={(e) => handleAnchor(e, 'contact')}
-              className="whitespace-nowrap shrink-0 px-8 py-3.5 border border-white/25 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 text-center"
+              className="shrink-0 px-8 py-3.5 border border-white/25 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 text-center"
             >
               Получить предложение
             </Link>
             <Link
               to="/#products"
               onClick={(e) => handleAnchor(e, 'products')}
-              className="whitespace-nowrap shrink-0 px-8 py-3.5 text-white/40 text-[11px] font-medium tracking-[0.15em] uppercase hover:text-white transition-colors duration-300 text-center"
+              className="shrink-0 px-8 py-3.5 text-white/40 text-[11px] font-medium tracking-[0.15em] uppercase hover:text-white transition-colors duration-300 text-center"
             >
               Смотреть продукцию
             </Link>

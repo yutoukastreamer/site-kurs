@@ -85,7 +85,7 @@ export default function GallerySection() {
               </p>
               <h2 className="font-light text-white" style={{ fontSize: 'clamp(1.875rem, 3.5vw, 3rem)' }}>На объектах</h2>
             </div>
-            <p className="text-white/50 text-sm max-w-xs whitespace-nowrap">
+            <p className="text-white/50 text-sm max-w-xs">
               {galleryImages.length} фотографий с реальных объектов
             </p>
           </div>
