@@ -45,12 +45,23 @@ function NewsCard({ item, onClick }) {
         onClick={() => onClick(item)}
       >
         <div className="aspect-[16/10] overflow-hidden">
-          <img
-            src={imgError ? PLACEHOLDER_IMG(item.id) : item.image}
-            alt={item.title}
-            onError={() => setImgError(true)}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-          />
+          {item.video ? (
+            <video
+              src={item.video}
+              muted
+              loop
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          ) : (
+            <img
+              src={imgError ? PLACEHOLDER_IMG(item.id) : item.image}
+              alt={item.title}
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+          )}
         </div>
         <div className="p-6 lg:p-8">
           <time className="text-[11px] font-medium tracking-[0.12em] uppercase text-text-secondary">
@@ -81,9 +92,13 @@ function NewsModal({ item, onClose }) {
 
   /* Scroll lock */
   useEffect(() => {
-    document.body.style.overflow = 'hidden'
+    const html = document.documentElement
+    const scrollbarWidth = window.innerWidth - html.clientWidth
+    html.style.overflow = 'hidden'
+    html.style.paddingRight = `${scrollbarWidth}px`
     return () => {
-      document.body.style.overflow = 'unset'
+      html.style.overflow = ''
+      html.style.paddingRight = ''
     }
   }, [])
 

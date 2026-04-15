@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
-import { useScrollReveal } from '../../hooks/useScrollReveal'
 
 const accentBg = {
   bulldozer: 'bg-bulldozer',
@@ -49,7 +48,7 @@ export default function DescriptionCardsSection({ product }) {
     <>
       {/* ══════ DESKTOP — horizontal scroll ══════ */}
       <div ref={containerRef} className="hidden lg:block relative" style={{ height: '300vh' }}>
-        <div className="sticky top-0 h-screen overflow-hidden">
+        <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-hidden">
           <motion.div
             className="flex h-full"
             style={{ x: translateX }}
@@ -232,17 +231,19 @@ function ComponentModal({ comp, accent, onClose }) {
         exit={{ opacity: 0, y: 20, scale: 0.97 }}
         transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-3 w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text transition-colors cursor-pointer z-10"
-          aria-label="Закрыть"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.2" />
-          </svg>
-        </button>
+        <div className="sticky top-0 z-10 flex justify-end pointer-events-none">
+          <button
+            onClick={onClose}
+            className="pointer-events-auto mt-2 mr-3 w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text transition-colors cursor-pointer bg-bg/80 backdrop-blur-sm"
+            aria-label="Закрыть"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.2" />
+            </svg>
+          </button>
+        </div>
 
-        <div className="p-8 lg:p-10">
+        <div className="p-8 lg:p-10 -mt-12">
           <div className="flex flex-col sm:flex-row gap-8">
             <div className="flex-1">
               <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-text-secondary mb-2 whitespace-nowrap">

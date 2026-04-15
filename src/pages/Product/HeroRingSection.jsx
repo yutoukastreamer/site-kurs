@@ -306,7 +306,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
     <>
       {/* L-shaped connector via transparent div borders */}
       <motion.div
-        className="absolute pointer-events-none z-[15]"
+        className="absolute pointer-events-none z-[10]"
         style={{
           left: `${connLeft}%`,
           top: `${connTop}%`,
@@ -333,14 +333,18 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
       >
-        <div className={`flex flex-col items-center gap-1.5 origin-center
+        <div className={`flex flex-col items-center origin-center
                           transition-transform duration-300 ease-out
                           ${isActive ? 'scale-110' : ''}`}>
-          <div className="w-20 h-20 flex items-center justify-center">
-            <img src={comp.image} alt={comp.name} className="w-full h-full object-contain drop-shadow-sm" />
+          <div className="flex items-end justify-center"
+               style={{
+                 width: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
+                 maxHeight: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
+               }}>
+            <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
           </div>
           <span className={`text-[10px] font-medium text-center max-w-[140px] leading-tight tracking-wide
-                            whitespace-pre-line transition-colors duration-300
+                            whitespace-pre-line transition-colors duration-300 mt-1.5
                             ${isActive ? 'text-text' : 'text-text-secondary'}`}>
             {comp.label || comp.name}
           </span>
@@ -362,7 +366,7 @@ function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scr
 
   return (
     <motion.div
-      className="absolute z-[18] pointer-events-auto cursor-pointer"
+      className="absolute z-[15] pointer-events-auto cursor-pointer"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
@@ -405,7 +409,7 @@ function HeroText({ product }) {
       <div className="flex gap-4 xl:gap-8 mb-8">
         {product.features.slice(0, 3).map((f) => (
           <div key={f.title} className="shrink-0">
-            <span className={`text-2xl font-light text-${product.accentColor} whitespace-nowrap`}>{f.value}</span>
+            <span className="text-2xl font-light text-text whitespace-nowrap">{f.value}</span>
             <span className="text-xs text-text-secondary ml-1 whitespace-nowrap">{f.unit}</span>
             <p className="text-[10px] text-text-secondary tracking-wide uppercase mt-1 whitespace-nowrap">{f.title}</p>
           </div>

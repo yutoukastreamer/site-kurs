@@ -199,13 +199,13 @@ export const products = {
       /* Top row */
       { ...COMPONENTS.gnssAntenna,         label: 'ГНСС антенны',                                    ringPos: { left: 15, top: 18 },  machinePoint: [32, 10],  clockHour: 11 },
       { ...COMPONENTS.panelBulldozer,      label: '10.1" консоль\nс ПО "КУРС"',                      ringPos: { left: 38, top: 3 },   machinePoint: [42, 15],  clockHour: 12 },
-      { ...COMPONENTS.prismLps,            label: 'Призма режима ЛПС\n(опционально)',                 ringPos: { left: 68, top: 5 },   machinePoint: [55, 10],  clockHour: 1 },
+      { ...COMPONENTS.prismLps,            label: 'Призма режима ЛПС\n(опционально)',                 ringPos: { left: 68, top: 5 },   machinePoint: [55, 10],  clockHour: 1, imageScale: 0.45 },
       /* Middle row */
       { ...COMPONENTS.hydraulicController, label: 'Контроллер\nгидравлики',                           ringPos: { left: 10, top: 46 },  machinePoint: [32, 42],  clockHour: 9 },
       { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nна отвале', id: 'inertial-blade', ringPos: { left: 84, top: 38 }, machinePoint: [80, 40], clockHour: 3 },
       /* Bottom row */
       { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nв кабине',  id: 'inertial-cabin', ringPos: { left: 12, top: 68 }, machinePoint: [35, 52], clockHour: 8 },
-      { ...COMPONENTS.centralController,   label: 'Центральный\nконтроллер',                          ringPos: { left: 40, top: 87 },  machinePoint: [48, 72],  clockHour: 6 },
+      { ...COMPONENTS.centralController,   label: 'Центральный\nконтроллер',                          ringPos: { left: 40, top: 87 },  machinePoint: [48, 72],  clockHour: 6, imageScale: 1.45 },
       { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nна штанге отвала\n(опционально)', id: 'inertial-arm', ringPos: { left: 76, top: 73 }, machinePoint: [68, 58], clockHour: 4 },
     ],
     /* Cards section — unique components only */
@@ -256,7 +256,7 @@ export const products = {
       { ...COMPONENTS.inertialSensor, x: 12, y: 45, label: 'Инерциальный датчик (рукоять)', id: 'inertial-sensor-2', machinePoint: [15, 42], clockHour: 9 },
       { ...COMPONENTS.inertialSensor, x: 8, y: 62, label: 'Инерциальный датчик (ковш)', id: 'inertial-sensor-3', machinePoint: [8, 68], clockHour: 7.5 },
       { ...COMPONENTS.inertialSensor, x: 35, y: 50, label: 'Инерциальный датчик (корпус)', id: 'inertial-sensor-4', machinePoint: [48, 52], clockHour: 5 },
-      { ...COMPONENTS.centralController, x: 45, y: 45, machinePoint: [58, 42], clockHour: 3 },
+      { ...COMPONENTS.centralController, x: 45, y: 45, machinePoint: [58, 42], clockHour: 3, imageScale: 1.45 },
     ],
     componentCards: [
       COMPONENTS.panelExcavator,
@@ -302,7 +302,7 @@ export const products = {
       { ...COMPONENTS.gnssAntenna, x: 30, y: 5, machinePoint: [25, 5], clockHour: 11 },
       { ...COMPONENTS.inertialSensor, x: 35, y: 55, machinePoint: [32, 55], clockHour: 8 },
       { ...COMPONENTS.hydraulicController, x: 50, y: 65, machinePoint: [48, 72], clockHour: 6 },
-      { ...COMPONENTS.centralController, x: 55, y: 40, machinePoint: [58, 35], clockHour: 3 },
+      { ...COMPONENTS.centralController, x: 55, y: 40, machinePoint: [58, 35], clockHour: 3, imageScale: 1.45 },
     ],
     componentCards: [
       COMPONENTS.panelGrader,
