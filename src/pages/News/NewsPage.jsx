@@ -23,7 +23,7 @@ function NewsTicker() {
         {doubled.map((title, i) => (
           <span
             key={i}
-            className="text-text-light/50 text-[13px] lg:text-sm font-medium tracking-[0.08em] uppercase shrink-0 flex items-center gap-16"
+            className="text-text-light/50 text-[10px] lg:text-sm font-medium tracking-[0.08em] uppercase shrink-0 flex items-center gap-16"
           >
             {title}
             <span className="w-1.5 h-1.5 rounded-full bg-white/20 shrink-0" />
