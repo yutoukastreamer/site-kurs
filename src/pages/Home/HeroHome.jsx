@@ -32,24 +32,27 @@ export default function HeroHome() {
       {/*
         Logos
         ─────
-        Desktop (md+): top-right corner as before.
-        Mobile: horizontally centered and vertically centered between the fixed
-        80px header and the "Российское производство" heading.
+        Desktop (md+): top-right corner, flex row.
+        Mobile: full-width grid [1fr auto 1fr] — the divider lands exactly
+        at the viewport horizontal center regardless of each logo's width.
+        Each logo justifies toward the divider (end/start) so the composition
+        is visually symmetric around the true center.
 
-        iPhone SE (<376px):  logos h-8 (32px), top-28 (112px),
-                              heading pt-44 (176px) → 32px gap both sides.
-        Larger mobile (xs+): logos h-10 (40px), top-[116px],
-                              heading pt-48 (192px) → 36px gap both sides.
+        Vertical (mobile):
+          iPhone SE (<376px):  logos h-8 (32px), top-28 (112px),
+                                heading pt-44 (176px) → 32px gap both sides.
+          ≥376px (xs+):         logos h-10 (40px), top-[116px],
+                                heading pt-48 (192px) → 36px gap both sides.
       */}
       <motion.div
-        className="absolute top-28 xs:top-[116px] md:top-28 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 lg:right-12 z-20 flex items-center gap-4 xs:gap-5"
+        className="absolute top-28 xs:top-[116px] md:top-28 inset-x-0 md:inset-x-auto md:right-8 lg:right-12 z-20 grid grid-cols-[1fr_auto_1fr] md:flex items-center gap-4 xs:gap-5"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <img src={logoKurs} alt="Курс" className="h-8 xs:h-10 lg:h-14 w-auto" />
+        <img src={logoKurs} alt="Курс" className="h-8 xs:h-10 lg:h-14 w-auto justify-self-end md:justify-self-auto" />
         <div className="w-px h-7 xs:h-8 bg-white/30" />
-        <img src={logoRussia} alt="Сделано в России" className="h-8 xs:h-10 lg:h-14 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
+        <img src={logoRussia} alt="Сделано в России" className="h-8 xs:h-10 lg:h-14 w-auto justify-self-start md:justify-self-auto" style={{ filter: 'brightness(0) invert(1)' }} />
       </motion.div>
 
       {/* Content */}
