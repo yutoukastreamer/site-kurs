@@ -1,31 +1,15 @@
-import { useEffect, useRef } from 'react'
-
-/**
- * Блок обратной связи — форма подгружается из Битрикс24.
- * Форма инициализируется через loader-скрипт Битрикс24,
- * который автоматически встраивает форму в DOM.
- */
+import { useEffect } from 'react'
 
 export default function ContactFormSection() {
-  const formContainerRef = useRef(null)
-
   useEffect(() => {
-    const container = formContainerRef.current
-    if (!container) return
-
     const script = document.createElement('script')
-    script.setAttribute('data-b24-form', 'inline/13/rr4ag5')
-    script.setAttribute('data-skip-moving', 'true')
     script.text = `
       (function(w,d,u){
-        var s=d.createElement('script');
-        s.async=true;
-        s.src=u+'?'+(Date.now()/180000|0);
-        var h=d.getElementsByTagName('script')[0];
-        h.parentNode.insertBefore(s,h);
-      })(window,document,'https://crm.gsi.ru/upload/crm/form/loader_13_rr4ag5.js');
+        var s=d.createElement('script');s.async=true;s.src=u+'?'+(Date.now()/60000|0);
+        var h=d.getElementsByTagName('script')[0];h.parentNode.insertBefore(s,h);
+      })(window,document,'https://crm.gsi.ru/upload/crm/site_button/loader_3_4b8pmj.js');
     `
-    container.appendChild(script)
+    document.body.appendChild(script)
 
     return () => {
       try { script.remove() } catch (e) { /* ignore */ }
@@ -49,7 +33,6 @@ export default function ContactFormSection() {
           >
             Пожалуйста заполните форму и мы отправим Вам электронный каталог или коммерческое предложение
           </div>
-          <div ref={formContainerRef} />
         </div>
         <div className="nkm-1" style={{ height: '100vh', width: '42%' }}>
           <div
