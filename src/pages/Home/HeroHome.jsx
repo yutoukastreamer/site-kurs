@@ -31,7 +31,7 @@ export default function HeroHome() {
 
       {/* Logos — top right corner, large & visible */}
       <motion.div
-        className="absolute top-28 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 lg:right-12 z-20 flex items-center gap-5"
+        className="hero-home-logos absolute top-28 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 lg:right-12 z-20 flex items-center justify-center gap-5 w-full md:w-auto"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
@@ -42,7 +42,7 @@ export default function HeroHome() {
       </motion.div>
 
       {/* Content */}
-      <div className="container-luxury relative z-10 pt-32 pb-20">
+      <div className="hero-home-content container-luxury relative z-10 pt-32 pb-20">
         <div className="max-w-3xl text-center md:text-left md:pl-0 lg:-ml-52">
           <motion.p
             className="text-[11px] font-medium tracking-[0.35em] uppercase text-white/40 mb-8"
