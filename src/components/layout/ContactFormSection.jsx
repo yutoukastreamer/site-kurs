@@ -37,13 +37,11 @@ export default function ContactFormSection() {
           flexWrap: 'wrap',
           minHeight: '400px',
           backgroundColor: '#1A1D23',
-          borderRadius: '8px',
-          overflow: 'hidden',
         }}>
           {/* Left — text */}
           <div style={{
             flex: '1 1 240px',
-            padding: '40px 32px',
+            padding: '60px 48px',
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
@@ -87,7 +85,7 @@ export default function ContactFormSection() {
             ref={formRef}
             style={{
               flex: '1 1 280px',
-              padding: '32px 28px',
+              padding: '40px 48px',
               borderLeft: '0.5px solid #2a2d34',
             }}
           />
