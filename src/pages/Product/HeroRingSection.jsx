@@ -107,6 +107,7 @@ export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
   const [heroHidden, setHeroHidden] = useState(false)
+  const autoScrollRef = useRef(false)
 
   const scrollProgress = useMotionValue(0)
 
@@ -128,6 +129,79 @@ export default function HeroRingSection({ product }) {
       window.removeEventListener('resize', update)
     }
   }, [scrollProgress])
+
+  /* ── Auto-play scroll animation on a single wheel tick ──
+     Когда пользователь попадает в "пиннутую" зону (контейнер 280vh),
+     перехватываем событие колёсика и плавно прокручиваем к началу/концу
+     зоны — так анимация проигрывается сама, без долгого ручного скролла. */
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!window.matchMedia('(min-width: 1024px)').matches) return
+
+    const el = containerRef.current
+    if (!el) return
+
+    let rafId = null
+
+    const easeInOutCubic = (t) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+    const smoothScrollTo = (target, duration = 1400) =>
+      new Promise((resolve) => {
+        const start = window.scrollY
+        const diff = target - start
+        if (Math.abs(diff) < 1) return resolve()
+        const startTime = performance.now()
+        const step = (now) => {
+          const t = Math.min((now - startTime) / duration, 1)
+          window.scrollTo(0, start + diff * easeInOutCubic(t))
+          if (t < 1) rafId = requestAnimationFrame(step)
+          else resolve()
+        }
+        rafId = requestAnimationFrame(step)
+      })
+
+    const onWheel = (e) => {
+      if (autoScrollRef.current) {
+        e.preventDefault()
+        return
+      }
+
+      const rect = el.getBoundingClientRect()
+      const scrollRange = el.offsetHeight - window.innerHeight
+      if (scrollRange <= 0) return
+
+      const delta = e.deltaY
+      if (!delta) return
+
+      // В пиннутой зоне: rect.top ∈ [-scrollRange, 0]
+      const inZone = rect.top <= 0 && rect.top >= -scrollRange
+      if (!inZone) return
+
+      // У верхней кромки — вверх пропускаем дальше по странице
+      if (delta < 0 && rect.top >= 0) return
+      // У нижней кромки — вниз пропускаем дальше по странице
+      if (delta > 0 && rect.top <= -scrollRange) return
+
+      e.preventDefault()
+
+      const containerTopAbs = window.scrollY + rect.top
+      const containerBottomAbs = containerTopAbs + scrollRange
+      const target = delta > 0 ? containerBottomAbs + 1 : containerTopAbs - 1
+
+      autoScrollRef.current = true
+      smoothScrollTo(target).then(() => {
+        autoScrollRef.current = false
+      })
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      if (rafId) cancelAnimationFrame(rafId)
+      autoScrollRef.current = false
+    }
+  }, [])
 
   const color = ACCENT_HEX[product.accentColor]
   const components = product.diagramComponents
