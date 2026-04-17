@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import logoGsi from '../../assets/images/logos/logo-gsi.png'
 import logoGsiWhite from '../../assets/images/logos/logo-gsi-white.png'
@@ -18,7 +18,6 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [footerInView, setFooterInView] = useState(false)
   const { pathname } = useLocation()
-  const navigate = useNavigate()
 
   useEffect(() => {
     setMobileOpen(false)
@@ -41,32 +40,6 @@ export default function Header() {
     io.observe(footer)
     return () => io.disconnect()
   }, [pathname])
-
-  /* Scroll to hash after navigation to / */
-  useEffect(() => {
-    const hash = window.location.hash
-    if (pathname === '/' && hash) {
-      const id = hash.slice(1)
-      setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
-    }
-  }, [pathname])
-
-  const handleAnchorClick = (e, to) => {
-    if (to.startsWith('/#')) {
-      e.preventDefault()
-      const id = to.slice(2)
-      if (pathname === '/') {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-      } else {
-        navigate('/', { state: { scrollTo: id } })
-        setTimeout(() => {
-          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-        }, 300)
-      }
-    }
-  }
 
   /* Light mode: on homepage, before scroll — white text/logos over video */
   const isHome = pathname === '/'
@@ -96,7 +69,6 @@ export default function Header() {
             <NavLink
               key={link.to}
               to={link.to}
-              onClick={(e) => handleAnchorClick(e, link.to)}
               className={({ isActive }) =>
                 `whitespace-nowrap text-[11px] xl:text-[12px] font-medium tracking-[0.14em] uppercase transition-colors duration-300 ${
                   isLight
@@ -128,7 +100,6 @@ export default function Header() {
           </a>
           <Link
             to="/#contact"
-            onClick={(e) => handleAnchorClick(e, '/#contact')}
             className={`whitespace-nowrap shrink-0 px-4 xl:px-6 py-2.5 text-[10px] xl:text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 border ${
               isLight
                 ? 'border-white/40 text-white hover:bg-white hover:text-bg-dark'
@@ -178,7 +149,6 @@ export default function Header() {
                 <NavLink
                   key={link.to}
                   to={link.to}
-                  onClick={(e) => handleAnchorClick(e, link.to)}
                   className={({ isActive }) =>
                     `text-sm font-medium tracking-[0.12em] uppercase ${
                       isActive && !link.to.startsWith('/#')
@@ -196,7 +166,6 @@ export default function Header() {
               </a>
               <Link
                 to="/#contact"
-                onClick={(e) => handleAnchorClick(e, '/#contact')}
                 className="self-start px-6 py-3 border border-text text-text text-[11px] font-medium tracking-[0.15em] uppercase"
               >
                 Получить предложение
