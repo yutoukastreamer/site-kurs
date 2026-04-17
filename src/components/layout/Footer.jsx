@@ -81,7 +81,7 @@ export default function Footer() {
                 zao@gsi.ru
               </a>
               <p className="text-sm text-white/35">
-                г. Москва, ул. Малая Семеновская, 9, стр. 6
+                Москва, ул. Малая Семеновская, 9, стр. 6
               </p>
               <p className="text-sm text-white/35">
                 ООО «ГЕОСТРОЙИЗЫСКАНИЯ»

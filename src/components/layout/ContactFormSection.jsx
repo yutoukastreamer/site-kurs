@@ -24,11 +24,14 @@ export default function ContactFormSection() {
   }, [])
 
   return (
-    <section id="contact" className="py-16 lg:py-24 bg-bg">
-      <div className="container-luxury">
+    <section id="contact" style={{ backgroundColor: '#1A1D23' }}>
+      <div className="container-luxury" style={{ padding: '60px 24px' }}>
         <style>{`
           @media(max-width: 600px) {
-            .b24-form-col { border-left: none !important; border-top: 0.5px solid #2a2d34 !important; }
+            .b24-form-col {
+              border-left: none !important;
+              border-top: 0.5px solid #2a2d34 !important;
+            }
           }
         `}</style>
 
@@ -36,12 +39,11 @@ export default function ContactFormSection() {
           display: 'flex',
           flexWrap: 'wrap',
           minHeight: '400px',
-          backgroundColor: '#1A1D23',
         }}>
           {/* Left — text */}
           <div style={{
             flex: '1 1 240px',
-            padding: '60px 48px',
+            padding: '40px 32px 40px 0',
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'center',
@@ -75,7 +77,9 @@ export default function ContactFormSection() {
               lineHeight: 1.7,
               margin: 0,
             }}>
-              Оставьте контактные данные и&nbsp;мы&nbsp;подберём оптимальное решение для&nbsp;ваших задач. Ответим на&nbsp;любые вопросы
+              Оставьте контактные данные и&nbsp;мы&nbsp;подберём
+              оптимальное решение для&nbsp;ваших задач.
+              Ответим на&nbsp;любые вопросы
             </p>
           </div>
 
@@ -85,7 +89,7 @@ export default function ContactFormSection() {
             ref={formRef}
             style={{
               flex: '1 1 280px',
-              padding: '40px 48px',
+              padding: '40px 0 40px 32px',
               borderLeft: '0.5px solid #2a2d34',
             }}
           />
