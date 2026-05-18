@@ -339,6 +339,22 @@ export default function HeroRingSection({ product }) {
                   />
                 )
               })}
+
+              {/* ── Hover side panel: enlarged image + name ── */}
+              <AnimatePresence>
+                {activeIndex !== null && (() => {
+                  const ac = components[activeIndex]
+                  const fromRight = ringPositions[activeIndex].left < 50
+                  return (
+                    <HoverPanel
+                      key={activeIndex}
+                      comp={ac}
+                      color={color}
+                      fromRight={fromRight}
+                    />
+                  )
+                })()}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -447,11 +463,6 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
                }}>
             <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
           </div>
-          <span className={`text-[10px] font-medium text-center max-w-[140px] leading-tight tracking-wide
-                            whitespace-pre-line transition-colors duration-300 mt-1.5
-                            ${isActive ? 'text-text' : 'text-text-secondary'}`}>
-            {comp.label || comp.name}
-          </span>
         </div>
       </motion.div>
     </>
@@ -491,6 +502,82 @@ function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scr
                     ${isActive ? 'scale-[2.2]' : 'hover:scale-[1.6]'}`}
         style={{ backgroundColor: color }}
       />
+    </motion.div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   Hover panel — slides in from the page edge on hover.
+   Component on LEFT half  →  panel slides in from the RIGHT
+   Component on RIGHT half →  panel slides in from the LEFT
+   ═══════════════════════════════════════════════════════ */
+function HoverPanel({ comp, color, fromRight }) {
+  const offsetPx = 420 // off-screen start distance
+  return (
+    <motion.div
+      initial={{ x: fromRight ? offsetPx : -offsetPx, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: fromRight ? offsetPx : -offsetPx, opacity: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className={`absolute z-30 pointer-events-none ${fromRight ? 'right-4 xl:right-10' : 'left-4 xl:left-10'}`}
+      style={{ top: '50%', y: '-50%', width: '19rem' }}
+    >
+      <div
+        className="relative overflow-hidden"
+        style={{
+          backgroundColor: '#1A1F2A',
+          borderRadius: '14px',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.05)',
+        }}
+      >
+        {/* Accent vertical bar on the schema-facing edge */}
+        <div
+          className={`absolute top-0 bottom-0 w-[2px] ${fromRight ? 'left-0' : 'right-0'}`}
+          style={{ backgroundColor: color }}
+        />
+
+        {/* Decorative corner ticks */}
+        <span className="absolute top-3 left-3 w-3 h-px bg-white/15" />
+        <span className="absolute top-3 left-3 w-px h-3 bg-white/15" />
+        <span className="absolute top-3 right-3 w-3 h-px bg-white/15" />
+        <span className="absolute top-3 right-3 w-px h-3 bg-white/15" />
+        <span className="absolute bottom-3 left-3 w-3 h-px bg-white/15" />
+        <span className="absolute bottom-3 left-3 w-px h-3 bg-white/15" />
+        <span className="absolute bottom-3 right-3 w-3 h-px bg-white/15" />
+        <span className="absolute bottom-3 right-3 w-px h-3 bg-white/15" />
+
+        {/* Image area with subtle accent-colored radial glow */}
+        <div className="relative aspect-[4/3] flex items-center justify-center">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(ellipse at center, ${color}26 0%, transparent 65%)`,
+            }}
+          />
+          <img
+            src={comp.image}
+            alt={comp.name}
+            className="relative max-w-[65%] max-h-[78%] object-contain"
+            style={{ filter: 'drop-shadow(0 12px 28px rgba(0,0,0,0.55))' }}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-white/[0.08]" />
+
+        {/* Text area */}
+        <div className="px-6 py-5">
+          <p
+            className="text-[10px] font-medium tracking-[0.32em] uppercase mb-2"
+            style={{ color, opacity: 0.85 }}
+          >
+            Компонент
+          </p>
+          <h3 className="text-base xl:text-lg font-light leading-snug text-white whitespace-pre-line">
+            {comp.label || comp.name}
+          </h3>
+        </div>
+      </div>
     </motion.div>
   )
 }
