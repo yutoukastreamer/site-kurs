@@ -424,7 +424,8 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
         }}
       />
 
-      {/* Component icon + label */}
+      {/* Component icon + label — in a frosted-glass circle so the
+          connector line never crosses the label text */}
       <motion.div
         className="absolute z-20 pointer-events-auto cursor-pointer"
         style={{
@@ -437,22 +438,47 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
       >
-        <div className={`flex flex-col items-center origin-center
-                          transition-transform duration-300 ease-out
-                          ${isActive ? 'scale-110' : ''}`}>
-          <div className="flex items-end justify-center"
-               style={{
-                 width: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
-                 maxHeight: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
-               }}>
-            <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
-          </div>
-          <span className={`text-[10px] font-medium text-center max-w-[140px] leading-tight tracking-wide
+        {(() => {
+          // Минимально-узкий круг: основан на размере иконки, но всегда
+          // оставляет место под подпись (минимум ~3 строки текста).
+          const iconRem = (comp.imageScale ?? 1) * 5
+          const ringRem = Math.max(8.5, iconRem + 3.5)
+          const labelMaxRem = ringRem - 1.6
+          return (
+            <div
+              className={`flex flex-col items-center justify-center
+                          rounded-full aspect-square
+                          bg-white/55 backdrop-blur-md
+                          border border-white/50
+                          shadow-[0_6px_20px_rgba(0,0,0,0.06)]
+                          origin-center transition-transform duration-300 ease-out
+                          ${isActive ? 'scale-110' : ''}`}
+              style={{ width: `${ringRem}rem`, height: `${ringRem}rem`, padding: '0.55rem' }}
+            >
+              <div
+                className="flex items-end justify-center"
+                style={{
+                  width: `${iconRem}rem`,
+                  maxHeight: `${iconRem}rem`,
+                }}
+              >
+                <img
+                  src={comp.image}
+                  alt={comp.name}
+                  className="max-w-full max-h-full h-auto object-contain drop-shadow-sm"
+                />
+              </div>
+              <span
+                className={`text-[10px] font-medium text-center leading-tight tracking-wide
                             whitespace-pre-line transition-colors duration-300 mt-1.5
-                            ${isActive ? 'text-text' : 'text-text-secondary'}`}>
-            {comp.label || comp.name}
-          </span>
-        </div>
+                            ${isActive ? 'text-text' : 'text-text-secondary'}`}
+                style={{ maxWidth: `${labelMaxRem}rem` }}
+              >
+                {comp.label || comp.name}
+              </span>
+            </div>
+          )
+        })()}
       </motion.div>
     </>
   )
