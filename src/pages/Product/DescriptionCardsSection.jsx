@@ -197,6 +197,9 @@ function CardDesktop({ comp, index, accent, onSelect }) {
 
 /* ─── Modal ─── */
 function ComponentModal({ comp, accent, onClose }) {
+  const scrollRef = useRef(null)
+  const [hasMoreBelow, setHasMoreBelow] = useState(false)
+
   useEffect(() => {
     const html = document.documentElement
     const scrollbarWidth = window.innerWidth - html.clientWidth
@@ -214,6 +217,24 @@ function ComponentModal({ comp, accent, onClose }) {
     return () => window.removeEventListener('keydown', handleKey)
   }, [onClose])
 
+  /* Отслеживаем, есть ли скрываемые характеристики ниже текущего скролла */
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const check = () => {
+      const more = el.scrollHeight - el.scrollTop - el.clientHeight > 8
+      setHasMoreBelow(more)
+    }
+    el.scrollTop = 0
+    check()
+    el.addEventListener('scroll', check, { passive: true })
+    window.addEventListener('resize', check)
+    return () => {
+      el.removeEventListener('scroll', check)
+      window.removeEventListener('resize', check)
+    }
+  }, [comp])
+
   return (
     <motion.div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
@@ -225,6 +246,7 @@ function ComponentModal({ comp, accent, onClose }) {
       <div className="absolute inset-0 bg-bg-dark/60 backdrop-blur-sm" onClick={onClose} />
 
       <motion.div
+        ref={scrollRef}
         className="relative bg-bg max-w-2xl w-full max-h-[85vh] overflow-y-auto border border-border modal-scroll"
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -234,11 +256,17 @@ function ComponentModal({ comp, accent, onClose }) {
         <div className="sticky top-0 z-10 flex justify-end pointer-events-none">
           <button
             onClick={onClose}
-            className="pointer-events-auto mt-2 mr-3 w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text transition-colors cursor-pointer bg-bg/80 backdrop-blur-sm"
+            className="pointer-events-auto mt-2 mr-3 w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text transition-colors cursor-pointer"
             aria-label="Закрыть"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.2" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.18))' }}
+            >
+              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
         </div>
@@ -270,6 +298,27 @@ function ComponentModal({ comp, accent, onClose }) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Подсказка о прокручиваемых характеристиках —
+           залипает у нижней кромки модалки и исчезает,
+           когда пользователь долистал до конца */}
+        <div
+          className={`sticky bottom-0 left-0 right-0 -mt-16 h-16 pointer-events-none z-10
+                      flex items-end justify-center pb-3 transition-opacity duration-300
+                      ${hasMoreBelow ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/90 to-transparent" />
+          <motion.div
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative flex flex-col items-center gap-1 text-text-secondary"
+          >
+            <span className="text-[10px] tracking-[0.22em] uppercase font-medium">Прокрутите</span>
+            <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
+              <path d="M1 1l8 7 8-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </motion.div>
         </div>
       </motion.div>
     </motion.div>
