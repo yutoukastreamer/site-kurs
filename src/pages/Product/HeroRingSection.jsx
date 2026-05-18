@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useTransform, useMotionValue, AnimatePresence } from 'framer-motion'
+import { motion, useTransform, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
@@ -107,26 +107,46 @@ export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
   const [heroHidden, setHeroHidden] = useState(false)
+  const heroHiddenRef = useRef(false)
   const autoScrollRef = useRef(false)
+  const rafScrollRef = useRef(null)
 
   const scrollProgress = useMotionValue(0)
+  // Spring-сглаживание: убирает рывки при быстрых scroll-событиях,
+  // но реакция остаётся живой (короткий лаг ~80–120ms).
+  const smoothProgress = useSpring(scrollProgress, {
+    stiffness: 120,
+    damping: 28,
+    mass: 0.4,
+    restDelta: 0.0005,
+  })
 
   useEffect(() => {
     const update = () => {
+      rafScrollRef.current = null
       const el = containerRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
       const scrollRange = el.offsetHeight - window.innerHeight
       const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
       scrollProgress.set(progress)
-      setHeroHidden(progress > 0.42)
+      const shouldHide = progress > 0.42
+      if (shouldHide !== heroHiddenRef.current) {
+        heroHiddenRef.current = shouldHide
+        setHeroHidden(shouldHide)
+      }
+    }
+    const onScroll = () => {
+      if (rafScrollRef.current != null) return
+      rafScrollRef.current = requestAnimationFrame(update)
     }
     update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (rafScrollRef.current != null) cancelAnimationFrame(rafScrollRef.current)
     }
   }, [scrollProgress])
 
@@ -218,13 +238,13 @@ export default function HeroRingSection({ product }) {
   const machineVW = imgVW * finalRingScale
   const machineVH = machineVW * (26 / 19)
 
-  /* ── Desktop scroll transforms ── */
-  const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
-  const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
-  const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
-  const heroOpacity = useTransform(scrollProgress, [0.18, 0.38], [1, 0])
-  const titleOpacity = useTransform(scrollProgress, [0.55, 0.68], [0, 1])
-  const bgOpacity = useTransform(scrollProgress, [0.35, 0.50], [0, 1])
+  /* ── Desktop scroll transforms (через smoothProgress — без рывков) ── */
+  const machineLeft = useTransform(smoothProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
+  const machineTop = useTransform(smoothProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
+  const machineScale = useTransform(smoothProgress, [0.25, 0.55], [1, finalRingScale])
+  const heroOpacity = useTransform(smoothProgress, [0.18, 0.38], [1, 0])
+  const titleOpacity = useTransform(smoothProgress, [0.55, 0.68], [0, 1])
+  const bgOpacity = useTransform(smoothProgress, [0.35, 0.50], [0, 1])
 
   return (
     <>
@@ -294,7 +314,7 @@ export default function HeroRingSection({ product }) {
                     dotOverride={dotOverride}
                     index={i}
                     total={components.length}
-                    scrollYProgress={scrollProgress}
+                    scrollYProgress={smoothProgress}
                     color={color}
                     machineVW={machineVW}
                     machineVH={machineVH}
@@ -316,7 +336,7 @@ export default function HeroRingSection({ product }) {
                     machineVH={machineVH}
                     index={i}
                     total={components.length}
-                    scrollYProgress={scrollProgress}
+                    scrollYProgress={smoothProgress}
                     color={color}
                     isActive={activeIndex === i}
                     onHover={(active) => setActiveIndex(active ? i : null)}
@@ -353,8 +373,22 @@ export default function HeroRingSection({ product }) {
    Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
 function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineVW, machineVH, isActive, onHover }) {
-  const stagger = index * (0.15 / total)
-  const itemOpacity = useTransform(scrollYProgress, [0.55 + stagger, 0.75 + stagger], [0, 1])
+  /* Тайминги (доли scrollProgress):
+     — Иконки появляются по кругу:   0.55 → 0.77  (по индексу)
+     — Линии-коннекторы:             0.77 → 0.87  (после иконок)
+     Ромбы на машине — см. MachineDot. */
+  const iconStagger = index * (0.17 / total)
+  const iconOpacity = useTransform(
+    scrollYProgress,
+    [0.55 + iconStagger, 0.60 + iconStagger],
+    [0, 1]
+  )
+  const lineStagger = index * (0.08 / total)
+  const lineOpacity = useTransform(
+    scrollYProgress,
+    [0.77 + lineStagger, 0.82 + lineStagger],
+    [0, 1]
+  )
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
@@ -390,7 +424,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
           borderRight: !compIsLeft ? border : 'none',
           borderBottom: compIsAbove ? border : 'none',
           borderTop: !compIsAbove ? border : 'none',
-          opacity: itemOpacity,
+          opacity: lineOpacity,
         }}
       />
 
@@ -402,7 +436,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
           top: `${position.top}%`,
           x: '-50%',
           y: '-50%',
-          opacity: itemOpacity,
+          opacity: iconOpacity,
         }}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
@@ -432,8 +466,13 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
    Machine point marker (diamond dot)
    ═══════════════════════════════════════════════════════ */
 function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scrollYProgress, color, isActive, onHover }) {
-  const stagger = index * (0.15 / total)
-  const dotOpacity = useTransform(scrollYProgress, [0.68 + stagger, 0.85 + stagger], [0, 1])
+  // Ромбы — финальная фаза, по той же круговой очерёдности, после линий
+  const stagger = index * (0.06 / total)
+  const dotOpacity = useTransform(
+    scrollYProgress,
+    [0.87 + stagger, 0.92 + stagger],
+    [0, 1]
+  )
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
