@@ -106,13 +106,6 @@ function clampPos(pos) {
 export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
-  const [vh, setVh] = useState(() => (typeof window !== 'undefined' ? window.innerHeight : 800))
-
-  useEffect(() => {
-    const onResize = () => setVh(window.innerHeight)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
   const [heroHidden, setHeroHidden] = useState(false)
   const heroHiddenRef = useRef(false)
   const autoScrollRef = useRef(false)
@@ -321,7 +314,6 @@ export default function HeroRingSection({ product }) {
                     color={color}
                     machineVW={machineVW}
                     machineVH={machineVH}
-                    vh={vh}
                     isActive={activeIndex === i}
                     onHover={(active) => setActiveIndex(active ? i : null)}
                   />
@@ -374,19 +366,9 @@ export default function HeroRingSection({ product }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   Schema item — icon + label inside a rectangular card.
-   L-line attaches to the OUTER edge of the card (top or bottom),
-   never crossing through the text inside.
+   Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
-
-/* Единые размеры карточки и иконки — одинаковые у всех компонентов */
-const CARD_W_REM = 9
-const CARD_H_REM = 6
-const ICON_REM = 2
-const REM_PX = 16
-const CARD_H_PX = CARD_H_REM * REM_PX
-
-function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineVW, machineVH, vh, isActive, onHover }) {
+function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineVW, machineVH, isActive, onHover }) {
   /* Тайминги (доли scrollProgress):
      — Иконки появляются по кругу:   0.55 → 0.77  (по индексу)
      — Линии-коннекторы:             0.77 → 0.87  (после иконок)
@@ -412,18 +394,13 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
   const toX = target.x
   const toY = target.y
 
-  /* Линия выходит не из центра карточки, а из её внешней кромки
-     (верхней или нижней — в зависимости от того, где находится ромб). */
-  const halfCardHvp = (CARD_H_PX / 2) / (vh || 800) * 100
-  const compIsAbove = fromY <= toY
-  const cardEdgeY = compIsAbove ? fromY + halfCardHvp : fromY - halfCardHvp
+  const connLeft = Math.min(fromX, toX)
+  const connTop = Math.min(fromY, toY)
+  const connW = Math.abs(fromX - toX)
+  const connH = Math.abs(fromY - toY)
 
   const compIsLeft = fromX <= toX
-
-  const connLeft = Math.min(fromX, toX)
-  const connTop = Math.min(cardEdgeY, toY)
-  const connW = Math.abs(fromX - toX)
-  const connH = Math.abs(cardEdgeY - toY)
+  const compIsAbove = fromY <= toY
 
   const bw = isActive ? '2px' : '1px'
   const alpha = isActive ? 'e6' : '80'
@@ -447,7 +424,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
         }}
       />
 
-      {/* Rectangular card: icon + label */}
+      {/* Component icon + label */}
       <motion.div
         className="absolute z-20 pointer-events-auto cursor-pointer"
         style={{
@@ -460,34 +437,19 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
       >
-        <div
-          className={`flex flex-col items-center justify-center
-                      bg-gray-50 border border-gray-200/70
-                      shadow-[0_4px_14px_rgba(0,0,0,0.06)]
-                      origin-center transition-transform duration-300 ease-out
-                      ${isActive ? 'scale-[1.04]' : ''}`}
-          style={{
-            width: `${CARD_W_REM}rem`,
-            height: `${CARD_H_REM}rem`,
-            padding: '10px',
-            borderRadius: '8px',
-          }}
-        >
-          <div
-            className="flex items-center justify-center shrink-0"
-            style={{ width: `${ICON_REM}rem`, height: `${ICON_REM}rem` }}
-          >
-            <img
-              src={comp.image}
-              alt={comp.name}
-              className="max-w-full max-h-full h-auto object-contain"
-            />
+        <div className={`flex flex-col items-center origin-center
+                          transition-transform duration-300 ease-out
+                          ${isActive ? 'scale-110' : ''}`}>
+          <div className="flex items-end justify-center"
+               style={{
+                 width: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
+                 maxHeight: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
+               }}>
+            <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
           </div>
-          <span
-            className={`text-[10px] font-medium text-center leading-tight tracking-wide
-                        whitespace-pre-line transition-colors duration-300 mt-1
-                        ${isActive ? 'text-text' : 'text-text-secondary'}`}
-          >
+          <span className={`text-[10px] font-medium text-center max-w-[140px] leading-tight tracking-wide
+                            whitespace-pre-line transition-colors duration-300 mt-1.5
+                            ${isActive ? 'text-text' : 'text-text-secondary'}`}>
             {comp.label || comp.name}
           </span>
         </div>
