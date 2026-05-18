@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useTransform, useMotionValue, useSpring, AnimatePresence } from 'framer-motion'
+import { motion, useTransform, useMotionValue, AnimatePresence } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
@@ -111,15 +111,11 @@ export default function HeroRingSection({ product }) {
   const autoScrollRef = useRef(false)
   const rafScrollRef = useRef(null)
 
+  // Прогресс читается напрямую — пружина добавляла «загрузочный» лаг.
+  // Плавность обеспечивается двумя другими механизмами:
+  //   • rAF-троттлинг scroll-handler'а (раз за кадр)
+  //   • программный плавный скролл с easeInOutCubic (см. ниже)
   const scrollProgress = useMotionValue(0)
-  // Spring-сглаживание: убирает рывки при быстрых scroll-событиях,
-  // но реакция остаётся живой (короткий лаг ~80–120ms).
-  const smoothProgress = useSpring(scrollProgress, {
-    stiffness: 120,
-    damping: 28,
-    mass: 0.4,
-    restDelta: 0.0005,
-  })
 
   useEffect(() => {
     const update = () => {
@@ -166,7 +162,7 @@ export default function HeroRingSection({ product }) {
     const easeInOutCubic = (t) =>
       t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 
-    const smoothScrollTo = (target, duration = 1400) =>
+    const smoothScrollTo = (target, duration = 1000) =>
       new Promise((resolve) => {
         const start = window.scrollY
         const diff = target - start
@@ -238,13 +234,13 @@ export default function HeroRingSection({ product }) {
   const machineVW = imgVW * finalRingScale
   const machineVH = machineVW * (26 / 19)
 
-  /* ── Desktop scroll transforms (через smoothProgress — без рывков) ── */
-  const machineLeft = useTransform(smoothProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
-  const machineTop = useTransform(smoothProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
-  const machineScale = useTransform(smoothProgress, [0.25, 0.55], [1, finalRingScale])
-  const heroOpacity = useTransform(smoothProgress, [0.18, 0.38], [1, 0])
-  const titleOpacity = useTransform(smoothProgress, [0.55, 0.68], [0, 1])
-  const bgOpacity = useTransform(smoothProgress, [0.35, 0.50], [0, 1])
+  /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ── */
+  const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
+  const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
+  const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
+  const heroOpacity = useTransform(scrollProgress, [0.18, 0.38], [1, 0])
+  const titleOpacity = useTransform(scrollProgress, [0.55, 0.68], [0, 1])
+  const bgOpacity = useTransform(scrollProgress, [0.35, 0.50], [0, 1])
 
   return (
     <>
@@ -314,7 +310,7 @@ export default function HeroRingSection({ product }) {
                     dotOverride={dotOverride}
                     index={i}
                     total={components.length}
-                    scrollYProgress={smoothProgress}
+                    scrollYProgress={scrollProgress}
                     color={color}
                     machineVW={machineVW}
                     machineVH={machineVH}
@@ -336,7 +332,7 @@ export default function HeroRingSection({ product }) {
                     machineVH={machineVH}
                     index={i}
                     total={components.length}
-                    scrollYProgress={smoothProgress}
+                    scrollYProgress={scrollProgress}
                     color={color}
                     isActive={activeIndex === i}
                     onHover={(active) => setActiveIndex(active ? i : null)}
