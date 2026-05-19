@@ -2,12 +2,6 @@ import { useRef, useEffect, useState } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
 
-const accentBg = {
-  bulldozer: 'bg-bulldozer',
-  excavator: 'bg-excavator',
-  grader: 'bg-grader',
-}
-
 /* ═══════════════════════════════════════════════════════
    Horizontal scroll: "О системе" → "Компоненты системы"
    Desktop: vertical scroll maps to horizontal slide
@@ -96,12 +90,10 @@ export default function DescriptionCardsSection({ product }) {
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
-                  {product.componentCards.map((comp, i) => (
+                  {product.componentCards.map((comp) => (
                     <CardDesktop
                       key={comp.id}
                       comp={comp}
-                      index={i}
-                      accent={product.accentColor}
                       onSelect={() => setSelected(comp)}
                     />
                   ))}
@@ -151,12 +143,10 @@ export default function DescriptionCardsSection({ product }) {
             Компоненты системы
           </h2>
           <div className="grid grid-cols-2 gap-4">
-            {product.componentCards.map((comp, i) => (
+            {product.componentCards.map((comp) => (
               <CardDesktop
                 key={comp.id}
                 comp={comp}
-                index={i}
-                accent={product.accentColor}
                 onSelect={() => setSelected(comp)}
               />
             ))}
@@ -169,7 +159,6 @@ export default function DescriptionCardsSection({ product }) {
         {selected && (
           <ComponentModal
             comp={selected}
-            accent={product.accentColor}
             onClose={() => setSelected(null)}
           />
         )}
@@ -179,7 +168,7 @@ export default function DescriptionCardsSection({ product }) {
 }
 
 /* ─── Card (works in both layouts) ─── */
-function CardDesktop({ comp, index, accent, onSelect }) {
+function CardDesktop({ comp, onSelect }) {
   return (
     <button
       onClick={onSelect}
@@ -196,7 +185,7 @@ function CardDesktop({ comp, index, accent, onSelect }) {
 }
 
 /* ─── Modal ─── */
-function ComponentModal({ comp, accent, onClose }) {
+function ComponentModal({ comp, onClose }) {
   const scrollRef = useRef(null)
   const [hasMoreBelow, setHasMoreBelow] = useState(false)
 
