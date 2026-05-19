@@ -222,7 +222,7 @@ function DesktopVideo({ product, accentColor }) {
           className="absolute z-30 flex flex-col items-center gap-4 cursor-pointer group"
         >
           <div className="w-20 h-20 lg:w-24 lg:h-24 border border-white/50 rounded-full grid place-items-center
-                          group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm pl-[3px]">
+                          group-hover:border-white group-hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
               <path
                 d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z"

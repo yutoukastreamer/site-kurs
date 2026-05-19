@@ -575,6 +575,9 @@ function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scr
    ═══════════════════════════════════════════════════════ */
 function HoverPanel({ comp, color, fromRight }) {
   const offsetPx = 420 // off-screen start distance
+  // Мелкие компоненты (напр. призма, imageScale < 1) показываем меньше;
+  // крупные не раздуваем — потолок масштаба = 1.
+  const imgScale = Math.min(comp.imageScale ?? 1, 1)
   return (
     <motion.div
       initial={{ x: fromRight ? offsetPx : -offsetPx, opacity: 0 }}
@@ -619,8 +622,12 @@ function HoverPanel({ comp, color, fromRight }) {
           <img
             src={comp.image}
             alt={comp.name}
-            className="relative max-w-[65%] max-h-[78%] object-contain"
-            style={{ filter: 'drop-shadow(0 12px 28px rgba(0,0,0,0.55))' }}
+            className="relative object-contain"
+            style={{
+              maxWidth: `${65 * imgScale}%`,
+              maxHeight: `${78 * imgScale}%`,
+              filter: 'drop-shadow(0 12px 28px rgba(0,0,0,0.55))',
+            }}
           />
         </div>
 
