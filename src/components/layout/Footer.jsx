@@ -47,7 +47,16 @@ export default function Footer() {
 
           {/* ── Left column: Logo + slogan + brand logos ── */}
           <div className="lg:col-span-4">
-            <Link to="/" className="inline-block mb-5">
+            <Link
+              to="/"
+              onClick={(e) => {
+                if (pathname === '/') {
+                  e.preventDefault()
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }
+              }}
+              className="inline-block mb-5"
+            >
               <img src={logoGsi} alt="ГСИ" className="h-10 w-auto" />
             </Link>
             <p className="text-white/35 text-sm leading-relaxed mb-6 max-w-xs">
