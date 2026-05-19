@@ -406,16 +406,6 @@ function HeroText({ product }) {
         {product.heroSubtitle}
       </p>
 
-      <div className="flex gap-4 xl:gap-8 mb-8">
-        {product.features.slice(0, 3).map((f) => (
-          <div key={f.title} className="shrink-0">
-            <span className="text-2xl font-light text-text whitespace-nowrap">{f.value}</span>
-            <span className="text-xs text-text-secondary ml-1 whitespace-nowrap">{f.unit}</span>
-            <p className="text-[10px] text-text-secondary tracking-wide uppercase mt-1 whitespace-nowrap">{f.title}</p>
-          </div>
-        ))}
-      </div>
-
       <div className="flex flex-col sm:flex-row gap-3 mb-10">
         <Button href="/catalog.pdf" download variant="primary">Скачать буклет PDF</Button>
         <Button href="#contact" variant="outline">Получить предложение</Button>
