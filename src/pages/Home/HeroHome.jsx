@@ -15,7 +15,7 @@ export default function HeroHome() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-bg-dark">
+    <section className="relative min-h-screen flex items-start md:items-center overflow-hidden bg-bg-dark">
       {/* Video background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -29,20 +29,34 @@ export default function HeroHome() {
       {/* Dark overlay */}
       <div className="absolute inset-0 z-[1] bg-gradient-to-t from-bg-dark/90 via-bg-dark/50 to-bg-dark/70" />
 
-      {/* Logos — top right corner, large & visible */}
+      {/*
+        Logos
+        ─────
+        Desktop (md+): top-right corner, flex row.
+        Mobile: full-width grid [1fr auto 1fr] — the divider lands exactly
+        at the viewport horizontal center regardless of each logo's width.
+        Each logo justifies toward the divider (end/start) so the composition
+        is visually symmetric around the true center.
+
+        Vertical (mobile):
+          iPhone SE (<376px):  logos h-8 (32px), top-28 (112px),
+                                heading pt-44 (176px) → 32px gap both sides.
+          ≥376px (xs+):         logos h-10 (40px), top-[116px],
+                                heading pt-48 (192px) → 36px gap both sides.
+      */}
       <motion.div
-        className="hero-home-logos absolute top-28 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 lg:right-12 z-20 flex items-center justify-center gap-5 w-full md:w-auto"
+        className="absolute top-28 xs:top-[116px] md:top-28 inset-x-0 md:inset-x-auto md:right-8 lg:right-12 z-20 grid grid-cols-[1fr_auto_1fr] md:flex items-center gap-4 xs:gap-5"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <img src={logoKurs} alt="Курс" className="h-10 lg:h-14 w-auto" />
-        <div className="w-px h-8 bg-white/30" />
-        <img src={logoRussia} alt="Сделано в России" className="h-10 lg:h-14 w-auto" style={{ filter: 'brightness(0) invert(1)' }} />
+        <img src={logoKurs} alt="Курс" className="h-8 xs:h-10 lg:h-14 w-auto justify-self-end md:justify-self-auto" />
+        <div className="w-px h-7 xs:h-8 bg-white/30" />
+        <img src={logoRussia} alt="Сделано в России" className="h-8 xs:h-10 lg:h-14 w-auto justify-self-start md:justify-self-auto" style={{ filter: 'brightness(0) invert(1)' }} />
       </motion.div>
 
       {/* Content */}
-      <div className="hero-home-content container-luxury relative z-10 pt-32 pb-20">
+      <div className="container-luxury relative z-10 pt-44 xs:pt-48 md:pt-32 pb-20">
         <div className="max-w-3xl text-center md:text-left md:pl-0 lg:-ml-52">
           <motion.p
             className="text-[11px] font-medium tracking-[0.35em] uppercase text-white/40 mb-8"

@@ -1,103 +1,98 @@
-import { useRef } from 'react'
-import SectionReveal from '../ui/SectionReveal'
-
-/**
- * Блок обратной связи — форма подгружается из Битрикс24.
- *
- * Как подключить:
- * 1. В Битрикс24 → CRM → Формы → создайте форму
- * 2. Скопируйте скрипт встраивания (тег <script>)
- * 3. Вставьте URL скрипта в переменную BITRIX_FORM_SCRIPT ниже
- * 4. Или вставьте полный HTML-код формы в div#bitrix-form
- */
-
-// TODO: Заменить на реальный URL скрипта Битрикс-формы
-// const BITRIX_FORM_SCRIPT = 'https://your-portal.bitrix24.ru/bitrix/js/crm/form_loader.js'
+import { useEffect, useRef } from 'react'
 
 export default function ContactFormSection() {
-  const formContainerRef = useRef(null)
+  const formRef = useRef(null)
 
-  /* Uncomment when Bitrix script is ready:
   useEffect(() => {
+    const container = formRef.current
+    if (!container) return
+
     const script = document.createElement('script')
-    script.src = BITRIX_FORM_SCRIPT
-    script.async = true
-    formContainerRef.current?.appendChild(script)
-    return () => script.remove()
+    script.setAttribute('data-b24-form', 'inline/13/rr4ag5')
+    script.setAttribute('data-skip-moving', 'true')
+    script.text = `
+      (function(w,d,u){
+        var s=d.createElement('script');s.async=true;s.src=u+'?'+(Date.now()/180000|0);
+        var h=d.getElementsByTagName('script')[0];h.parentNode.insertBefore(s,h);
+      })(window,document,'https://crm.gsi.ru/upload/crm/form/loader_13_rr4ag5.js');
+    `
+    container.appendChild(script)
+
+    return () => {
+      try { script.remove() } catch (e) { /* ignore */ }
+    }
   }, [])
-  */
 
   return (
-    <section id="contact" className="py-20 lg:py-28 bg-bg-dark">
-      <div className="container-luxury">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-          {/* Left — heading + text */}
-          <SectionReveal>
-            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-white/40 mb-4 whitespace-nowrap">
+    <section id="contact" style={{ backgroundColor: '#1A1D23' }}>
+      <div className="container-luxury" style={{ padding: '60px 24px' }}>
+        <style>{`
+          @media(max-width: 600px) {
+            .b24-form-col {
+              border-left: none !important;
+              border-top: 0.5px solid #2a2d34 !important;
+            }
+          }
+        `}</style>
+
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          minHeight: '400px',
+        }}>
+          {/* Left — text */}
+          <div style={{
+            flex: '1 1 240px',
+            padding: '40px 32px 40px 0',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            flexDirection: 'column',
+          }}>
+            <p style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              fontFamily: "'Inter', system-ui, sans-serif",
+              color: '#9a9da3',
+              margin: '0 0 16px',
+            }}>
               Обратная связь
             </p>
-            <h2 className="font-light mb-6 text-white leading-tight" style={{ fontSize: 'clamp(1.875rem, 3vw, 2.25rem)' }}>
-              Оставьте заявку
+            <h2 style={{
+              fontSize: 'clamp(1.875rem, 3.5vw, 3rem)',
+              fontWeight: 300,
+              fontFamily: "'Inter', system-ui, sans-serif",
+              color: '#F7F8FA',
+              margin: '0 0 24px',
+              lineHeight: 1.2,
+            }}>
+              Свяжитесь с&nbsp;нами
             </h2>
-            <p className="text-white/40 text-sm leading-relaxed max-w-md">
-              Заполните форму, и наш специалист свяжется с вами в ближайшее время.
-              Мы подберём оптимальное решение для вашей техники и задач.
+            <p style={{
+              fontSize: '14px',
+              fontFamily: "'Inter', system-ui, sans-serif",
+              color: '#9a9da3',
+              lineHeight: 1.7,
+              margin: 0,
+            }}>
+              Оставьте контактные данные и&nbsp;мы&nbsp;подберём
+              оптимальное решение для&nbsp;ваших задач.
+              Ответим на&nbsp;любые вопросы
             </p>
-          </SectionReveal>
+          </div>
 
-          {/* Right — Bitrix form container */}
-          <SectionReveal delay={0.2}>
-            <div
-              ref={formContainerRef}
-              className="bg-white/[0.03] border border-white/10 p-6 lg:p-8"
-            >
-              {/*
-                Сюда Битрикс вставит свою форму автоматически.
-                Пока форма не подключена — показываем placeholder-поля.
-              */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-medium tracking-[0.15em] uppercase text-white/40 mb-2">
-                    Ваше имя
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Иван Иванов"
-                    className="w-full bg-transparent border border-white/15 px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-white/40 focus:outline-none transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium tracking-[0.15em] uppercase text-white/40 mb-2">
-                    Телефон
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="+7 (___) ___-__-__"
-                    className="w-full bg-transparent border border-white/15 px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-white/40 focus:outline-none transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium tracking-[0.15em] uppercase text-white/40 mb-2">
-                    Комментарий
-                  </label>
-                  <textarea
-                    rows="3"
-                    placeholder="Какая техника, задачи..."
-                    className="w-full bg-transparent border border-white/15 px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:border-white/40 focus:outline-none transition-colors resize-none"
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="w-full px-8 py-3.5 border border-white/30 text-white text-[11px] font-medium tracking-[0.15em] uppercase hover:bg-white hover:text-bg-dark transition-all duration-300 cursor-pointer whitespace-nowrap"
-                >
-                  Отправить заявку
-                </button>
-                <p className="text-[10px] text-white/20 leading-relaxed">
-                  Нажимая кнопку, вы соглашаетесь с обработкой персональных данных
-                </p>
-              </div>
-            </div>
-          </SectionReveal>
+          {/* Right — Bitrix form */}
+          <div
+            className="b24-form-col"
+            ref={formRef}
+            style={{
+              flex: '1 1 280px',
+              padding: '40px 0 40px 32px',
+              borderLeft: '0.5px solid #2a2d34',
+            }}
+          />
         </div>
       </div>
     </section>

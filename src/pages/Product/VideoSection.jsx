@@ -427,7 +427,7 @@ function MobileVideo({ product, accentColor }) {
                 className="absolute inset-0 flex items-center justify-center z-10 bg-black/40"
                 aria-label="Воспроизвести"
               >
-                <div className="w-16 h-16 border border-white/70 rounded-full grid place-items-center backdrop-blur-sm bg-black/20 pl-[3px]">
+                <div className="w-16 h-16 border border-white/70 rounded-full grid place-items-center backdrop-blur-sm bg-black/20">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
                     <path d="M8 5.14v13.72a1 1 0 001.5.86l11.04-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" />
                   </svg>

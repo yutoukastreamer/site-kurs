@@ -15,6 +15,9 @@
 
   --font-heading: "Inter", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
+
+  /* Extra-small breakpoint for devices larger than iPhone SE (320px) */
+  --breakpoint-xs: 23.5rem; /* 376px */
 }
 
 /* ─── Base styles ─── */
@@ -135,6 +138,12 @@
 
 .ticker-track:hover {
   animation-play-state: paused;
+}
+
+@media (max-width: 1023px) {
+  .ticker-track {
+    animation-duration: 22s;
+  }
 }
 
 /* ─── Global thin scrollbar ─── */

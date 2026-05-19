@@ -29,7 +29,7 @@ export default function WhereToBuy() {
             </div>
             <div className="min-w-0 text-center sm:text-left">
               <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-text">
-                г.&nbsp;Москва, ул.&nbsp;Малая Семеновская, д.&nbsp;9, стр.&nbsp;1
+                Москва, ул.&nbsp;Малая Семеновская, д.&nbsp;9, стр.&nbsp;1
               </p>
               <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-text-secondary mt-1.5">
                 Телефон:{' '}
