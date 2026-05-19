@@ -312,9 +312,8 @@ function ComponentModal({ comp, accent, onClose }) {
           <motion.div
             animate={{ y: [0, 4, 0] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-            className="relative flex flex-col items-center gap-1 text-text-secondary"
+            className="relative text-text-secondary"
           >
-            <span className="text-[10px] tracking-[0.22em] uppercase font-medium">Прокрутите</span>
             <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
               <path d="M1 1l8 7 8-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
