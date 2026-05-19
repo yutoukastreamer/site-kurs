@@ -198,7 +198,7 @@ export default function HeroRingSection({ product }) {
 
               {/* Ring heading — starts exactly when machine animation ends */}
               <motion.div
-                className="absolute left-1/2 text-center z-30"
+                className="absolute left-1/2 text-center z-30 pointer-events-none"
                 style={{ opacity: titleOpacity, x: '-50%', top: '14%' }}
               >
                 <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-2 whitespace-nowrap">
@@ -281,6 +281,9 @@ export default function HeroRingSection({ product }) {
 function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineVW, machineVH, isActive, onHover }) {
   const stagger = index * (0.15 / total)
   const itemOpacity = useTransform(scrollYProgress, [0.55 + stagger, 0.75 + stagger], [0, 1])
+  /* Пока иконка не видна — не перехватываем курсор, иначе невидимый
+     спрайт ворует hover у кнопки в hero-блоке. */
+  const itemPointer = useTransform(itemOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
@@ -322,13 +325,14 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
 
       {/* Component icon + label */}
       <motion.div
-        className="absolute z-20 pointer-events-auto cursor-pointer"
+        className="absolute z-20 cursor-pointer"
         style={{
           left: `${position.left}%`,
           top: `${position.top}%`,
           x: '-50%',
           y: '-50%',
           opacity: itemOpacity,
+          pointerEvents: itemPointer,
         }}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
@@ -360,19 +364,21 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
 function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scrollYProgress, color, isActive, onHover }) {
   const stagger = index * (0.15 / total)
   const dotOpacity = useTransform(scrollYProgress, [0.68 + stagger, 0.85 + stagger], [0, 1])
+  const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
 
   return (
     <motion.div
-      className="absolute z-[15] pointer-events-auto cursor-pointer"
+      className="absolute z-[15] cursor-pointer"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
         x: '-50%',
         y: '-50%',
         opacity: dotOpacity,
+        pointerEvents: dotPointer,
       }}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
