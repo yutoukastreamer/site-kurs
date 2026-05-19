@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { FaPlay, FaMessage } from 'react-icons/fa6'
 import { SiTelegram, SiVk, SiYoutube } from 'react-icons/si'
 import logoGsi from '../../assets/images/logos/logo-gsi-white.png'
@@ -25,6 +25,21 @@ const menuLinks = [
 ]
 
 export default function Footer() {
+  const { pathname } = useLocation()
+
+  /* Хеш-ссылки на главной (/#gallery, /#where-to-buy):
+     <Link> здесь меняет только хеш, pathname не меняется → ни App.jsx,
+     ни useEffect в Header не срабатывают. Делаем скролл вручную.
+     На остальных страницах Link нормально навигирует на /, и якорь
+     уже подхватывается Header'ом по смене pathname. */
+  const handleMenuClick = (e, to) => {
+    if (to.startsWith('/#') && pathname === '/') {
+      e.preventDefault()
+      const id = to.slice(2)
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <footer id="main-footer" className="bg-bg-dark text-text-light">
       <div className="container-luxury py-16 lg:py-20">
@@ -32,7 +47,16 @@ export default function Footer() {
 
           {/* ── Left column: Logo + slogan + brand logos ── */}
           <div className="lg:col-span-4">
-            <Link to="/" className="inline-block mb-5">
+            <Link
+              to="/"
+              onClick={(e) => {
+                if (pathname === '/') {
+                  e.preventDefault()
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }
+              }}
+              className="inline-block mb-5"
+            >
               <img src={logoGsi} alt="ГСИ" className="h-10 w-auto" />
             </Link>
             <p className="text-white/35 text-sm leading-relaxed mb-6 max-w-xs">
@@ -54,6 +78,7 @@ export default function Footer() {
                 <Link
                   key={link.to}
                   to={link.to}
+                  onClick={(e) => handleMenuClick(e, link.to)}
                   className="text-sm text-white/50 hover:text-white transition-colors duration-300"
                 >
                   {link.label}

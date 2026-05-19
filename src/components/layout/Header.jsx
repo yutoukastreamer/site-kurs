@@ -55,7 +55,16 @@ export default function Header() {
     >
       <div className="container-luxury flex items-center justify-between h-20">
         {/* Logo GSI */}
-        <Link to="/" className="flex items-center shrink-0">
+        <Link
+          to="/"
+          onClick={(e) => {
+            if (pathname === '/') {
+              e.preventDefault()
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }
+          }}
+          className="flex items-center shrink-0"
+        >
           <img
             src={isLight ? logoGsiWhite : logoGsi}
             alt="ГСИ"

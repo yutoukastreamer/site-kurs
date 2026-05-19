@@ -5,9 +5,7 @@ export default function Button({ children, to, href, variant = 'primary', classN
 
   const variants = {
     primary: 'border border-text text-text hover:bg-text hover:text-text-light',
-    outline: 'border border-border text-text-secondary hover:border-text hover:text-text',
-    dark: 'border border-white/25 text-white hover:bg-white hover:text-bg-dark',
-    ghost: 'text-text-secondary hover:text-text',
+    outline: 'border border-text/30 text-text hover:border-text hover:bg-text hover:text-text-light',
   }
 
   const classes = `${base} ${variants[variant]} ${className}`

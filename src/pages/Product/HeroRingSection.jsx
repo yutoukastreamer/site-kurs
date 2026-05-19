@@ -288,7 +288,7 @@ export default function HeroRingSection({ product }) {
 
               {/* Ring heading — starts exactly when machine animation ends */}
               <motion.div
-                className="absolute left-1/2 text-center z-30"
+                className="absolute left-1/2 text-center z-30 pointer-events-none"
                 style={{ opacity: titleOpacity, x: '-50%', top: '14%' }}
               >
                 <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-2 whitespace-nowrap">
@@ -401,6 +401,9 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
     [0.77 + lineStagger, 0.82 + lineStagger],
     [0, 1]
   )
+  /* Пока иконка не проявилась — не перехватываем курсор, иначе
+     невидимый спрайт ворует hover у кнопки в hero-блоке. */
+  const iconPointer = useTransform(iconOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
@@ -442,13 +445,14 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
 
       {/* Component icon + label */}
       <motion.div
-        className="absolute z-20 pointer-events-auto cursor-pointer"
+        className="absolute z-20 cursor-pointer"
         style={{
           left: `${position.left}%`,
           top: `${position.top}%`,
           x: '-50%',
           y: '-50%',
           opacity: iconOpacity,
+          pointerEvents: iconPointer,
         }}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
@@ -480,19 +484,21 @@ function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scr
     [0.87 + stagger, 0.92 + stagger],
     [0, 1]
   )
+  const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
 
   return (
     <motion.div
-      className="absolute z-[15] pointer-events-auto cursor-pointer"
+      className="absolute z-[15] cursor-pointer"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
         x: '-50%',
         y: '-50%',
         opacity: dotOpacity,
+        pointerEvents: dotPointer,
       }}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
@@ -601,16 +607,6 @@ function HeroText({ product }) {
       <p className="text-sm text-text-secondary leading-relaxed max-w-md mb-8">
         {product.heroSubtitle}
       </p>
-
-      <div className="flex gap-4 xl:gap-8 mb-8">
-        {product.features.slice(0, 3).map((f) => (
-          <div key={f.title} className="shrink-0">
-            <span className="text-2xl font-light text-text whitespace-nowrap">{f.value}</span>
-            <span className="text-xs text-text-secondary ml-1 whitespace-nowrap">{f.unit}</span>
-            <p className="text-[10px] text-text-secondary tracking-wide uppercase mt-1 whitespace-nowrap">{f.title}</p>
-          </div>
-        ))}
-      </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-10">
         <Button href="/catalog.pdf" download variant="primary">Скачать буклет PDF</Button>
