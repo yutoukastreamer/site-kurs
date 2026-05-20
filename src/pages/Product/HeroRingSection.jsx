@@ -24,6 +24,9 @@ const EASE = [0.25, 0.1, 0.25, 1]
  * ║  SCHEMA_LAYOUT — координаты иконок И точек на машине                    ║
  * ╠═══════════════════════════════════════════════════════════════════════════╣
  * ║                                                                         ║
+ * ║  ⚠️  ИСПОЛЬЗУЕТСЯ ТОЛЬКО НА ДЕСКТОПЕ (lg+).                              ║
+ * ║      Для мобильной версии — смотри ниже SCHEMA_LAYOUT_MOBILE.           ║
+ * ║                                                                         ║
  * ║  left  — горизонталь иконки:  0 = левый край,  50 = центр, 100 = право ║
  * ║  top   — вертикаль иконки:    0 = верх экрана, 50 = середина, 100 = низ║
  * ║                                                                         ║
@@ -45,33 +48,86 @@ const EASE = [0.25, 0.1, 0.25, 1]
 const SCHEMA_LAYOUT = {
   bulldozer: [
     /* #  название                           left  top    dot: [x, y] на машине   */
-    /* 0: ГНСС антенны                  */ { left: 30, top: 32, dot: [22, 7] },
+    /* 0: ГНСС антенны                  */ { left: 30, top: 32, dot: [32, 13] },
     /* 1: 10.1" консоль с ПО "КУРС"    */ { left: 78, top: 34, dot: [38, 30] },
-    /* 2: Призма режима ЛПС (опц.)     */ { left: 56, top: 31, dot: [45, 5] },
-    /* 3: Контроллер гидравлики         */ { left: 18, top: 50, dot: [12, 38] },
+    /* 2: Призма режима ЛПС (опц.)     */ { left: 56, top: 31, dot: [45, 13] },
+    /* 3: Контроллер гидравлики         */ { left: 18, top: 50, dot: [12, 42] },
     /* 4: Инерц. датчик на отвале       */ { left: 80, top: 62, dot: [75, 60] },
-    /* 5: Инерц. датчик в кабине        */ { left: 28, top: 75, dot: [28, 61] },
-    /* 6: Центральный контроллер        */ { left: 45, top: 86, dot: [17, 37] },
-    /* 7: Инерц. датчик на штанге отв.  */ { left: 65, top: 83, dot: [47, 83] },
+    /* 5: Инерц. датчик в кабине        */ { left: 28, top: 75, dot: [15, 37] },
+    /* 6: Центральный контроллер        */ { left: 45, top: 86, dot: [20, 40] },
+    /* 7: Инерц. датчик на штанге отв.  */ { left: 65, top: 83, dot: [47, 75] },
   ],
   excavator: [
     /* #  название                           left  top    dot: [x, y] на машине   */
     /* 0: Панель управления с ПО «Курс» */ { left: 78, top: 60, dot: [50, 57] },
-    /* 1: ГНСС антенны                  */ { left: 23, top: 53, dot: [5, 49] },
-    /* 2: Инерц. датчик (стрела)        */ { left: 34, top: 34, dot: [33, 39] },
-    /* 3: Инерц. датчик (рукоять)       */ { left: 70, top: 34, dot: [75, 33] },
-    /* 4: Инерц. датчик (ковш)          */ { left: 69, top: 82, dot: [ 82, 65] },
-    /* 5: Инерц. датчик (корпус)        */ { left: 30, top: 78, dot: [33, 65] },
-    /* 6: Центральный контроллер        */ { left: 48, top: 90, dot: [41, 52] },
+    /* 1: ГНСС антенны                  */ { left: 23, top: 53, dot: [5, 47] },
+    /* 2: Инерц. датчик (стрела)        */ { left: 34, top: 34, dot: [31, 38] },
+    /* 3: Инерц. датчик (рукоять)       */ { left: 70, top: 34, dot: [75, 23] },
+    /* 4: Инерц. датчик (ковш)          */ { left: 69, top: 82, dot: [ 80, 74] },
+    /* 5: Инерц. датчик (корпус)        */ { left: 30, top: 78, dot: [33, 78] },
+    /* 6: Центральный контроллер        */ { left: 48, top: 90, dot: [43, 42] },
   ],
 
   grader: [
     /* #  название                           left  top    dot: [x, y] на машине   */
     /* 0: Панель управления с ПО «Курс» */ { left: 68, top: 35, dot: [40, 40] },
-    /* 1: ГНСС антенны                  */ { left: 43, top: 83, dot: [26, 72] },
-    /* 2: Инерциальный датчик           */ { left: 77, top: 64, dot: [42, 74] },
+    /* 1: ГНСС антенны                  */ { left: 43, top: 83, dot: [26, 69] },
+    /* 2: Инерциальный датчик           */ { left: 77, top: 64, dot: [42, 71] },
     /* 3: Контроллер гидравлики         */ { left: 22, top: 60, dot: [39, 52] },
-    /* 4: Центральный контроллер        */ { left: 30, top: 32, dot: [18, 44] },
+    /* 4: Центральный контроллер        */ { left: 30, top: 32, dot: [23, 39] },
+  ],
+}
+
+/*
+ * ╔═══════════════════════════════════════════════════════════════════════════╗
+ * ║  SCHEMA_LAYOUT_MOBILE — координаты точек ТОЛЬКО для мобильной схемы     ║
+ * ╠═══════════════════════════════════════════════════════════════════════════╣
+ * ║                                                                         ║
+ * ║  Применяется на экранах < lg (< 1024px), т.е. блок «Схема расположения» ║
+ * ║  в мобильной карусели (функция MobileRing в этом же файле).             ║
+ * ║                                                                         ║
+ * ║  На мобильной версии машина показывается во всю ширину карточки,        ║
+ * ║  поэтому координаты = проценты ОТНОСИТЕЛЬНО изображения машины:         ║
+ * ║                                                                         ║
+ * ║  dot: [x, y]                                                             ║
+ * ║    x — горизонталь по картинке:  0 = левый край,  100 = правый край     ║
+ * ║    y — вертикаль по картинке:    0 = верх,        100 = низ              ║
+ * ║                                                                         ║
+ * ║  ▸ увеличь x → точка правее     ▸ увеличь y → точка ниже                 ║
+ * ║  ▸ уменьши x → точка левее      ▸ уменьши y → точка выше                 ║
+ * ║                                                                         ║
+ * ║  Индекс в массиве = индекс компонента в product.diagramComponents       ║
+ * ║  (порядок должен совпадать с SCHEMA_LAYOUT выше).                       ║
+ * ║                                                                         ║
+ * ║  Изменения ЗДЕСЬ не влияют на десктоп и наоборот.                       ║
+ * ╚═══════════════════════════════════════════════════════════════════════════╝
+ */
+const SCHEMA_LAYOUT_MOBILE = {
+  bulldozer: [
+    /* 0: ГНСС антенны                  */ { dot: [32, 13] },
+    /* 1: 10.1" консоль с ПО "КУРС"    */ { dot: [38, 30] },
+    /* 2: Призма режима ЛПС (опц.)     */ { dot: [45, 13] },
+    /* 3: Контроллер гидравлики         */ { dot: [12, 42] },
+    /* 4: Инерц. датчик на отвале       */ { dot: [75, 60] },
+    /* 5: Инерц. датчик в кабине        */ { dot: [15, 37] },
+    /* 6: Центральный контроллер        */ { dot: [20, 40] },
+    /* 7: Инерц. датчик на штанге отв.  */ { dot: [47, 75] },
+  ],
+  excavator: [
+    /* 0: Панель управления с ПО «Курс» */ { dot: [50, 57] },
+    /* 1: ГНСС антенны                  */ { dot: [5, 47] },
+    /* 2: Инерц. датчик (стрела)        */ { dot: [31, 38] },
+    /* 3: Инерц. датчик (рукоять)       */ { dot: [75, 23] },
+    /* 4: Инерц. датчик (ковш)          */ { dot: [80, 74] },
+    /* 5: Инерц. датчик (корпус)        */ { dot: [33, 78] },
+    /* 6: Центральный контроллер        */ { dot: [43, 42] },
+  ],
+  grader: [
+    /* 0: Панель управления с ПО «Курс» */ { dot: [40, 40] },
+    /* 1: ГНСС антенны                  */ { dot: [26, 69] },
+    /* 2: Инерциальный датчик           */ { dot: [42, 71] },
+    /* 3: Контроллер гидравлики         */ { dot: [39, 52] },
+    /* 4: Центральный контроллер        */ { dot: [23, 39] },
   ],
 }
 
@@ -86,10 +142,13 @@ function defaultHours(n) {
   return Array.from({ length: n }, (_, i) => ((12 / n) * i) || 12)
 }
 
-function machineToVP(mx, my, machineVW, machineVH) {
+/* Переводит координату на машине (mx,my — проценты по картинке машины)
+   в координату вьюпорта. box.wPct / box.hPct — фактический размер
+   картинки машины в процентах вьюпорта (меряется из DOM). */
+function machineToVP(mx, my, box) {
   return {
-    x: 50 + (mx / 100 - 0.5) * machineVW,
-    y: 56 + (my / 100 - 0.5) * machineVH,
+    x: 50 + (mx / 100 - 0.5) * box.wPct,
+    y: 56 + (my / 100 - 0.5) * box.hPct,
   }
 }
 
@@ -107,27 +166,117 @@ export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
   const [heroHidden, setHeroHidden] = useState(false)
+  const heroHiddenRef = useRef(false)
+  const autoScrollRef = useRef(false)
+  const rafScrollRef = useRef(null)
 
+  // Прогресс читается напрямую — пружина добавляла «загрузочный» лаг.
+  // Плавность обеспечивается двумя другими механизмами:
+  //   • rAF-троттлинг scroll-handler'а (раз за кадр)
+  //   • программный плавный скролл с easeInOutCubic (см. ниже)
   const scrollProgress = useMotionValue(0)
 
   useEffect(() => {
     const update = () => {
+      rafScrollRef.current = null
       const el = containerRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
       const scrollRange = el.offsetHeight - window.innerHeight
       const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
       scrollProgress.set(progress)
-      setHeroHidden(progress > 0.42)
+      const shouldHide = progress > 0.42
+      if (shouldHide !== heroHiddenRef.current) {
+        heroHiddenRef.current = shouldHide
+        setHeroHidden(shouldHide)
+      }
+    }
+    const onScroll = () => {
+      if (rafScrollRef.current != null) return
+      rafScrollRef.current = requestAnimationFrame(update)
     }
     update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (rafScrollRef.current != null) cancelAnimationFrame(rafScrollRef.current)
     }
   }, [scrollProgress])
+
+  /* ── Auto-play scroll animation on a single wheel tick ──
+     Когда пользователь попадает в "пиннутую" зону (контейнер 280vh),
+     перехватываем событие колёсика и плавно прокручиваем к началу/концу
+     зоны — так анимация проигрывается сама, без долгого ручного скролла. */
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!window.matchMedia('(min-width: 1024px)').matches) return
+
+    const el = containerRef.current
+    if (!el) return
+
+    let rafId = null
+
+    const easeInOutCubic = (t) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+    const smoothScrollTo = (target, duration = 1000) =>
+      new Promise((resolve) => {
+        const start = window.scrollY
+        const diff = target - start
+        if (Math.abs(diff) < 1) return resolve()
+        const startTime = performance.now()
+        const step = (now) => {
+          const t = Math.min((now - startTime) / duration, 1)
+          window.scrollTo(0, start + diff * easeInOutCubic(t))
+          if (t < 1) rafId = requestAnimationFrame(step)
+          else resolve()
+        }
+        rafId = requestAnimationFrame(step)
+      })
+
+    const onWheel = (e) => {
+      if (autoScrollRef.current) {
+        e.preventDefault()
+        return
+      }
+
+      const rect = el.getBoundingClientRect()
+      const scrollRange = el.offsetHeight - window.innerHeight
+      if (scrollRange <= 0) return
+
+      const delta = e.deltaY
+      if (!delta) return
+
+      // В пиннутой зоне: rect.top ∈ [-scrollRange, 0]
+      const inZone = rect.top <= 0 && rect.top >= -scrollRange
+      if (!inZone) return
+
+      // У верхней кромки — вверх пропускаем дальше по странице
+      if (delta < 0 && rect.top >= 0) return
+      // У нижней кромки — вниз пропускаем дальше по странице
+      if (delta > 0 && rect.top <= -scrollRange) return
+
+      e.preventDefault()
+
+      const containerTopAbs = window.scrollY + rect.top
+      const containerBottomAbs = containerTopAbs + scrollRange
+      const target = delta > 0 ? containerBottomAbs + 1 : containerTopAbs - 1
+
+      autoScrollRef.current = true
+      smoothScrollTo(target).then(() => {
+        autoScrollRef.current = false
+      })
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      if (rafId) cancelAnimationFrame(rafId)
+      autoScrollRef.current = false
+    }
+  }, [])
 
   const color = ACCENT_HEX[product.accentColor]
   const components = product.diagramComponents
@@ -141,10 +290,40 @@ export default function HeroRingSection({ product }) {
 
   const imgVW = product.heroImgVW ?? 32
   const finalRingScale = product.ringMachineScale ?? 0.6
-  const machineVW = imgVW * finalRingScale
-  const machineVH = machineVW * (26 / 19)
 
-  /* ── Desktop scroll transforms ── */
+  /* Реальный размер картинки машины (после finalRingScale) в процентах
+     вьюпорта. Меряется из DOM через ResizeObserver — поэтому точки схемы
+     не «разъезжаются» при смене размера экрана, соотношения сторон или
+     при срабатывании maxWidth-капа. Стартовое значение — оценка по формуле,
+     дальше уточняется измерением. */
+  const machineBoxRef = useRef(null)
+  const [machineBox, setMachineBox] = useState(() => ({
+    wPct: imgVW * finalRingScale,
+    hPct: imgVW * finalRingScale * (26 / 19),
+  }))
+
+  useEffect(() => {
+    const el = machineBoxRef.current
+    if (!el) return
+    const measure = () => {
+      const r = el.getBoundingClientRect()
+      if (!r.width || !r.height) return
+      setMachineBox({
+        wPct: (r.width / window.innerWidth) * 100 * finalRingScale,
+        hPct: (r.height / window.innerHeight) * 100 * finalRingScale,
+      })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [finalRingScale])
+
+  /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ── */
   const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
   const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
   const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
@@ -169,7 +348,7 @@ export default function HeroRingSection({ product }) {
             className="absolute z-[5] pointer-events-none"
             style={{ left: machineLeft, top: machineTop }}
           >
-            <div className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
+            <div ref={machineBoxRef} className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
               <motion.div style={{ scale: machineScale }} className="origin-center">
                 <img
                   src={product.heroImage}
@@ -198,7 +377,7 @@ export default function HeroRingSection({ product }) {
 
               {/* Ring heading — starts exactly when machine animation ends */}
               <motion.div
-                className="absolute left-1/2 text-center z-30"
+                className="absolute left-1/2 text-center z-30 pointer-events-none"
                 style={{ opacity: titleOpacity, x: '-50%', top: '14%' }}
               >
                 <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-2 whitespace-nowrap">
@@ -222,8 +401,7 @@ export default function HeroRingSection({ product }) {
                     total={components.length}
                     scrollYProgress={scrollProgress}
                     color={color}
-                    machineVW={machineVW}
-                    machineVH={machineVH}
+                    machineBox={machineBox}
                     isActive={activeIndex === i}
                     onHover={(active) => setActiveIndex(active ? i : null)}
                   />
@@ -238,8 +416,7 @@ export default function HeroRingSection({ product }) {
                     key={`dot-${i}`}
                     comp={comp}
                     dotOverride={dotOverride}
-                    machineVW={machineVW}
-                    machineVH={machineVH}
+                    machineBox={machineBox}
                     index={i}
                     total={components.length}
                     scrollYProgress={scrollProgress}
@@ -249,6 +426,22 @@ export default function HeroRingSection({ product }) {
                   />
                 )
               })}
+
+              {/* ── Hover side panel: enlarged image + name ── */}
+              <AnimatePresence>
+                {activeIndex !== null && (() => {
+                  const ac = components[activeIndex]
+                  const fromRight = ringPositions[activeIndex].left < 50
+                  return (
+                    <HoverPanel
+                      key={activeIndex}
+                      comp={ac}
+                      color={color}
+                      fromRight={fromRight}
+                    />
+                  )
+                })()}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -278,12 +471,29 @@ export default function HeroRingSection({ product }) {
 /* ═══════════════════════════════════════════════════════
    Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
-function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineVW, machineVH, isActive, onHover }) {
-  const stagger = index * (0.15 / total)
-  const itemOpacity = useTransform(scrollYProgress, [0.55 + stagger, 0.75 + stagger], [0, 1])
+function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineBox, isActive, onHover }) {
+  /* Тайминги (доли scrollProgress):
+     — Иконки появляются по кругу:   0.55 → 0.77  (по индексу)
+     — Линии-коннекторы:             0.77 → 0.87  (после иконок)
+     Ромбы на машине — см. MachineDot. */
+  const iconStagger = index * (0.17 / total)
+  const iconOpacity = useTransform(
+    scrollYProgress,
+    [0.55 + iconStagger, 0.60 + iconStagger],
+    [0, 1]
+  )
+  const lineStagger = index * (0.08 / total)
+  const lineOpacity = useTransform(
+    scrollYProgress,
+    [0.77 + lineStagger, 0.82 + lineStagger],
+    [0, 1]
+  )
+  /* Пока иконка не проявилась — не перехватываем курсор, иначе
+     невидимый спрайт ворует hover у кнопки в hero-блоке. */
+  const iconPointer = useTransform(iconOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
-  const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
+  const target = machineToVP(mp[0], mp[1], machineBox)
 
   const fromX = position.left
   const fromY = position.top
@@ -316,19 +526,20 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
           borderRight: !compIsLeft ? border : 'none',
           borderBottom: compIsAbove ? border : 'none',
           borderTop: !compIsAbove ? border : 'none',
-          opacity: itemOpacity,
+          opacity: lineOpacity,
         }}
       />
 
       {/* Component icon + label */}
       <motion.div
-        className="absolute z-20 pointer-events-auto cursor-pointer"
+        className="absolute z-20 cursor-pointer"
         style={{
           left: `${position.left}%`,
           top: `${position.top}%`,
           x: '-50%',
           y: '-50%',
-          opacity: itemOpacity,
+          opacity: iconOpacity,
+          pointerEvents: iconPointer,
         }}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
@@ -343,11 +554,6 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
                }}>
             <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
           </div>
-          <span className={`text-[10px] font-medium text-center max-w-[140px] leading-tight tracking-wide
-                            whitespace-pre-line transition-colors duration-300 mt-1.5
-                            ${isActive ? 'text-text' : 'text-text-secondary'}`}>
-            {comp.label || comp.name}
-          </span>
         </div>
       </motion.div>
     </>
@@ -357,22 +563,29 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
 /* ═══════════════════════════════════════════════════════
    Machine point marker (diamond dot)
    ═══════════════════════════════════════════════════════ */
-function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scrollYProgress, color, isActive, onHover }) {
-  const stagger = index * (0.15 / total)
-  const dotOpacity = useTransform(scrollYProgress, [0.68 + stagger, 0.85 + stagger], [0, 1])
+function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgress, color, isActive, onHover }) {
+  // Ромбы — финальная фаза, по той же круговой очерёдности, после линий
+  const stagger = index * (0.06 / total)
+  const dotOpacity = useTransform(
+    scrollYProgress,
+    [0.87 + stagger, 0.92 + stagger],
+    [0, 1]
+  )
+  const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
-  const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
+  const target = machineToVP(mp[0], mp[1], machineBox)
 
   return (
     <motion.div
-      className="absolute z-[15] pointer-events-auto cursor-pointer"
+      className="absolute z-[15] cursor-pointer"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
         x: '-50%',
         y: '-50%',
         opacity: dotOpacity,
+        pointerEvents: dotPointer,
       }}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
@@ -382,6 +595,89 @@ function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scr
                     ${isActive ? 'scale-[2.2]' : 'hover:scale-[1.6]'}`}
         style={{ backgroundColor: color }}
       />
+    </motion.div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   Hover panel — slides in from the page edge on hover.
+   Component on LEFT half  →  panel slides in from the RIGHT
+   Component on RIGHT half →  panel slides in from the LEFT
+   ═══════════════════════════════════════════════════════ */
+function HoverPanel({ comp, color, fromRight }) {
+  const offsetPx = 420 // off-screen start distance
+  // Мелкие компоненты (напр. призма, imageScale < 1) показываем меньше;
+  // крупные не раздуваем — потолок масштаба = 1.
+  const imgScale = Math.min(comp.imageScale ?? 1, 1)
+  return (
+    <motion.div
+      initial={{ x: fromRight ? offsetPx : -offsetPx, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: fromRight ? offsetPx : -offsetPx, opacity: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className={`absolute z-30 pointer-events-none ${fromRight ? 'right-4 xl:right-10' : 'left-4 xl:left-10'}`}
+      style={{ top: '50%', y: '-50%', width: '19rem' }}
+    >
+      <div
+        className="relative overflow-hidden"
+        style={{
+          backgroundColor: '#1A1F2A',
+          borderRadius: '14px',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.05)',
+        }}
+      >
+        {/* Accent vertical bar on the schema-facing edge */}
+        <div
+          className={`absolute top-0 bottom-0 w-[2px] ${fromRight ? 'left-0' : 'right-0'}`}
+          style={{ backgroundColor: color }}
+        />
+
+        {/* Decorative corner ticks */}
+        <span className="absolute top-3 left-3 w-3 h-px bg-white/15" />
+        <span className="absolute top-3 left-3 w-px h-3 bg-white/15" />
+        <span className="absolute top-3 right-3 w-3 h-px bg-white/15" />
+        <span className="absolute top-3 right-3 w-px h-3 bg-white/15" />
+        <span className="absolute bottom-3 left-3 w-3 h-px bg-white/15" />
+        <span className="absolute bottom-3 left-3 w-px h-3 bg-white/15" />
+        <span className="absolute bottom-3 right-3 w-3 h-px bg-white/15" />
+        <span className="absolute bottom-3 right-3 w-px h-3 bg-white/15" />
+
+        {/* Image area with subtle accent-colored radial glow */}
+        <div className="relative aspect-[4/3] flex items-center justify-center">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(ellipse at center, ${color}26 0%, transparent 65%)`,
+            }}
+          />
+          <img
+            src={comp.image}
+            alt={comp.name}
+            className="relative object-contain"
+            style={{
+              maxWidth: `${65 * imgScale}%`,
+              maxHeight: `${78 * imgScale}%`,
+              filter: 'drop-shadow(0 12px 28px rgba(0,0,0,0.55))',
+            }}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-white/[0.08]" />
+
+        {/* Text area */}
+        <div className="px-6 py-5">
+          <p
+            className="text-[10px] font-medium tracking-[0.32em] uppercase mb-2"
+            style={{ color, opacity: 0.85 }}
+          >
+            Компонент
+          </p>
+          <h3 className="text-base xl:text-lg font-light leading-snug text-white whitespace-pre-line">
+            {comp.label || comp.name}
+          </h3>
+        </div>
+      </div>
     </motion.div>
   )
 }
@@ -406,16 +702,6 @@ function HeroText({ product }) {
         {product.heroSubtitle}
       </p>
 
-      <div className="flex gap-4 xl:gap-8 mb-8">
-        {product.features.slice(0, 3).map((f) => (
-          <div key={f.title} className="shrink-0">
-            <span className="text-2xl font-light text-text whitespace-nowrap">{f.value}</span>
-            <span className="text-xs text-text-secondary ml-1 whitespace-nowrap">{f.unit}</span>
-            <p className="text-[10px] text-text-secondary tracking-wide uppercase mt-1 whitespace-nowrap">{f.title}</p>
-          </div>
-        ))}
-      </div>
-
       <div className="flex flex-col sm:flex-row gap-3 mb-10">
         <Button href="/catalog.pdf" download variant="primary">Скачать буклет PDF</Button>
         <Button href="#contact" variant="outline">Получить предложение</Button>
@@ -434,7 +720,8 @@ function HeroText({ product }) {
    ═══════════════════════════════════════════════════════ */
 function MobileRing({ product, color }) {
   const components = product.diagramComponents
-  const layout = SCHEMA_LAYOUT[product.slug]
+  /* Мобильный layout — редактируй SCHEMA_LAYOUT_MOBILE в шапке файла */
+  const layout = SCHEMA_LAYOUT_MOBILE[product.slug]
   const [activeIdx, setActiveIdx] = useState(0)
   const [direction, setDirection] = useState(0)
 
