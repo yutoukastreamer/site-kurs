@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Seo from '../../components/Seo'
 import SectionReveal from '../../components/ui/SectionReveal'
 import AnimatedHeading from '../../components/ui/AnimatedHeading'
 import newsData from '../../data/newsData'
@@ -194,6 +195,12 @@ export default function NewsPage() {
 
   return (
     <>
+      <Seo
+        title="Новости — КУРС | 3D системы нивелирования"
+        description="Новости компании ГСИ и систем 3D нивелирования КУРС: обновления продуктов, события и применение на стройплощадках."
+        keywords="новости КУРС, новости ГСИ, 3D нивелирование"
+        path="/news"
+      />
       {/* Hero section */}
       <section className="pt-32 lg:pt-40 pb-0 bg-bg">
         <div className="container-luxury">
