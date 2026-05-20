@@ -142,10 +142,13 @@ function defaultHours(n) {
   return Array.from({ length: n }, (_, i) => ((12 / n) * i) || 12)
 }
 
-function machineToVP(mx, my, machineVW, machineVH) {
+/* Переводит координату на машине (mx,my — проценты по картинке машины)
+   в координату вьюпорта. box.wPct / box.hPct — фактический размер
+   картинки машины в процентах вьюпорта (меряется из DOM). */
+function machineToVP(mx, my, box) {
   return {
-    x: 50 + (mx / 100 - 0.5) * machineVW,
-    y: 56 + (my / 100 - 0.5) * machineVH,
+    x: 50 + (mx / 100 - 0.5) * box.wPct,
+    y: 56 + (my / 100 - 0.5) * box.hPct,
   }
 }
 
@@ -287,8 +290,38 @@ export default function HeroRingSection({ product }) {
 
   const imgVW = product.heroImgVW ?? 32
   const finalRingScale = product.ringMachineScale ?? 0.6
-  const machineVW = imgVW * finalRingScale
-  const machineVH = machineVW * (26 / 19)
+
+  /* Реальный размер картинки машины (после finalRingScale) в процентах
+     вьюпорта. Меряется из DOM через ResizeObserver — поэтому точки схемы
+     не «разъезжаются» при смене размера экрана, соотношения сторон или
+     при срабатывании maxWidth-капа. Стартовое значение — оценка по формуле,
+     дальше уточняется измерением. */
+  const machineBoxRef = useRef(null)
+  const [machineBox, setMachineBox] = useState(() => ({
+    wPct: imgVW * finalRingScale,
+    hPct: imgVW * finalRingScale * (26 / 19),
+  }))
+
+  useEffect(() => {
+    const el = machineBoxRef.current
+    if (!el) return
+    const measure = () => {
+      const r = el.getBoundingClientRect()
+      if (!r.width || !r.height) return
+      setMachineBox({
+        wPct: (r.width / window.innerWidth) * 100 * finalRingScale,
+        hPct: (r.height / window.innerHeight) * 100 * finalRingScale,
+      })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [finalRingScale])
 
   /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ── */
   const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
@@ -315,7 +348,7 @@ export default function HeroRingSection({ product }) {
             className="absolute z-[5] pointer-events-none"
             style={{ left: machineLeft, top: machineTop }}
           >
-            <div className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
+            <div ref={machineBoxRef} className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
               <motion.div style={{ scale: machineScale }} className="origin-center">
                 <img
                   src={product.heroImage}
@@ -368,8 +401,7 @@ export default function HeroRingSection({ product }) {
                     total={components.length}
                     scrollYProgress={scrollProgress}
                     color={color}
-                    machineVW={machineVW}
-                    machineVH={machineVH}
+                    machineBox={machineBox}
                     isActive={activeIndex === i}
                     onHover={(active) => setActiveIndex(active ? i : null)}
                   />
@@ -384,8 +416,7 @@ export default function HeroRingSection({ product }) {
                     key={`dot-${i}`}
                     comp={comp}
                     dotOverride={dotOverride}
-                    machineVW={machineVW}
-                    machineVH={machineVH}
+                    machineBox={machineBox}
                     index={i}
                     total={components.length}
                     scrollYProgress={scrollProgress}
@@ -440,7 +471,7 @@ export default function HeroRingSection({ product }) {
 /* ═══════════════════════════════════════════════════════
    Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
-function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineVW, machineVH, isActive, onHover }) {
+function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineBox, isActive, onHover }) {
   /* Тайминги (доли scrollProgress):
      — Иконки появляются по кругу:   0.55 → 0.77  (по индексу)
      — Линии-коннекторы:             0.77 → 0.87  (после иконок)
@@ -462,7 +493,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
   const iconPointer = useTransform(iconOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
-  const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
+  const target = machineToVP(mp[0], mp[1], machineBox)
 
   const fromX = position.left
   const fromY = position.top
@@ -532,7 +563,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
 /* ═══════════════════════════════════════════════════════
    Machine point marker (diamond dot)
    ═══════════════════════════════════════════════════════ */
-function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scrollYProgress, color, isActive, onHover }) {
+function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgress, color, isActive, onHover }) {
   // Ромбы — финальная фаза, по той же круговой очерёдности, после линий
   const stagger = index * (0.06 / total)
   const dotOpacity = useTransform(
@@ -543,7 +574,7 @@ function MachineDot({ comp, dotOverride, machineVW, machineVH, index, total, scr
   const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
-  const target = machineToVP(mp[0], mp[1], machineVW, machineVH)
+  const target = machineToVP(mp[0], mp[1], machineBox)
 
   return (
     <motion.div
