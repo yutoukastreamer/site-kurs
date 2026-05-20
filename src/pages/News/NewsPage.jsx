@@ -213,7 +213,7 @@ export default function NewsPage() {
           </AnimatedHeading>
           <SectionReveal delay={0.15}>
             <p className="mt-4 lg:mt-6 text-base lg:text-lg text-text-secondary max-w-2xl leading-relaxed">
-              Актуальные события, обновления продукции и достижения компании Курс
+              Актуальная информация, события и наши достижения
             </p>
           </SectionReveal>
         </div>

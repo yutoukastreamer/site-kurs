@@ -72,7 +72,7 @@ export default function WhyChooseUs() {
             </div>
             <p className="text-sm text-text-secondary max-w-md leading-relaxed">
               Отечественные 3D системы нивелирования — разработаны инженерами,
-              провереные на дорожных объектах и стройплощадках по всей России.
+              провереные на дорожных объектах и строительных площадках по всей России.
             </p>
           </div>
         </SectionReveal>

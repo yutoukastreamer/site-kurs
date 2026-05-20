@@ -60,7 +60,7 @@ export default function Footer() {
               <img src={logoGsi} alt="ГСИ" className="h-10 w-auto" />
             </Link>
             <p className="text-white/35 text-sm leading-relaxed mb-6 max-w-xs">
-            ГЕОСТРОЙИЗЫСКАНИЯ — отечественные 3D системы нивелирования для спецтехники
+            Отечественные 3D системы нивелирования для спецтехники
             </p>
             <div className="flex items-center gap-4">
               <img src={logoKurs} alt="Курс" className="h-7 w-auto" />

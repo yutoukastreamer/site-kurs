@@ -203,15 +203,15 @@ export const products = {
     diagramComponents: [
       /* Top row */
       { ...COMPONENTS.gnssAntenna,         label: 'ГНСС антенны',                                    ringPos: { left: 15, top: 18 },  machinePoint: [32, 10],  clockHour: 11 },
-      { ...COMPONENTS.panelBulldozer,      label: '10.1" консоль\nс ПО "КУРС"',                      ringPos: { left: 38, top: 3 },   machinePoint: [42, 15],  clockHour: 12 },
+      { ...COMPONENTS.panelBulldozer,      label: '10.1" консоль с ПО "КУРС"',                      ringPos: { left: 38, top: 3 },   machinePoint: [42, 15],  clockHour: 12 },
       { ...COMPONENTS.prismLps,            label: 'Призма режима ЛПС\n(опционально)',                 ringPos: { left: 68, top: 5 },   machinePoint: [55, 10],  clockHour: 1, imageScale: 0.45 },
       /* Middle row */
-      { ...COMPONENTS.hydraulicController, label: 'Контроллер\nгидравлики',                           ringPos: { left: 10, top: 46 },  machinePoint: [32, 42],  clockHour: 9 },
-      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nна отвале', id: 'inertial-blade', ringPos: { left: 84, top: 38 }, machinePoint: [80, 40], clockHour: 3 },
+      { ...COMPONENTS.hydraulicController, label: 'Контроллер гидравлики',                           ringPos: { left: 10, top: 46 },  machinePoint: [32, 42],  clockHour: 9 },
+      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\n(отвал)', id: 'inertial-blade', ringPos: { left: 84, top: 38 }, machinePoint: [80, 40], clockHour: 3 },
       /* Bottom row */
-      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nв кабине',  id: 'inertial-cabin', ringPos: { left: 12, top: 68 }, machinePoint: [35, 52], clockHour: 8 },
-      { ...COMPONENTS.centralController,   label: 'Центральный\nконтроллер',                          ringPos: { left: 40, top: 87 },  machinePoint: [48, 72],  clockHour: 6, imageScale: 1.45 },
-      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\nна штанге отвала\n(опционально)', id: 'inertial-arm', ringPos: { left: 76, top: 73 }, machinePoint: [68, 58], clockHour: 4 },
+      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\n(корпус)',  id: 'inertial-cabin', ringPos: { left: 12, top: 68 }, machinePoint: [35, 52], clockHour: 8 },
+      { ...COMPONENTS.centralController,   label: 'Центральный контроллер',                          ringPos: { left: 40, top: 87 },  machinePoint: [48, 72],  clockHour: 6, imageScale: 1.45 },
+      { ...COMPONENTS.inertialSensor,      label: 'Инерциальный датчик\n(опционально на раму отвала)', id: 'inertial-arm', ringPos: { left: 76, top: 73 }, machinePoint: [68, 58], clockHour: 4 },
     ],
     /* Cards section — unique components only */
     componentCards: [
@@ -295,7 +295,7 @@ export const products = {
     cardImage: cardGrader,
     cardImageColor: cardGraderColor,
     description:
-      'Двухмачтовая 3D-система для грейдеров — это современная технология автоматического управления рабочим оборудованием позволяющая выполнять планировочные работы с высокой точностью и минимальным участием оператора. Основной принцип работы заключается в использовании цифровой модели местности (проектной поверхности), загруженной в бортовой компьютер грейдера. Позиционирование отвала грейдера осуществляется за счет совместной обработки данных, получаемых с ГНСС антенн и инеруиальных датчиков.',
+      'Двухмачтовая 3D-система для грейдера — это современная технология автоматического управления рабочим оборудованием позволяющая выполнять планировочные работы с высокой точностью и минимальным участием оператора. Основной принцип работы заключается в использовании цифровой модели местности (проектной поверхности), загруженной в бортовой компьютер грейдера. Позиционирование отвала грейдера осуществляется за счет совместной обработки данных, получаемых с ГНСС антенн и инерциальных датчиков.',
     features: [
       { title: 'Мачты', value: '2', unit: 'шт', description: 'Двойная мачтовая система для максимальной точности' },
       { title: 'Точность', value: '±2', unit: 'мм', description: 'Наивысшая точность профилирования в классе' },
