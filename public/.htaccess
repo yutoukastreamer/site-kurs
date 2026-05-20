@@ -1,0 +1,10 @@
+# SPA-fallback для Apache: любой неизвестный путь отдаёт index.html,
+# чтобы React Router работал при прямом заходе и обновлении страницы.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
