@@ -63,11 +63,6 @@ export default function Seo({ title, description, keywords, path = '/' }) {
     setMetaProp('og:description', description)
     setMetaProp('og:url', url)
     setMetaProp('og:image', OG_IMAGE)
-
-    setMetaName('twitter:card', 'summary_large_image')
-    setMetaName('twitter:title', title)
-    setMetaName('twitter:description', description)
-    setMetaName('twitter:image', OG_IMAGE)
   }, [title, description, keywords, path])
 
   return null
