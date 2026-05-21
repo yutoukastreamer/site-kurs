@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useTransform, AnimatePresence } from 'framer-motion'
-import { useScrollScene } from '../../hooks/useScrollScene'
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
@@ -167,8 +166,11 @@ export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
 
-  /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика — см. useScrollScene */
-  const scrollProgress = useScrollScene(containerRef)
+  /* Нативный прогресс прокрутки пиннутой секции (0..1) — скролл не перехватывается */
+  const { scrollYProgress: scrollProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  })
 
   const color = ACCENT_HEX[product.accentColor]
   const components = product.diagramComponents
@@ -227,7 +229,7 @@ export default function HeroRingSection({ product }) {
   return (
     <>
       {/* ══════ DESKTOP — pinned scroll animation ══════ */}
-      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '280vh' }}>
+      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '200vh' }}>
         <div className="sticky top-0 h-screen overflow-hidden bg-bg">
 
           {/* Background transition: bg → bg-alt */}

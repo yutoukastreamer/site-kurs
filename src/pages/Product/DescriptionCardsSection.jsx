@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
-import { useScrollScene } from '../../hooks/useScrollScene'
 
 /* ═══════════════════════════════════════════════════════
    Horizontal scroll: "О системе" → "Компоненты системы"
@@ -12,10 +11,13 @@ export default function DescriptionCardsSection({ product }) {
   const containerRef = useRef(null)
   const [selected, setSelected] = useState(null)
 
-  /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика.
-     Пока открыт попап характеристик — авто-скролл на паузе,
-     иначе фон прокручивался бы под модалкой. */
-  const scrollProgress = useScrollScene(containerRef, { paused: selected !== null })
+  /* Нативный прогресс прокрутки пиннутой секции (0..1) — скролл не перехватывается.
+     Пока открыта модалка, страница заморожена через overflow:hidden, поэтому
+     scrollYProgress не меняется и фон под модалкой не уезжает. */
+  const { scrollYProgress: scrollProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  })
 
   /* Horizontal translate:
      0–25%: Panel 1 stays pinned (dwell)
@@ -26,7 +28,7 @@ export default function DescriptionCardsSection({ product }) {
   return (
     <>
       {/* ══════ DESKTOP — horizontal scroll ══════ */}
-      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '300vh' }}>
+      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '250vh' }}>
         <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-hidden">
           <motion.div
             className="flex h-full"
@@ -176,12 +178,14 @@ function ComponentModal({ comp, onClose }) {
 
   useEffect(() => {
     const html = document.documentElement
+    const prevOverflow = html.style.overflow
+    const prevPadding = html.style.paddingRight
     const scrollbarWidth = window.innerWidth - html.clientWidth
     html.style.overflow = 'hidden'
     html.style.paddingRight = `${scrollbarWidth}px`
     return () => {
-      html.style.overflow = ''
-      html.style.paddingRight = ''
+      html.style.overflow = prevOverflow
+      html.style.paddingRight = prevPadding
     }
   }, [])
 
