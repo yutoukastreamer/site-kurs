@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion'
+import { motion, useTransform, AnimatePresence } from 'framer-motion'
 import { useScrollScene } from '../../hooks/useScrollScene'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
@@ -166,20 +166,9 @@ function clampPos(pos) {
 export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
-  const [heroHidden, setHeroHidden] = useState(false)
-  const heroHiddenRef = useRef(false)
 
   /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика — см. useScrollScene */
-  const scrollProgress = useScrollScene(containerRef, { duration: 1100 })
-
-  /* Прячем hero-текст из DOM, когда он почти прозрачен */
-  useMotionValueEvent(scrollProgress, 'change', (v) => {
-    const hidden = v > 0.42
-    if (hidden !== heroHiddenRef.current) {
-      heroHiddenRef.current = hidden
-      setHeroHidden(hidden)
-    }
-  })
+  const scrollProgress = useScrollScene(containerRef)
 
   const color = ACCENT_HEX[product.accentColor]
   const components = product.diagramComponents
@@ -231,6 +220,7 @@ export default function HeroRingSection({ product }) {
   const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
   const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
   const heroOpacity = useTransform(scrollProgress, [0.18, 0.38], [1, 0])
+  const heroTextPointer = useTransform(heroOpacity, (o) => (o > 0.05 ? 'auto' : 'none'))
   const titleOpacity = useTransform(scrollProgress, [0.55, 0.68], [0, 1])
   const bgOpacity = useTransform(scrollProgress, [0.35, 0.50], [0, 1])
 
@@ -262,17 +252,16 @@ export default function HeroRingSection({ product }) {
             </div>
           </motion.div>
 
-          {/* Hero text — fully removed from DOM when transparent */}
-          {!heroHidden && (
-            <motion.div
-              className="absolute right-[4%] xl:right-[8%] top-0 bottom-0 w-[45%] xl:w-[42%] max-w-xl flex items-center z-20"
-              style={{ opacity: heroOpacity }}
-            >
-              <div className={`border-l-2 ${ACCENT_BORDER[product.accentColor]} pl-4 xl:pl-8 animate-hero-enter`}>
-                <HeroText product={product} />
-              </div>
-            </motion.div>
-          )}
+          {/* Hero text — всегда в DOM (без ремоунта), управляется opacity.
+              pointer-events отключаются, когда текст почти прозрачен. */}
+          <motion.div
+            className="absolute right-[4%] xl:right-[8%] top-0 bottom-0 w-[45%] xl:w-[42%] max-w-xl flex items-center z-20"
+            style={{ opacity: heroOpacity, pointerEvents: heroTextPointer }}
+          >
+            <div className={`border-l-2 ${ACCENT_BORDER[product.accentColor]} pl-4 xl:pl-8 animate-hero-enter`}>
+              <HeroText product={product} />
+            </div>
+          </motion.div>
 
           {/* ── Schema overlay — relative container, safe bounds via clampPos ── */}
           <div className="absolute inset-0 z-20 pointer-events-none">

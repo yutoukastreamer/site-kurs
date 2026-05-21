@@ -1,26 +1,26 @@
 import { useEffect } from 'react'
-import { useMotionValue } from 'framer-motion'
+import { useMotionValue, animate } from 'framer-motion'
 
-const easeInOutCubic = (t) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-
+const DURATION = 1.8                       // сек — длительность авто-проигрыша
+const EASE = [0.42, 0, 0.58, 1]            // плавный ease-in-out
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v)
 
 /*
  * useScrollScene — прогресс прокрутки «пиннутой» секции (0..1) + авто-проигрыш.
  *
- * Возвращает MotionValue `scrollProgress`, который ведут:
- *  • при обычной прокрутке — scroll-событие (rAF-троттлинг);
- *  • при авто-проигрыше — ОДИН rAF-цикл, который одновременно двигает
- *    страницу и выставляет scrollProgress. Во время авто-проигрыша
- *    обработчик scroll-события отключён — никаких побочных пересчётов
- *    и getBoundingClientRect параллельно не выполняется.
+ * scrollProgress ведут:
+ *  • обычная прокрутка — scroll-событие (rAF-троттлинг);
+ *  • авто-проигрыш — анимационный движок framer-motion (animate()), который
+ *    в одном цикле плавно двигает и страницу, и scrollProgress. На время
+ *    авто-проигрыша обработчик scroll-события отключён — никаких побочных
+ *    пересчётов параллельно не идёт.
  *
- * Один тик колёсика в зоне секции запускает плавную прокрутку всей зоны.
- * Триггер срабатывает мгновенно — как только секция занимает верхнюю
- * половину экрана (вниз) или находится в своей зоне (вверх).
+ * Один тик колёсика в зоне секции (в любую сторону) запускает плавный
+ * проигрыш всей зоны: вниз — к концу, вверх — к началу. Триггер срабатывает
+ * мгновенно и симметрично в обе стороны; дальняя кромка по направлению
+ * выхода не перехватывается — из секции можно свободно выйти.
  */
-export function useScrollScene(containerRef, { duration = 1100 } = {}) {
+export function useScrollScene(containerRef) {
   const scrollProgress = useMotionValue(0)
 
   useEffect(() => {
@@ -31,18 +31,20 @@ export function useScrollScene(containerRef, { duration = 1100 } = {}) {
 
     let autoScrolling = false
     let scrollRaf = null
-    let animRaf = null
+    let playback = null
+
+    const rangeOf = () => el.offsetHeight - window.innerHeight
 
     /* ── Обычная прокрутка → прогресс (rAF-троттлинг) ── */
     const readProgress = () => {
       scrollRaf = null
-      if (autoScrolling) return
-      const range = el.offsetHeight - window.innerHeight
+      const range = rangeOf()
       if (range <= 0) return
       scrollProgress.set(clamp01(-el.getBoundingClientRect().top / range))
     }
     const onScroll = () => {
-      if (scrollRaf == null) scrollRaf = requestAnimationFrame(readProgress)
+      if (autoScrolling || scrollRaf != null) return
+      scrollRaf = requestAnimationFrame(readProgress)
     }
     readProgress()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -56,7 +58,7 @@ export function useScrollScene(containerRef, { duration = 1100 } = {}) {
         return
       }
 
-      const range = el.offsetHeight - window.innerHeight
+      const range = rangeOf()
       if (range <= 0) return
 
       const delta = e.deltaY
@@ -66,36 +68,33 @@ export function useScrollScene(containerRef, { duration = 1100 } = {}) {
       const vh = window.innerHeight
       const goingDown = delta > 0
 
-      // Вниз: секция активна, как только её верх в верхней половине экрана.
-      // Вверх: пока секция находится в пределах своей зоны.
-      const triggerDown = goingDown && rectTop <= vh * 0.5 && rectTop > -range
-      const triggerUp = !goingDown && rectTop <= 0 && rectTop >= -range
+      // Зона авто-проигрыша + полэкрана «подхвата» с каждой стороны.
+      // Дальняя кромка по направлению выхода исключена.
+      const triggerDown = goingDown && rectTop > -range && rectTop <= vh * 0.5
+      const triggerUp = !goingDown && rectTop < 0 && rectTop >= -range - vh * 0.5
       if (!triggerDown && !triggerUp) return
-
-      e.preventDefault()
 
       const rectTopAbs = window.scrollY + rectTop
       const startY = window.scrollY
       const targetY = goingDown ? rectTopAbs + range : rectTopAbs
       const diff = targetY - startY
+      // Почти на месте — не перехватываем (иначе можно «застрять» у кромки).
       if (Math.abs(diff) < 1) return
 
+      e.preventDefault()
       autoScrolling = true
-      const startTime = performance.now()
-      const step = (now) => {
-        const t = Math.min((now - startTime) / duration, 1)
-        const y = startY + diff * easeInOutCubic(t)
-        // Одна операция: двигаем страницу и СРАЗУ выставляем прогресс —
-        // визуальная анимация идёт синхронно, без лага и побочных событий.
-        window.scrollTo(0, y)
-        scrollProgress.set(clamp01((y - rectTopAbs) / range))
-        if (t < 1) {
-          animRaf = requestAnimationFrame(step)
-        } else {
+      playback = animate(startY, targetY, {
+        duration: DURATION,
+        ease: EASE,
+        onUpdate: (y) => {
+          // Одна операция: двигаем страницу и сразу выставляем прогресс.
+          window.scrollTo(0, y)
+          scrollProgress.set(clamp01((y - rectTopAbs) / range))
+        },
+        onComplete: () => {
           autoScrolling = false
-        }
-      }
-      animRaf = requestAnimationFrame(step)
+        },
+      })
     }
     window.addEventListener('wheel', onWheel, { passive: false })
 
@@ -104,9 +103,9 @@ export function useScrollScene(containerRef, { duration = 1100 } = {}) {
       window.removeEventListener('resize', onScroll)
       window.removeEventListener('wheel', onWheel)
       if (scrollRaf) cancelAnimationFrame(scrollRaf)
-      if (animRaf) cancelAnimationFrame(animRaf)
+      if (playback) playback.stop()
     }
-  }, [containerRef, scrollProgress, duration])
+  }, [containerRef, scrollProgress])
 
   return scrollProgress
 }

@@ -12,7 +12,7 @@ export default function DescriptionCardsSection({ product }) {
   const containerRef = useRef(null)
 
   /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика — см. useScrollScene */
-  const scrollProgress = useScrollScene(containerRef, { duration: 1100 })
+  const scrollProgress = useScrollScene(containerRef)
 
   /* Horizontal translate:
      0–25%: Panel 1 stays pinned (dwell)
