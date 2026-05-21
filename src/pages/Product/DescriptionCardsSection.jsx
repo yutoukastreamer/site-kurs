@@ -10,17 +10,18 @@ import { useScrollScene } from '../../hooks/useScrollScene'
    ═══════════════════════════════════════════════════════ */
 export default function DescriptionCardsSection({ product }) {
   const containerRef = useRef(null)
+  const [selected, setSelected] = useState(null)
 
-  /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика — см. useScrollScene */
-  const scrollProgress = useScrollScene(containerRef)
+  /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика.
+     Пока открыт попап характеристик — авто-скролл на паузе,
+     иначе фон прокручивался бы под модалкой. */
+  const scrollProgress = useScrollScene(containerRef, { paused: selected !== null })
 
   /* Horizontal translate:
      0–25%: Panel 1 stays pinned (dwell)
      25–55%: slide from Panel 1 → Panel 2
      55–100%: Panel 2 stays pinned (dwell) */
   const translateX = useTransform(scrollProgress, [0, 0.25, 0.55, 1], ['0vw', '0vw', '-100vw', '-100vw'])
-
-  const [selected, setSelected] = useState(null)
 
   return (
     <>

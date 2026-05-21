@@ -19,8 +19,11 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v)
  * проигрыш всей зоны: вниз — к концу, вверх — к началу. Триггер срабатывает
  * мгновенно и симметрично в обе стороны; дальняя кромка по направлению
  * выхода не перехватывается — из секции можно свободно выйти.
+ *
+ * paused — когда true (например, открыт попап), авто-проигрыш отключён
+ * и идущая анимация останавливается, чтобы фон не прокручивался.
  */
-export function useScrollScene(containerRef) {
+export function useScrollScene(containerRef, { paused = false } = {}) {
   const scrollProgress = useMotionValue(0)
 
   useEffect(() => {
@@ -52,7 +55,7 @@ export function useScrollScene(containerRef) {
 
     /* ── Авто-проигрыш по колёсику (только десктоп) ── */
     const onWheel = (e) => {
-      if (!isDesktop) return
+      if (!isDesktop || paused) return
       if (autoScrolling) {
         e.preventDefault()
         return
@@ -105,7 +108,7 @@ export function useScrollScene(containerRef) {
       if (scrollRaf) cancelAnimationFrame(scrollRaf)
       if (playback) playback.stop()
     }
-  }, [containerRef, scrollProgress])
+  }, [containerRef, scrollProgress, paused])
 
   return scrollProgress
 }
