@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useTransform, useMotionValue, AnimatePresence } from 'framer-motion'
+import { motion, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion'
+import { useScrollScene } from '../../hooks/useScrollScene'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
@@ -167,116 +168,18 @@ export default function HeroRingSection({ product }) {
   const [activeIndex, setActiveIndex] = useState(null)
   const [heroHidden, setHeroHidden] = useState(false)
   const heroHiddenRef = useRef(false)
-  const autoScrollRef = useRef(false)
-  const rafScrollRef = useRef(null)
 
-  // Прогресс читается напрямую — пружина добавляла «загрузочный» лаг.
-  // Плавность обеспечивается двумя другими механизмами:
-  //   • rAF-троттлинг scroll-handler'а (раз за кадр)
-  //   • программный плавный скролл с easeInOutCubic (см. ниже)
-  const scrollProgress = useMotionValue(0)
+  /* Прогресс скролл-сцены + авто-проигрыш по тику колёсика — см. useScrollScene */
+  const scrollProgress = useScrollScene(containerRef, { duration: 1100 })
 
-  useEffect(() => {
-    const update = () => {
-      rafScrollRef.current = null
-      const el = containerRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const scrollRange = el.offsetHeight - window.innerHeight
-      const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
-      scrollProgress.set(progress)
-      const shouldHide = progress > 0.42
-      if (shouldHide !== heroHiddenRef.current) {
-        heroHiddenRef.current = shouldHide
-        setHeroHidden(shouldHide)
-      }
+  /* Прячем hero-текст из DOM, когда он почти прозрачен */
+  useMotionValueEvent(scrollProgress, 'change', (v) => {
+    const hidden = v > 0.42
+    if (hidden !== heroHiddenRef.current) {
+      heroHiddenRef.current = hidden
+      setHeroHidden(hidden)
     }
-    const onScroll = () => {
-      if (rafScrollRef.current != null) return
-      rafScrollRef.current = requestAnimationFrame(update)
-    }
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-      if (rafScrollRef.current != null) cancelAnimationFrame(rafScrollRef.current)
-    }
-  }, [scrollProgress])
-
-  /* ── Auto-play scroll animation on a single wheel tick ──
-     Когда пользователь попадает в "пиннутую" зону (контейнер 280vh),
-     перехватываем событие колёсика и плавно прокручиваем к началу/концу
-     зоны — так анимация проигрывается сама, без долгого ручного скролла. */
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!window.matchMedia('(min-width: 1024px)').matches) return
-
-    const el = containerRef.current
-    if (!el) return
-
-    let rafId = null
-
-    const easeInOutCubic = (t) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-
-    const smoothScrollTo = (target, duration = 1000) =>
-      new Promise((resolve) => {
-        const start = window.scrollY
-        const diff = target - start
-        if (Math.abs(diff) < 1) return resolve()
-        const startTime = performance.now()
-        const step = (now) => {
-          const t = Math.min((now - startTime) / duration, 1)
-          window.scrollTo(0, start + diff * easeInOutCubic(t))
-          if (t < 1) rafId = requestAnimationFrame(step)
-          else resolve()
-        }
-        rafId = requestAnimationFrame(step)
-      })
-
-    const onWheel = (e) => {
-      if (autoScrollRef.current) {
-        e.preventDefault()
-        return
-      }
-
-      const rect = el.getBoundingClientRect()
-      const scrollRange = el.offsetHeight - window.innerHeight
-      if (scrollRange <= 0) return
-
-      const delta = e.deltaY
-      if (!delta) return
-
-      // В пиннутой зоне: rect.top ∈ [-scrollRange, 0]
-      const inZone = rect.top <= 0 && rect.top >= -scrollRange
-      if (!inZone) return
-
-      // У верхней кромки — вверх пропускаем дальше по странице
-      if (delta < 0 && rect.top >= 0) return
-      // У нижней кромки — вниз пропускаем дальше по странице
-      if (delta > 0 && rect.top <= -scrollRange) return
-
-      e.preventDefault()
-
-      const containerTopAbs = window.scrollY + rect.top
-      const containerBottomAbs = containerTopAbs + scrollRange
-      const target = delta > 0 ? containerBottomAbs + 1 : containerTopAbs - 1
-
-      autoScrollRef.current = true
-      smoothScrollTo(target).then(() => {
-        autoScrollRef.current = false
-      })
-    }
-
-    window.addEventListener('wheel', onWheel, { passive: false })
-    return () => {
-      window.removeEventListener('wheel', onWheel)
-      if (rafId) cancelAnimationFrame(rafId)
-      autoScrollRef.current = false
-    }
-  }, [])
+  })
 
   const color = ACCENT_HEX[product.accentColor]
   const components = product.diagramComponents
