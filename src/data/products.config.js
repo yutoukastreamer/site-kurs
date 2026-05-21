@@ -106,7 +106,7 @@ const COMPONENTS = {
     image: inertialSensor,
     specs: [
       { label: 'Размер', value: '146 х 116 х 45 мм' },
-      { label: 'Акселеометр', value: '3 - осевой' },
+      { label: 'Акселерометр', value: '3 - осевой' },
       { label: 'Диапазон ускорений', value: '±6 g' },
       { label: 'Диапазон угловых скоростей', value: '±125 °/с' },
       { label: 'Защита', value: 'IP67' },
