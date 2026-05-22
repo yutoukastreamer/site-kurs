@@ -1,107 +1,76 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence, animate } from 'framer-motion'
+import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
+
+/* ─── Акцентный цвет техники ─── */
+const ACCENT_HEX = {
+  bulldozer: '#3B6B9C',
+  excavator: '#9C7B3B',
+  grader: '#3B8C6E',
+}
 
 /* ═══════════════════════════════════════════════════════
    Horizontal scroll: "О системе" → "Компоненты системы"
-   Desktop: vertical scroll maps to horizontal slide
-   Mobile: normal vertical stack
+   Desktop: pinned scroll — секция «прилипает» к экрану, вертикальная
+            прокрутка превращается в горизонтальный сдвиг панелей.
+            Прогресс прогоняется через пружину useSpring, которая
+            сглаживает рывки физической мыши в плавный глайд.
+   Mobile:  обычный вертикальный стек.
    ═══════════════════════════════════════════════════════ */
 export default function DescriptionCardsSection({ product }) {
   const containerRef = useRef(null)
   const [selected, setSelected] = useState(null)
+  const [currentSlide, setCurrentSlide] = useState(0)
 
-  /* Нативный прогресс прокрутки пиннутой секции (0..1) — скролл не перехватывается.
-     Пока открыта модалка, страница заморожена через overflow:hidden, поэтому
-     scrollYProgress не меняется и фон под модалкой не уезжает. */
-  const { scrollYProgress: scrollProgress } = useScroll({
+  const color = ACCENT_HEX[product.accentColor] || ACCENT_HEX.bulldozer
+
+  /* Нативный прогресс прокрутки пиннутой секции (0..1).
+     Пока открыта модалка, страница заморожена через overflow:hidden,
+     поэтому scrollYProgress не меняется и фон под модалкой не уезжает. */
+  const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
 
-  /* Horizontal translate:
-     0–25%: Panel 1 stays pinned (dwell)
-     25–55%: slide from Panel 1 → Panel 2
-     55–100%: Panel 2 stays pinned (dwell) */
-  const translateX = useTransform(scrollProgress, [0, 0.25, 0.55, 1], ['0vw', '0vw', '-100vw', '-100vw'])
+  /* Пружина сглаживает дискретные «щелчки» колеса мыши: physical mouse
+     на Windows прыгает рывками ~100px, useSpring превращает это в
+     плавный непрерывный глайд панелей. */
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  })
 
-  /* ── Триггерный автоскролл (доводка) ──
-     Первый тик колёсика в зоне секции плавно доигрывает сдвиг панелей до
-     конца (или откручивает к началу) и магнитит экран ровно к соседнему
-     блоку — секция не может «застрять» посередине. Флаг isAnimating глушит
-     повторные тики; при открытой модалке доводка отключается. */
-  const isAnimatingRef = useRef(false)
+  /* Горизонтальный сдвиг панелей:
+     0–0.2  — Панель 1 удерживается (dwell)
+     0.2–0.8 — слайд Панель 1 → Панель 2
+     0.8–1  — Панель 2 удерживается (dwell) */
+  const x = useTransform(smoothProgress, [0, 0.2, 0.8, 1], ['0vw', '0vw', '-100vw', '-100vw'])
 
-  useEffect(() => {
-    const EPS = 0.02
-    let animation = null
-    let releaseTimer = null
+  /* Активная точка переключается на середине перехода */
+  useMotionValueEvent(smoothProgress, 'change', (v) => {
+    setCurrentSlide(v >= 0.5 ? 1 : 0)
+  })
 
-    const handleWheel = (e) => {
-      // Открыта модалка — не вмешиваемся, прокрутка идёт внутри неё
-      if (selected) return
-
-      const el = containerRef.current
-      if (!el) return
-
-      if (isAnimatingRef.current) {
-        e.preventDefault()
-        return
-      }
-
-      const rect = el.getBoundingClientRect()
-      const scrollRange = el.offsetHeight - window.innerHeight
-      if (scrollRange <= 0) return // мобильная вёрстка / секция скрыта
-
-      // Секция «в зоне», пока её sticky-контейнер удерживает экран
-      const inZone = rect.top <= 0 && rect.top >= -scrollRange
-      if (!inZone) return
-
-      const dir = e.deltaY
-      if (dir === 0) return
-
-      const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
-      const containerTop = window.scrollY + rect.top
-
-      let targetY
-      if (dir > 0) {
-        if (progress >= 1 - EPS) return // панели сдвинуты — отпускаем вниз
-        targetY = containerTop + scrollRange
-      } else {
-        if (progress <= EPS) return // панели в начале — отпускаем вверх
-        targetY = containerTop
-      }
-
-      e.preventDefault()
-      isAnimatingRef.current = true
-      animation = animate(window.scrollY, targetY, {
-        duration: 1.2,
-        ease: [0.25, 0.1, 0.25, 1],
-        onUpdate: (v) => window.scrollTo(0, v),
-        onComplete: () => {
-          // короткая пауза гасит инерцию трекпада после доводки
-          releaseTimer = setTimeout(() => { isAnimatingRef.current = false }, 120)
-        },
-      })
-    }
-
-    window.addEventListener('wheel', handleWheel, { passive: false })
-    return () => {
-      window.removeEventListener('wheel', handleWheel)
-      if (animation) animation.stop()
-      if (releaseTimer) clearTimeout(releaseTimer)
-    }
-  }, [selected])
+  /* Клик по точке — плавный доскролл страницы к нужной панели */
+  const goToSlide = (index) => {
+    const el = containerRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const containerTop = window.scrollY + rect.top
+    const scrollRange = el.offsetHeight - window.innerHeight
+    window.scrollTo({
+      top: containerTop + (index === 1 ? scrollRange : 0),
+      behavior: 'smooth',
+    })
+  }
 
   return (
     <>
-      {/* ══════ DESKTOP — horizontal scroll ══════ */}
-      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '250vh' }}>
-        <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-hidden">
-          <motion.div
-            className="flex h-full"
-            style={{ x: translateX }}
-          >
+      {/* ══════ DESKTOP — pinned horizontal scroll ══════ */}
+      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '200vh' }}>
+        <div className="sticky top-0 h-screen overflow-hidden bg-bg">
+          <motion.div className="flex h-full" style={{ x }}>
             {/* Panel 1 — О системе */}
             <div className="w-screen h-full shrink-0 flex items-center bg-bg">
               <div className="container-luxury">
@@ -156,6 +125,28 @@ export default function DescriptionCardsSection({ product }) {
               </div>
             </div>
           </motion.div>
+
+          {/* ── Точки-индикаторы панелей ── */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+            {[0, 1].map((i) => (
+              <button
+                key={i}
+                onClick={() => goToSlide(i)}
+                className="p-2 cursor-pointer"
+                aria-label={`Перейти к панели ${i + 1}`}
+              >
+                <motion.span
+                  className="block rounded-full"
+                  animate={{
+                    width: currentSlide === i ? 26 : 8,
+                    backgroundColor: currentSlide === i ? color : 'rgba(128,128,128,0.3)',
+                  }}
+                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                  style={{ height: 8 }}
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
