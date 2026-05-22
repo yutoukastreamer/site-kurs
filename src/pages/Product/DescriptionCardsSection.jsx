@@ -38,6 +38,31 @@ export default function DescriptionCardsSection({ product }) {
     })
   }
 
+  /* ── Трансляция вертикального колёсика в горизонтальный скролл ──
+     onWheel в React пассивный — preventDefault() в нём не сработает,
+     поэтому вешаем wheel-листенер вручную с { passive: false }.
+     Пока контейнер не упёрся в край — крутим его вбок и гасим
+     вертикальную прокрутку страницы; на краю preventDefault НЕ зовём,
+     и страница нативно листается дальше к соседним блокам.
+     CSS Scroll Snap сам доводит контейнер до ближайшей панели. */
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    const handleWheel = (e) => {
+      const maxScroll = el.scrollWidth - el.clientWidth
+      const canScrollRight = e.deltaY > 0 && el.scrollLeft < maxScroll - 1
+      const canScrollLeft = e.deltaY < 0 && el.scrollLeft > 0
+      if (!canScrollRight && !canScrollLeft) return // упёрлись в край
+
+      e.preventDefault()
+      el.scrollLeft += e.deltaY
+    }
+
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [])
+
   return (
     <>
       {/* ══════ DESKTOP — нативный горизонтальный скролл со snap ══════ */}
