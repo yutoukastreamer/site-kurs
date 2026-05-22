@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useMotionValue, useTransform, AnimatePresence, animate } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
 
 /* ═══════════════════════════════════════════════════════
@@ -9,6 +9,7 @@ import SectionReveal from '../../components/ui/SectionReveal'
    ═══════════════════════════════════════════════════════ */
 export default function DescriptionCardsSection({ product }) {
   const containerRef = useRef(null)
+  const isAnimatingRef = useRef(false)
   const scrollProgress = useMotionValue(0)
 
   useEffect(() => {
@@ -37,6 +38,72 @@ export default function DescriptionCardsSection({ product }) {
   const translateX = useTransform(scrollProgress, [0, 0.25, 0.55, 1], ['0vw', '0vw', '-100vw', '-100vw'])
 
   const [selected, setSelected] = useState(null)
+
+  /* ── Триггерный автоскролл (доводка) для pinned-секции ──
+     Первый тик колесика в зоне секции плавно доигрывает сдвиг
+     панелей до конца (или откручивает к началу) и магнитит экран
+     ровно к следующему / предыдущему блоку. */
+  useEffect(() => {
+    const EPS = 0.02
+    let animation = null
+    let releaseTimer = null
+
+    const handleWheel = (e) => {
+      // Открыта модалка — не вмешиваемся, прокрутка идёт внутри неё
+      if (selected) return
+
+      const el = containerRef.current
+      if (!el) return
+
+      // Пока идёт авто-доводка — глушим повторные тики колесика
+      if (isAnimatingRef.current) {
+        e.preventDefault()
+        return
+      }
+
+      const rect = el.getBoundingClientRect()
+      const scrollRange = el.offsetHeight - window.innerHeight
+      if (scrollRange <= 0) return // мобильная вёрстка / секция скрыта
+
+      // Секция «в зоне», пока её sticky-контейнер удерживает экран
+      const inZone = rect.top <= 0 && rect.top >= -scrollRange
+      if (!inZone) return
+
+      const dir = e.deltaY
+      if (dir === 0) return
+
+      const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
+      const containerTop = window.scrollY + rect.top
+
+      let targetY
+      if (dir > 0) {
+        if (progress >= 1 - EPS) return // панели сдвинуты — отпускаем вниз
+        targetY = containerTop + scrollRange
+      } else {
+        if (progress <= EPS) return // панели в начале — отпускаем вверх
+        targetY = containerTop
+      }
+
+      e.preventDefault()
+      isAnimatingRef.current = true
+      animation = animate(window.scrollY, targetY, {
+        duration: 1.2,
+        ease: [0.25, 0.1, 0.25, 1],
+        onUpdate: (v) => window.scrollTo(0, v),
+        onComplete: () => {
+          // короткая пауза гасит инерцию трекпада после доводки
+          releaseTimer = setTimeout(() => { isAnimatingRef.current = false }, 120)
+        },
+      })
+    }
+
+    window.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      window.removeEventListener('wheel', handleWheel)
+      if (animation) animation.stop()
+      if (releaseTimer) clearTimeout(releaseTimer)
+    }
+  }, [selected])
 
   return (
     <>

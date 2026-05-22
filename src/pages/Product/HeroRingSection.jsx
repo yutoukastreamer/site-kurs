@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useTransform, useMotionValue, AnimatePresence } from 'framer-motion'
+import { motion, useTransform, useMotionValue, AnimatePresence, animate } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
@@ -105,6 +105,7 @@ function clampPos(pos) {
    ═══════════════════════════════════════════════════════ */
 export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
+  const isAnimatingRef = useRef(false)
   const [activeIndex, setActiveIndex] = useState(null)
   const [heroHidden, setHeroHidden] = useState(false)
 
@@ -128,6 +129,69 @@ export default function HeroRingSection({ product }) {
       window.removeEventListener('resize', update)
     }
   }, [scrollProgress])
+
+  /* ── Триггерный автоскролл (доводка) для pinned-секции ──
+     Первый тик колесика в зоне секции плавно доигрывает анимацию
+     сборки схемы до конца (или откручивает к началу) и магнитит
+     экран ровно к следующему / предыдущему блоку. */
+  useEffect(() => {
+    const EPS = 0.02
+    let animation = null
+    let releaseTimer = null
+
+    const handleWheel = (e) => {
+      const el = containerRef.current
+      if (!el) return
+
+      // Пока идёт авто-доводка — глушим повторные тики колесика
+      if (isAnimatingRef.current) {
+        e.preventDefault()
+        return
+      }
+
+      const rect = el.getBoundingClientRect()
+      const scrollRange = el.offsetHeight - window.innerHeight
+      if (scrollRange <= 0) return // мобильная вёрстка / секция скрыта
+
+      // Секция «в зоне», пока её sticky-контейнер удерживает экран
+      const inZone = rect.top <= 0 && rect.top >= -scrollRange
+      if (!inZone) return
+
+      const dir = e.deltaY
+      if (dir === 0) return
+
+      const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
+      const containerTop = window.scrollY + rect.top
+
+      let targetY
+      if (dir > 0) {
+        if (progress >= 1 - EPS) return // схема собрана — отпускаем вниз
+        targetY = containerTop + scrollRange
+      } else {
+        if (progress <= EPS) return // схема в начале — отпускаем вверх
+        targetY = containerTop
+      }
+
+      e.preventDefault()
+      isAnimatingRef.current = true
+      animation = animate(window.scrollY, targetY, {
+        duration: 1.2,
+        ease: [0.25, 0.1, 0.25, 1],
+        onUpdate: (v) => window.scrollTo(0, v),
+        onComplete: () => {
+          // короткая пауза гасит инерцию трекпада после доводки
+          releaseTimer = setTimeout(() => { isAnimatingRef.current = false }, 120)
+        },
+      })
+    }
+
+    window.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      window.removeEventListener('wheel', handleWheel)
+      if (animation) animation.stop()
+      if (releaseTimer) clearTimeout(releaseTimer)
+    }
+  }, [])
 
   const color = ACCENT_HEX[product.accentColor]
   const components = product.diagramComponents
