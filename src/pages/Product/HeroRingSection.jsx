@@ -567,10 +567,10 @@ function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgre
 function HoverPanel({ comp, color, fromRight }) {
   const offsetPx = 420 // off-screen start distance
   /* Масштаб картинки в панели наведения. Мелкие компоненты (призма,
-     imageScale < 1) показываем заметно крупнее их схемной иконки —
-     прибавка 0.35; компоненты с imageScale ≥ 1 не раздуваем (потолок 1). */
+     imageScale < 1) показываем умеренно крупнее их схемной иконки —
+     прибавка 0.20; компоненты с imageScale ≥ 1 не раздуваем (потолок 1). */
   const rawScale = comp.imageScale ?? 1
-  const imgScale = Math.min(rawScale < 1 ? rawScale + 0.35 : rawScale, 1)
+  const imgScale = Math.min(rawScale < 1 ? rawScale + 0.20 : rawScale, 1)
   return (
     <motion.div
       initial={{ x: fromRight ? offsetPx : -offsetPx, opacity: 0 }}
