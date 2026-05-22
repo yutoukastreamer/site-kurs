@@ -1,163 +1,130 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence, animate } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
+
+/* ─── Акцентный цвет техники ─── */
+const ACCENT_HEX = {
+  bulldozer: '#3B6B9C',
+  excavator: '#9C7B3B',
+  grader: '#3B8C6E',
+}
 
 /* ═══════════════════════════════════════════════════════
    Horizontal scroll: "О системе" → "Компоненты системы"
-   Desktop: vertical scroll maps to horizontal slide
-   Mobile: normal vertical stack
+   Desktop: нативный CSS Scroll Snap (overflow-x + snap-x mandatory).
+            Перелистывание считает сам браузер на уровне композитора —
+            плавно на любых устройствах, без JS-расчёта прогресса и без
+            фейковой sticky-высоты.
+   Mobile:  обычный вертикальный стек.
    ═══════════════════════════════════════════════════════ */
 export default function DescriptionCardsSection({ product }) {
-  const containerRef = useRef(null)
+  const scrollRef = useRef(null)
   const [selected, setSelected] = useState(null)
+  const [currentSlide, setCurrentSlide] = useState(0)
 
-  /* Нативный прогресс прокрутки пиннутой секции (0..1) — скролл не перехватывается.
-     Пока открыта модалка, страница заморожена через overflow:hidden, поэтому
-     scrollYProgress не меняется и фон под модалкой не уезжает. */
-  const { scrollYProgress: scrollProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  })
+  const color = ACCENT_HEX[product.accentColor] || ACCENT_HEX.bulldozer
 
-  /* Horizontal translate:
-     0–25%: Panel 1 stays pinned (dwell)
-     25–55%: slide from Panel 1 → Panel 2
-     55–100%: Panel 2 stays pinned (dwell) */
-  const translateX = useTransform(scrollProgress, [0, 0.25, 0.55, 1], ['0vw', '0vw', '-100vw', '-100vw'])
+  /* Активный слайд вычисляем из нативного scrollLeft контейнера */
+  const handleScroll = (e) => {
+    const idx = Math.round(e.target.scrollLeft / window.innerWidth)
+    setCurrentSlide(Math.min(1, Math.max(0, idx)))
+  }
 
-  /* ── Триггерный автоскролл (доводка) ──
-     Первый тик колёсика в зоне секции плавно доигрывает сдвиг панелей до
-     конца (или откручивает к началу) и магнитит экран ровно к соседнему
-     блоку — секция не может «застрять» посередине. Флаг isAnimating глушит
-     повторные тики; при открытой модалке доводка отключается. */
-  const isAnimatingRef = useRef(false)
-
-  useEffect(() => {
-    const EPS = 0.02
-    let animation = null
-    let releaseTimer = null
-
-    const handleWheel = (e) => {
-      // Открыта модалка — не вмешиваемся, прокрутка идёт внутри неё
-      if (selected) return
-
-      const el = containerRef.current
-      if (!el) return
-
-      if (isAnimatingRef.current) {
-        e.preventDefault()
-        return
-      }
-
-      const rect = el.getBoundingClientRect()
-      const scrollRange = el.offsetHeight - window.innerHeight
-      if (scrollRange <= 0) return // мобильная вёрстка / секция скрыта
-
-      // Секция «в зоне», пока её sticky-контейнер удерживает экран
-      const inZone = rect.top <= 0 && rect.top >= -scrollRange
-      if (!inZone) return
-
-      const dir = e.deltaY
-      if (dir === 0) return
-
-      const progress = Math.max(0, Math.min(1, -rect.top / scrollRange))
-      const containerTop = window.scrollY + rect.top
-
-      let targetY
-      if (dir > 0) {
-        if (progress >= 1 - EPS) return // панели сдвинуты — отпускаем вниз
-        targetY = containerTop + scrollRange
-      } else {
-        if (progress <= EPS) return // панели в начале — отпускаем вверх
-        targetY = containerTop
-      }
-
-      e.preventDefault()
-      isAnimatingRef.current = true
-      animation = animate(window.scrollY, targetY, {
-        duration: 1.2,
-        ease: [0.25, 0.1, 0.25, 1],
-        onUpdate: (v) => window.scrollTo(0, v),
-        onComplete: () => {
-          // короткая пауза гасит инерцию трекпада после доводки
-          releaseTimer = setTimeout(() => { isAnimatingRef.current = false }, 120)
-        },
-      })
-    }
-
-    window.addEventListener('wheel', handleWheel, { passive: false })
-    return () => {
-      window.removeEventListener('wheel', handleWheel)
-      if (animation) animation.stop()
-      if (releaseTimer) clearTimeout(releaseTimer)
-    }
-  }, [selected])
+  /* Клик по точке — плавная нативная прокрутка к нужной панели */
+  const goToSlide = (index) => {
+    scrollRef.current?.scrollTo({
+      left: index * window.innerWidth,
+      behavior: 'smooth',
+    })
+  }
 
   return (
     <>
-      {/* ══════ DESKTOP — horizontal scroll ══════ */}
-      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '250vh' }}>
-        <div className="sticky top-20 h-[calc(100vh-5rem)] overflow-hidden">
-          <motion.div
-            className="flex h-full"
-            style={{ x: translateX }}
-          >
-            {/* Panel 1 — О системе */}
-            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
-              <div className="container-luxury">
-                <div className="grid grid-cols-2 gap-24 items-center">
-                  <SectionReveal>
-                    <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
-                      О системе
-                    </p>
-                    <h2 className="font-light mb-8 leading-tight" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)' }}>
-                      Инженерное совершенство в каждой детали
-                    </h2>
-                    <p className="text-text-secondary leading-relaxed text-base mb-8">
-                      {product.description}
-                    </p>
-                    <div className="divider-accent" />
-                  </SectionReveal>
-
-                  <SectionReveal delay={0.2}>
-                    <div className="aspect-[4/3] bg-bg-alt overflow-hidden flex items-center justify-center p-8">
-                      <img
-                        src={product.systemImage}
-                        alt={`Система ${product.name}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  </SectionReveal>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel 2 — Компоненты системы */}
-            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
-              <div className="container-luxury">
-                <div className="mb-8">
-                  <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
-                    Оборудование
+      {/* ══════ DESKTOP — нативный горизонтальный скролл со snap ══════ */}
+      <section className="hidden lg:block relative h-screen bg-bg">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex h-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory
+                     [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {/* Panel 1 — О системе */}
+          <div className="w-screen h-full shrink-0 snap-start flex items-center bg-bg">
+            <div className="container-luxury">
+              <div className="grid grid-cols-2 gap-24 items-center">
+                <SectionReveal>
+                  <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
+                    О системе
                   </p>
-                  <h2 className="font-light" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)' }}>
-                    Компоненты системы
+                  <h2 className="font-light mb-8 leading-tight" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)' }}>
+                    Инженерное совершенство в каждой детали
                   </h2>
-                </div>
+                  <p className="text-text-secondary leading-relaxed text-base mb-8">
+                    {product.description}
+                  </p>
+                  <div className="divider-accent" />
+                </SectionReveal>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
-                  {product.componentCards.map((comp) => (
-                    <CardDesktop
-                      key={comp.id}
-                      comp={comp}
-                      onSelect={() => setSelected(comp)}
+                <SectionReveal delay={0.2}>
+                  <div className="aspect-[4/3] bg-bg-alt overflow-hidden flex items-center justify-center p-8">
+                    <img
+                      src={product.systemImage}
+                      alt={`Система ${product.name}`}
+                      className="w-full h-full object-contain"
                     />
-                  ))}
-                </div>
+                  </div>
+                </SectionReveal>
               </div>
             </div>
-          </motion.div>
+          </div>
+
+          {/* Panel 2 — Компоненты системы */}
+          <div className="w-screen h-full shrink-0 snap-start flex items-center bg-bg">
+            <div className="container-luxury">
+              <div className="mb-8">
+                <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
+                  Оборудование
+                </p>
+                <h2 className="font-light" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)' }}>
+                  Компоненты системы
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
+                {product.componentCards.map((comp) => (
+                  <CardDesktop
+                    key={comp.id}
+                    comp={comp}
+                    onSelect={() => setSelected(comp)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* ── Точки-индикаторы панелей ── */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+          {[0, 1].map((i) => (
+            <button
+              key={i}
+              onClick={() => goToSlide(i)}
+              className="p-2 cursor-pointer"
+              aria-label={`Перейти к панели ${i + 1}`}
+            >
+              <motion.span
+                className="block rounded-full"
+                animate={{
+                  width: currentSlide === i ? 26 : 8,
+                  backgroundColor: currentSlide === i ? color : 'rgba(128,128,128,0.3)',
+                }}
+                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ height: 8 }}
+              />
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* ══════ MOBILE — normal vertical stack ══════ */}
       <section className="lg:hidden py-20 bg-bg">
