@@ -19,7 +19,7 @@ export default function ContactFormSection() {
     container.appendChild(script)
 
     return () => {
-      try { script.remove() } catch (e) { /* ignore */ }
+      try { script.remove() } catch { /* ignore */ }
     }
   }, [])
 

@@ -22,7 +22,7 @@ export default function App() {
     } else {
       window.scrollTo(0, 0)
     }
-  }, [location.key])
+  }, [location.key, location.hash])
 
   return <AppRouter />
 }

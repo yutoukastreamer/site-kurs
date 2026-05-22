@@ -19,9 +19,13 @@ export default function Header() {
   const [footerInView, setFooterInView] = useState(false)
   const { pathname } = useLocation()
 
-  useEffect(() => {
+  /* Закрываем мобильное меню при смене маршрута — корректировка
+     состояния во время рендера вместо setState внутри эффекта. */
+  const [menuPathname, setMenuPathname] = useState(pathname)
+  if (pathname !== menuPathname) {
+    setMenuPathname(pathname)
     setMobileOpen(false)
-  }, [pathname])
+  }
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 40)
