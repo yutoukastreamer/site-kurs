@@ -94,7 +94,7 @@ export default function Footer() {
             </p>
             <div className="flex flex-col gap-3 mb-8">
               <a
-                href="tel:+78001234567"
+                href="tel:+78007775714"
                 className="text-sm text-white/50 hover:text-white transition-colors whitespace-nowrap"
               >
                 8 800 777 57 14

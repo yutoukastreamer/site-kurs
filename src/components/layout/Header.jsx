@@ -102,7 +102,7 @@ export default function Header() {
         {/* Right side */}
         <div className="hidden lg:flex items-center gap-3 xl:gap-6 shrink-0">
           <a
-            href="tel:+78001234567"
+            href="tel:+78007775714"
             className={`whitespace-nowrap text-[11px] xl:text-[12px] font-medium tracking-wide transition-colors ${
               isLight
                 ? 'text-white/60 hover:text-white'
@@ -174,7 +174,7 @@ export default function Header() {
                 </NavLink>
               ))}
               <div className="divider-accent mt-2" />
-              <a href="tel:+78001234567" className="text-sm text-text-secondary">
+              <a href="tel:+78007775714" className="text-sm text-text-secondary">
                 8 800 777 57 14
               </a>
               <Link
