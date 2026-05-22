@@ -38,29 +38,51 @@ export default function DescriptionCardsSection({ product }) {
     })
   }
 
-  /* ── Трансляция вертикального колёсика в горизонтальный скролл ──
-     onWheel в React пассивный — preventDefault() в нём не сработает,
-     поэтому вешаем wheel-листенер вручную с { passive: false }.
-     Пока контейнер не упёрся в край — крутим его вбок и гасим
-     вертикальную прокрутку страницы; на краю preventDefault НЕ зовём,
-     и страница нативно листается дальше к соседним блокам.
-     CSS Scroll Snap сам доводит контейнер до ближайшей панели. */
+  /* ── Дискретный перехват колёсика: один тик = один слайд ──
+     Никакой пиксельной математики (scrollLeft += deltaY конфликтовал
+     с CSS Snap и намертво застревал). Просто плавно прокручиваем
+     контейнер к соседней панели через scrollTo — он попадает ровно
+     в snap-точку, браузер и JS не борются за скролл.
+     onWheel в React пассивный, поэтому wheel-листенер вешаем вручную
+     с { passive: false }. Замок isScrollingRef глушит повторные тики
+     на время перехода (debounce ~600 мс), чтобы слайды не «моргали».
+     На краю секции preventDefault не зовём — страница листается дальше. */
+  const isScrollingRef = useRef(false)
+
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
+    let releaseTimer = null
 
     const handleWheel = (e) => {
-      const maxScroll = el.scrollWidth - el.clientWidth
-      const canScrollRight = e.deltaY > 0 && el.scrollLeft < maxScroll - 1
-      const canScrollLeft = e.deltaY < 0 && el.scrollLeft > 0
-      if (!canScrollRight && !canScrollLeft) return // упёрлись в край
+      // Идёт плавный переход — глушим повторные тики колёсика
+      if (isScrollingRef.current) {
+        e.preventDefault()
+        return
+      }
 
-      e.preventDefault()
-      el.scrollLeft += e.deltaY
+      const slide = Math.round(el.scrollLeft / window.innerWidth)
+
+      if (e.deltaY > 0 && slide === 0) {
+        e.preventDefault()
+        el.scrollTo({ left: window.innerWidth, behavior: 'smooth' })
+      } else if (e.deltaY < 0 && slide === 1) {
+        e.preventDefault()
+        el.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        return // край секции — отдаём скролл странице
+      }
+
+      // Замок на время плавного перехода
+      isScrollingRef.current = true
+      releaseTimer = setTimeout(() => { isScrollingRef.current = false }, 600)
     }
 
     el.addEventListener('wheel', handleWheel, { passive: false })
-    return () => el.removeEventListener('wheel', handleWheel)
+    return () => {
+      el.removeEventListener('wheel', handleWheel)
+      if (releaseTimer) clearTimeout(releaseTimer)
+    }
   }, [])
 
   return (
