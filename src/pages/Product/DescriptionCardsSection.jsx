@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useSpring, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion'
 import SectionReveal from '../../components/ui/SectionReveal'
 
 /* ─── Акцентный цвет техники ─── */
@@ -11,167 +11,144 @@ const ACCENT_HEX = {
 
 /* ═══════════════════════════════════════════════════════
    Horizontal scroll: "О системе" → "Компоненты системы"
-   Desktop: нативный CSS Scroll Snap (overflow-x + snap-x mandatory).
-            Перелистывание считает сам браузер на уровне композитора —
-            плавно на любых устройствах, без JS-расчёта прогресса и без
-            фейковой sticky-высоты.
+   Desktop: pinned scroll — секция «прилипает» к экрану, вертикальная
+            прокрутка превращается в горизонтальный сдвиг панелей.
+            Прогресс прогоняется через пружину useSpring, которая
+            сглаживает рывки физической мыши в плавный глайд.
    Mobile:  обычный вертикальный стек.
    ═══════════════════════════════════════════════════════ */
 export default function DescriptionCardsSection({ product }) {
-  const scrollRef = useRef(null)
+  const containerRef = useRef(null)
   const [selected, setSelected] = useState(null)
   const [currentSlide, setCurrentSlide] = useState(0)
 
   const color = ACCENT_HEX[product.accentColor] || ACCENT_HEX.bulldozer
 
-  /* Активный слайд вычисляем из нативного scrollLeft контейнера */
-  const handleScroll = (e) => {
-    const idx = Math.round(e.target.scrollLeft / window.innerWidth)
-    setCurrentSlide(Math.min(1, Math.max(0, idx)))
-  }
+  /* Нативный прогресс прокрутки пиннутой секции (0..1).
+     Пока открыта модалка, страница заморожена через overflow:hidden,
+     поэтому scrollYProgress не меняется и фон под модалкой не уезжает. */
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  })
 
-  /* Клик по точке — плавная нативная прокрутка к нужной панели */
+  /* Пружина сглаживает дискретные «щелчки» колеса мыши: physical mouse
+     на Windows прыгает рывками ~100px, useSpring превращает это в
+     плавный непрерывный глайд панелей. */
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  })
+
+  /* Горизонтальный сдвиг панелей:
+     0–0.2  — Панель 1 удерживается (dwell)
+     0.2–0.8 — слайд Панель 1 → Панель 2
+     0.8–1  — Панель 2 удерживается (dwell) */
+  const x = useTransform(smoothProgress, [0, 0.2, 0.8, 1], ['0vw', '0vw', '-100vw', '-100vw'])
+
+  /* Активная точка переключается на середине перехода */
+  useMotionValueEvent(smoothProgress, 'change', (v) => {
+    setCurrentSlide(v >= 0.5 ? 1 : 0)
+  })
+
+  /* Клик по точке — плавный доскролл страницы к нужной панели */
   const goToSlide = (index) => {
-    scrollRef.current?.scrollTo({
-      left: index * window.innerWidth,
+    const el = containerRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const containerTop = window.scrollY + rect.top
+    const scrollRange = el.offsetHeight - window.innerHeight
+    window.scrollTo({
+      top: containerTop + (index === 1 ? scrollRange : 0),
       behavior: 'smooth',
     })
   }
 
-  /* ── Дискретный перехват колёсика: один тик = один слайд ──
-     Никакой пиксельной математики (scrollLeft += deltaY конфликтовал
-     с CSS Snap и намертво застревал). Просто плавно прокручиваем
-     контейнер к соседней панели через scrollTo — он попадает ровно
-     в snap-точку, браузер и JS не борются за скролл.
-     onWheel в React пассивный, поэтому wheel-листенер вешаем вручную
-     с { passive: false }. Замок isScrollingRef глушит повторные тики
-     на время перехода (debounce ~600 мс), чтобы слайды не «моргали».
-     На краю секции preventDefault не зовём — страница листается дальше. */
-  const isScrollingRef = useRef(false)
-
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    let releaseTimer = null
-
-    const handleWheel = (e) => {
-      // Идёт плавный переход — глушим повторные тики колёсика
-      if (isScrollingRef.current) {
-        e.preventDefault()
-        return
-      }
-
-      const slide = Math.round(el.scrollLeft / window.innerWidth)
-
-      if (e.deltaY > 0 && slide === 0) {
-        e.preventDefault()
-        el.scrollTo({ left: window.innerWidth, behavior: 'smooth' })
-      } else if (e.deltaY < 0 && slide === 1) {
-        e.preventDefault()
-        el.scrollTo({ left: 0, behavior: 'smooth' })
-      } else {
-        return // край секции — отдаём скролл странице
-      }
-
-      // Замок на время плавного перехода
-      isScrollingRef.current = true
-      releaseTimer = setTimeout(() => { isScrollingRef.current = false }, 600)
-    }
-
-    el.addEventListener('wheel', handleWheel, { passive: false })
-    return () => {
-      el.removeEventListener('wheel', handleWheel)
-      if (releaseTimer) clearTimeout(releaseTimer)
-    }
-  }, [])
-
   return (
     <>
-      {/* ══════ DESKTOP — нативный горизонтальный скролл со snap ══════ */}
-      <section className="hidden lg:block relative h-screen bg-bg">
-        <div
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex h-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory
-                     [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {/* Panel 1 — О системе */}
-          <div className="w-screen h-full shrink-0 snap-start flex items-center bg-bg">
-            <div className="container-luxury">
-              <div className="grid grid-cols-2 gap-24 items-center">
-                <SectionReveal>
-                  <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
-                    О системе
+      {/* ══════ DESKTOP — pinned horizontal scroll ══════ */}
+      <div ref={containerRef} className="hidden lg:block relative" style={{ height: '200vh' }}>
+        <div className="sticky top-0 h-screen overflow-hidden bg-bg">
+          <motion.div className="flex h-full" style={{ x }}>
+            {/* Panel 1 — О системе */}
+            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
+              <div className="container-luxury">
+                <div className="grid grid-cols-2 gap-24 items-center">
+                  <SectionReveal>
+                    <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-4 whitespace-nowrap">
+                      О системе
+                    </p>
+                    <h2 className="font-light mb-8 leading-tight" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)' }}>
+                      Инженерное совершенство в каждой детали
+                    </h2>
+                    <p className="text-text-secondary leading-relaxed text-base mb-8">
+                      {product.description}
+                    </p>
+                    <div className="divider-accent" />
+                  </SectionReveal>
+
+                  <SectionReveal delay={0.2}>
+                    <div className="aspect-[4/3] bg-bg-alt overflow-hidden flex items-center justify-center p-8">
+                      <img
+                        src={product.systemImage}
+                        alt={`Система ${product.name}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </SectionReveal>
+                </div>
+              </div>
+            </div>
+
+            {/* Panel 2 — Компоненты системы */}
+            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
+              <div className="container-luxury">
+                <div className="mb-8">
+                  <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
+                    Оборудование
                   </p>
-                  <h2 className="font-light mb-8 leading-tight" style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)' }}>
-                    Инженерное совершенство в каждой детали
+                  <h2 className="font-light" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)' }}>
+                    Компоненты системы
                   </h2>
-                  <p className="text-text-secondary leading-relaxed text-base mb-8">
-                    {product.description}
-                  </p>
-                  <div className="divider-accent" />
-                </SectionReveal>
+                </div>
 
-                <SectionReveal delay={0.2}>
-                  <div className="aspect-[4/3] bg-bg-alt overflow-hidden flex items-center justify-center p-8">
-                    <img
-                      src={product.systemImage}
-                      alt={`Система ${product.name}`}
-                      className="w-full h-full object-contain"
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
+                  {product.componentCards.map((comp) => (
+                    <CardDesktop
+                      key={comp.id}
+                      comp={comp}
+                      onSelect={() => setSelected(comp)}
                     />
-                  </div>
-                </SectionReveal>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Panel 2 — Компоненты системы */}
-          <div className="w-screen h-full shrink-0 snap-start flex items-center bg-bg">
-            <div className="container-luxury">
-              <div className="mb-8">
-                <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
-                  Оборудование
-                </p>
-                <h2 className="font-light" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)' }}>
-                  Компоненты системы
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
-                {product.componentCards.map((comp) => (
-                  <CardDesktop
-                    key={comp.id}
-                    comp={comp}
-                    onSelect={() => setSelected(comp)}
-                  />
-                ))}
-              </div>
-            </div>
+          {/* ── Точки-индикаторы панелей ── */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+            {[0, 1].map((i) => (
+              <button
+                key={i}
+                onClick={() => goToSlide(i)}
+                className="p-2 cursor-pointer"
+                aria-label={`Перейти к панели ${i + 1}`}
+              >
+                <motion.span
+                  className="block rounded-full"
+                  animate={{
+                    width: currentSlide === i ? 26 : 8,
+                    backgroundColor: currentSlide === i ? color : 'rgba(128,128,128,0.3)',
+                  }}
+                  transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                  style={{ height: 8 }}
+                />
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* ── Точки-индикаторы панелей ── */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-          {[0, 1].map((i) => (
-            <button
-              key={i}
-              onClick={() => goToSlide(i)}
-              className="p-2 cursor-pointer"
-              aria-label={`Перейти к панели ${i + 1}`}
-            >
-              <motion.span
-                className="block rounded-full"
-                animate={{
-                  width: currentSlide === i ? 26 : 8,
-                  backgroundColor: currentSlide === i ? color : 'rgba(128,128,128,0.3)',
-                }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                style={{ height: 8 }}
-              />
-            </button>
-          ))}
-        </div>
-      </section>
+      </div>
 
       {/* ══════ MOBILE — normal vertical stack ══════ */}
       <section className="lg:hidden py-20 bg-bg">
