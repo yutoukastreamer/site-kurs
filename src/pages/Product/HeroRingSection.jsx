@@ -261,6 +261,11 @@ export default function HeroRingSection({ product }) {
     wPct: imgVW * finalRingScale,
     hPct: imgVW * finalRingScale * (26 / 19),
   }))
+  /* Флаг загрузки картинки машины: на медленном интернете <img>
+     успевает отрисоваться с нулевой высотой, и первый замер бокса
+     даёт нулевые проценты. Перезамер после onLoad гарантирует точные
+     координаты точек схемы. */
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
 
   useEffect(() => {
     const el = machineBoxRef.current
@@ -281,16 +286,20 @@ export default function HeroRingSection({ product }) {
       ro.disconnect()
       window.removeEventListener('resize', measure)
     }
-  }, [finalRingScale])
+  }, [finalRingScale, isImageLoaded])
 
-  /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ── */
-  const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
-  const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
-  const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
-  const heroOpacity = useTransform(scrollProgress, [0.18, 0.38], [1, 0])
+  /* ── Desktop scroll transforms — компактные диапазоны ──
+     На некоторых браузерах/экранах хостинга scrollYProgress физически
+     не доходит до 0.55–0.68 (страница упирается в дно раньше). Поэтому
+     всю анимацию сборки укладываем в первую половину прогресса (0..~0.6):
+     схема гарантированно успевает собраться на любых устройствах. */
+  const machineLeft = useTransform(scrollProgress, [0, 0.20, 0.45], ['25%', '25%', '50%'])
+  const machineTop = useTransform(scrollProgress, [0, 0.20, 0.45], ['46%', '46%', '56%'])
+  const machineScale = useTransform(scrollProgress, [0.20, 0.45], [1, finalRingScale])
+  const heroOpacity = useTransform(scrollProgress, [0.10, 0.30], [1, 0])
   const heroTextPointer = useTransform(heroOpacity, (o) => (o > 0.05 ? 'auto' : 'none'))
-  const titleOpacity = useTransform(scrollProgress, [0.55, 0.68], [0, 1])
-  const bgOpacity = useTransform(scrollProgress, [0.35, 0.50], [0, 1])
+  const titleOpacity = useTransform(scrollProgress, [0.45, 0.58], [0, 1])
+  const bgOpacity = useTransform(scrollProgress, [0.30, 0.45], [0, 1])
 
   return (
     <>
@@ -306,14 +315,15 @@ export default function HeroRingSection({ product }) {
 
           {/* Machine image — scroll-linked position & scale */}
           <motion.div
-            className="absolute z-[5] pointer-events-none"
+            className="absolute z-[5] pointer-events-none [will-change:transform,opacity]"
             style={{ left: machineLeft, top: machineTop }}
           >
             <div ref={machineBoxRef} className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
-              <motion.div style={{ scale: machineScale }} className="origin-center">
+              <motion.div style={{ scale: machineScale }} className="origin-center [will-change:transform]">
                 <img
                   src={product.heroImage}
                   alt={product.name}
+                  onLoad={() => setIsImageLoaded(true)}
                   className="w-full h-auto object-contain drop-shadow-lg animate-fade-in"
                 />
               </motion.div>
@@ -323,7 +333,7 @@ export default function HeroRingSection({ product }) {
           {/* Hero text — всегда в DOM (без ремоунта), управляется opacity.
               pointer-events отключаются, когда текст почти прозрачен. */}
           <motion.div
-            className="absolute right-[4%] xl:right-[8%] top-0 bottom-0 w-[45%] xl:w-[42%] max-w-xl flex items-center z-20"
+            className="absolute right-[4%] xl:right-[8%] top-0 bottom-0 w-[45%] xl:w-[42%] max-w-xl flex items-center z-20 [will-change:transform,opacity]"
             style={{ opacity: heroOpacity, pointerEvents: heroTextPointer }}
           >
             <div className={`border-l-2 ${ACCENT_BORDER[product.accentColor]} pl-4 xl:pl-8 animate-hero-enter`}>
@@ -337,7 +347,7 @@ export default function HeroRingSection({ product }) {
 
               {/* Ring heading — starts exactly when machine animation ends */}
               <motion.div
-                className="absolute left-1/2 text-center z-30 pointer-events-none"
+                className="absolute left-1/2 text-center z-30 pointer-events-none [will-change:transform,opacity]"
                 style={{ opacity: titleOpacity, x: '-50%', top: '14%' }}
               >
                 <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-2 whitespace-nowrap">
@@ -432,20 +442,22 @@ export default function HeroRingSection({ product }) {
    Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
 function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineBox, isActive, onHover }) {
-  /* Тайминги (доли scrollProgress):
-     — Иконки появляются по кругу:   0.55 → 0.77  (по индексу)
-     — Линии-коннекторы:             0.77 → 0.87  (после иконок)
+  /* Тайминги (доли scrollProgress) — компактные, чтобы всё уложилось
+     в первую половину прогресса (под 0.6) и схема собралась даже там,
+     где scrollYProgress не доходит до конца:
+     — Иконки появляются по кругу:   0.45 → ~0.55 (с лёгким каскадом)
+     — Линии-коннекторы:             0.48 → ~0.58 (после иконок)
      Ромбы на машине — см. MachineDot. */
-  const iconStagger = index * (0.17 / total)
+  const iconStagger = index * (0.04 / total)
   const iconOpacity = useTransform(
     scrollYProgress,
-    [0.55 + iconStagger, 0.60 + iconStagger],
+    [0.45 + iconStagger, 0.52 + iconStagger],
     [0, 1]
   )
-  const lineStagger = index * (0.08 / total)
+  const lineStagger = index * (0.04 / total)
   const lineOpacity = useTransform(
     scrollYProgress,
-    [0.77 + lineStagger, 0.82 + lineStagger],
+    [0.48 + lineStagger, 0.55 + lineStagger],
     [0, 1]
   )
   /* Пока иконка не проявилась — не перехватываем курсор, иначе
@@ -476,7 +488,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
     <>
       {/* L-shaped connector via transparent div borders */}
       <motion.div
-        className="absolute pointer-events-none z-[10]"
+        className="absolute pointer-events-none z-[10] [will-change:opacity]"
         style={{
           left: `${connLeft}%`,
           top: `${connTop}%`,
@@ -492,7 +504,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
 
       {/* Component icon + label */}
       <motion.div
-        className="absolute z-20 cursor-pointer"
+        className="absolute z-20 cursor-pointer [will-change:transform,opacity]"
         style={{
           left: `${position.left}%`,
           top: `${position.top}%`,
@@ -524,11 +536,13 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
    Machine point marker (diamond dot)
    ═══════════════════════════════════════════════════════ */
 function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgress, color, isActive, onHover }) {
-  // Ромбы — финальная фаза, по той же круговой очерёдности, после линий
-  const stagger = index * (0.06 / total)
+  // Ромбы — финальная фаза, по той же круговой очерёдности, после линий.
+  // Диапазон сжат под 0.6, чтобы появлялись даже там, где scrollYProgress
+  // не доходит до прежних 0.87–0.92.
+  const stagger = index * (0.03 / total)
   const dotOpacity = useTransform(
     scrollYProgress,
-    [0.87 + stagger, 0.92 + stagger],
+    [0.51 + stagger, 0.58 + stagger],
     [0, 1]
   )
   const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
@@ -538,7 +552,7 @@ function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgre
 
   return (
     <motion.div
-      className="absolute z-[15] cursor-pointer"
+      className="absolute z-[15] cursor-pointer [will-change:transform,opacity]"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
