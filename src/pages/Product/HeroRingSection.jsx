@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence, animate } from 'framer-motion'
+import { motion, useScroll, useTransform, AnimatePresence, animate, useMotionValueEvent } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
 import logoRussia from '../../assets/images/logos/logo-made-in-russia.png'
@@ -298,6 +298,12 @@ export default function HeroRingSection({ product }) {
       <div ref={containerRef} className="hidden lg:block relative" style={{ height: '200vh' }}>
         <div className="sticky top-0 h-screen overflow-hidden bg-bg">
 
+          {/* DEBUG: временный оверлей со значением scrollYProgress для
+              диагностики бага на Chromium-хостинге. После того, как причина
+              станет ясна — удалить этот <ProgressBadge /> и сам компонент
+              ниже в файле. */}
+          <ProgressBadge scrollProgress={scrollProgress} />
+
           {/* Background transition: bg → bg-alt */}
           <motion.div
             className="absolute inset-0 bg-bg-alt"
@@ -425,6 +431,26 @@ export default function HeroRingSection({ product }) {
 
       <MobileRing product={product} color={color} />
     </>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   DEBUG — временный оверлей с живым scrollYProgress
+   Нужен, чтобы понять, до какого значения реально доходит
+   прогресс на проблемном Chromium-хостинге. После того, как
+   разобрались с багом — удалить этот компонент и его вызов
+   <ProgressBadge /> внутри HeroRingSection.
+   ═══════════════════════════════════════════════════════ */
+function ProgressBadge({ scrollProgress }) {
+  const [value, setValue] = useState(0)
+  useMotionValueEvent(scrollProgress, 'change', setValue)
+  return (
+    <div
+      className="absolute bottom-4 right-4 z-[60] px-4 py-2 rounded-md font-mono text-base font-medium bg-black/85 text-white shadow-lg pointer-events-none select-none"
+      style={{ minWidth: '10rem', textAlign: 'center' }}
+    >
+      progress: {value.toFixed(3)}
+    </div>
   )
 }
 
