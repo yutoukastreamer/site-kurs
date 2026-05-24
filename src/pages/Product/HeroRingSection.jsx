@@ -291,15 +291,23 @@ export default function HeroRingSection({ product }) {
   /* ── Desktop scroll transforms — компактные диапазоны ──
      На некоторых браузерах/экранах хостинга scrollYProgress физически
      не доходит до 0.55–0.68 (страница упирается в дно раньше). Поэтому
-     всю анимацию сборки укладываем в первую половину прогресса (0..~0.6):
+     всю анимацию сборки укладываем в первую половину прогресса (0..~0.5):
      схема гарантированно успевает собраться на любых устройствах. */
   const machineLeft = useTransform(scrollProgress, [0, 0.20, 0.45], ['25%', '25%', '50%'])
   const machineTop = useTransform(scrollProgress, [0, 0.20, 0.45], ['46%', '46%', '56%'])
   const machineScale = useTransform(scrollProgress, [0.20, 0.45], [1, finalRingScale])
   const heroOpacity = useTransform(scrollProgress, [0.10, 0.30], [1, 0])
   const heroTextPointer = useTransform(heroOpacity, (o) => (o > 0.05 ? 'auto' : 'none'))
-  const titleOpacity = useTransform(scrollProgress, [0.45, 0.58], [0, 1])
-  const bgOpacity = useTransform(scrollProgress, [0.30, 0.45], [0, 1])
+  const titleOpacity = useTransform(scrollProgress, [0.36, 0.42], [0, 1])
+  const bgOpacity = useTransform(scrollProgress, [0.25, 0.40], [0, 1])
+
+  /* ── Жёсткое переключение видимости через display ──
+     Chromium (Blink) агрессивно кеширует слои пиннутой секции и иногда
+     «забывает» обновить opacity, из-за чего hero-текст залипает поверх
+     схемы. Display-флип — это хард-свитч, который Blink не может
+     соптимизировать: контейнер физически удаляется из рендера. */
+  const heroDisplay = useTransform(scrollProgress, [0, 0.35, 0.36], ['block', 'block', 'none'])
+  const schemaDisplay = useTransform(scrollProgress, [0, 0.35, 0.36], ['none', 'none', 'block'])
 
   return (
     <>
@@ -331,18 +339,25 @@ export default function HeroRingSection({ product }) {
           </motion.div>
 
           {/* Hero text — всегда в DOM (без ремоунта), управляется opacity.
-              pointer-events отключаются, когда текст почти прозрачен. */}
+              На 36% прогресса display переключается на 'none' —
+              хард-свитч против бага композитора Chromium. */}
           <motion.div
             className="absolute right-[4%] xl:right-[8%] top-0 bottom-0 w-[45%] xl:w-[42%] max-w-xl flex items-center z-20 [will-change:transform,opacity]"
-            style={{ opacity: heroOpacity, pointerEvents: heroTextPointer }}
+            style={{ opacity: heroOpacity, pointerEvents: heroTextPointer, display: heroDisplay }}
           >
             <div className={`border-l-2 ${ACCENT_BORDER[product.accentColor]} pl-4 xl:pl-8 animate-hero-enter`}>
               <HeroText product={product} />
             </div>
           </motion.div>
 
-          {/* ── Schema overlay — relative container, safe bounds via clampPos ── */}
-          <div className="absolute inset-0 z-20 pointer-events-none">
+          {/* ── Schema overlay — relative container, safe bounds via clampPos.
+              display переключается на 'block' только после 35% прогресса —
+              хард-свитч против бага композитора Chromium, чтобы невидимые
+              спрайты схемы не мерцали поверх hero-блока. ── */}
+          <motion.div
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{ display: schemaDisplay }}
+          >
             <div className="relative w-full h-full">
 
               {/* Ring heading — starts exactly when machine animation ends */}
@@ -413,7 +428,7 @@ export default function HeroRingSection({ product }) {
                 })()}
               </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -442,22 +457,23 @@ export default function HeroRingSection({ product }) {
    Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
 function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineBox, isActive, onHover }) {
-  /* Тайминги (доли scrollProgress) — компактные, чтобы всё уложилось
-     в первую половину прогресса (под 0.6) и схема собралась даже там,
-     где scrollYProgress не доходит до конца:
-     — Иконки появляются по кругу:   0.45 → ~0.55 (с лёгким каскадом)
-     — Линии-коннекторы:             0.48 → ~0.58 (после иконок)
-     Ромбы на машине — см. MachineDot. */
-  const iconStagger = index * (0.04 / total)
+  /* Тайминги (доли scrollProgress) — стартуют строго после display-флипа
+     схемы на 0.36 и полностью завершаются к 0.50, чтобы вся сборка
+     уложилась в окно, гарантированно проходимое scrollYProgress на
+     любом браузере:
+     — Иконки:          0.36 → ~0.42 (с лёгким каскадом)
+     — Линии:           0.38 → ~0.44 (после иконок)
+     Ромбы — см. MachineDot. */
+  const iconStagger = index * (0.02 / total)
   const iconOpacity = useTransform(
     scrollYProgress,
-    [0.45 + iconStagger, 0.52 + iconStagger],
+    [0.36 + iconStagger, 0.42 + iconStagger],
     [0, 1]
   )
-  const lineStagger = index * (0.04 / total)
+  const lineStagger = index * (0.02 / total)
   const lineOpacity = useTransform(
     scrollYProgress,
-    [0.48 + lineStagger, 0.55 + lineStagger],
+    [0.38 + lineStagger, 0.44 + lineStagger],
     [0, 1]
   )
   /* Пока иконка не проявилась — не перехватываем курсор, иначе
@@ -537,12 +553,11 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
    ═══════════════════════════════════════════════════════ */
 function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgress, color, isActive, onHover }) {
   // Ромбы — финальная фаза, по той же круговой очерёдности, после линий.
-  // Диапазон сжат под 0.6, чтобы появлялись даже там, где scrollYProgress
-  // не доходит до прежних 0.87–0.92.
-  const stagger = index * (0.03 / total)
+  // Диапазон под 0.5, чтобы вся сборка завершалась до 0.50 включительно.
+  const stagger = index * (0.02 / total)
   const dotOpacity = useTransform(
     scrollYProgress,
-    [0.51 + stagger, 0.58 + stagger],
+    [0.42 + stagger, 0.48 + stagger],
     [0, 1]
   )
   const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
