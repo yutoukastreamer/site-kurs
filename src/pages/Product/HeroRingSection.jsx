@@ -283,14 +283,45 @@ export default function HeroRingSection({ product }) {
     }
   }, [finalRingScale])
 
-  /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ── */
+  /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ──
+     left/top машины оставлены на декларативном пути Framer Motion — они
+     корректно обновляются во всех браузерах. Все opacity/scale, наоборот,
+     прокидываются в DOM ИМПЕРАТИВНО через useMotionValueEvent ниже:
+     Chromium в связке sticky + scroll-driven MotionValue не применяет
+     style.opacity, посчитанный декларативно (DOM-атрибут залипает на
+     стартовом значении, хотя сам MotionValue считается верно). Прямая
+     запись в element.style.* этот баг обходит. */
   const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
   const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
   const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
   const heroOpacity = useTransform(scrollProgress, [0.18, 0.38], [1, 0])
-  const heroTextPointer = useTransform(heroOpacity, (o) => (o > 0.05 ? 'auto' : 'none'))
   const titleOpacity = useTransform(scrollProgress, [0.55, 0.68], [0, 1])
   const bgOpacity = useTransform(scrollProgress, [0.35, 0.50], [0, 1])
+
+  /* Императивные рефы — см. комментарий выше */
+  const machineScaleRef = useRef(null)
+  const heroTextRef = useRef(null)
+  const titleRef = useRef(null)
+  const bgRef = useRef(null)
+
+  useMotionValueEvent(machineScale, 'change', (v) => {
+    const el = machineScaleRef.current
+    if (el) el.style.transform = `scale(${v})`
+  })
+  useMotionValueEvent(heroOpacity, 'change', (v) => {
+    const el = heroTextRef.current
+    if (!el) return
+    el.style.opacity = v
+    el.style.pointerEvents = v > 0.05 ? 'auto' : 'none'
+  })
+  useMotionValueEvent(titleOpacity, 'change', (v) => {
+    const el = titleRef.current
+    if (el) el.style.opacity = v
+  })
+  useMotionValueEvent(bgOpacity, 'change', (v) => {
+    const el = bgRef.current
+    if (el) el.style.opacity = v
+  })
 
   return (
     <>
@@ -298,16 +329,14 @@ export default function HeroRingSection({ product }) {
       <div ref={containerRef} className="hidden lg:block relative" style={{ height: '200vh' }}>
         <div className="sticky top-0 h-screen overflow-hidden bg-bg">
 
-          {/* DEBUG: временный оверлей со значением scrollYProgress для
-              диагностики бага на Chromium-хостинге. После того, как причина
-              станет ясна — удалить этот <ProgressBadge /> и сам компонент
-              ниже в файле. */}
-          <ProgressBadge scrollProgress={scrollProgress} />
-
-          {/* Background transition: bg → bg-alt */}
-          <motion.div
+          {/* Background transition: bg → bg-alt
+              opacity ставится императивно (см. useMotionValueEvent выше),
+              стартовое значение 0 в inline-style — чтобы до первого тика
+              скролла фон оставался скрытым. */}
+          <div
+            ref={bgRef}
             className="absolute inset-0 bg-bg-alt"
-            style={{ opacity: bgOpacity }}
+            style={{ opacity: 0 }}
           />
 
           {/* Machine image — scroll-linked position & scale */}
@@ -316,35 +345,38 @@ export default function HeroRingSection({ product }) {
             style={{ left: machineLeft, top: machineTop }}
           >
             <div ref={machineBoxRef} className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
-              <motion.div style={{ scale: machineScale }} className="origin-center">
+              <div ref={machineScaleRef} className="origin-center" style={{ transform: 'scale(1)' }}>
                 <img
                   src={product.heroImage}
                   alt={product.name}
                   className="w-full h-auto object-contain drop-shadow-lg animate-fade-in"
                 />
-              </motion.div>
+              </div>
             </div>
           </motion.div>
 
           {/* Hero text — всегда в DOM (без ремоунта), управляется opacity.
-              pointer-events отключаются, когда текст почти прозрачен. */}
-          <motion.div
+              opacity и pointer-events ставятся императивно (см. выше). */}
+          <div
+            ref={heroTextRef}
             className="absolute right-[4%] xl:right-[8%] top-0 bottom-0 w-[45%] xl:w-[42%] max-w-xl flex items-center z-20"
-            style={{ opacity: heroOpacity, pointerEvents: heroTextPointer }}
+            style={{ opacity: 1 }}
           >
             <div className={`border-l-2 ${ACCENT_BORDER[product.accentColor]} pl-4 xl:pl-8 animate-hero-enter`}>
               <HeroText product={product} />
             </div>
-          </motion.div>
+          </div>
 
           {/* ── Schema overlay — relative container, safe bounds via clampPos ── */}
           <div className="absolute inset-0 z-20 pointer-events-none">
             <div className="relative w-full h-full">
 
-              {/* Ring heading — starts exactly when machine animation ends */}
-              <motion.div
+              {/* Ring heading — starts exactly when machine animation ends.
+                  opacity ставится императивно (см. useMotionValueEvent выше). */}
+              <div
+                ref={titleRef}
                 className="absolute left-1/2 text-center z-30 pointer-events-none"
-                style={{ opacity: titleOpacity, x: '-50%', top: '14%' }}
+                style={{ opacity: 0, transform: 'translateX(-50%)', top: '14%' }}
               >
                 <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-2 whitespace-nowrap">
                   Устройство
@@ -352,7 +384,7 @@ export default function HeroRingSection({ product }) {
                 <h2 className="font-light whitespace-nowrap" style={{ fontSize: 'clamp(1.25rem, 2.2vw, 1.875rem)' }}>
                   Схема расположения компонентов
                 </h2>
-              </motion.div>
+              </div>
 
               {/* Components with border-based L-shaped connectors */}
               {components.map((comp, i) => {
@@ -435,33 +467,16 @@ export default function HeroRingSection({ product }) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   DEBUG — временный оверлей с живым scrollYProgress
-   Нужен, чтобы понять, до какого значения реально доходит
-   прогресс на проблемном Chromium-хостинге. После того, как
-   разобрались с багом — удалить этот компонент и его вызов
-   <ProgressBadge /> внутри HeroRingSection.
-   ═══════════════════════════════════════════════════════ */
-function ProgressBadge({ scrollProgress }) {
-  const [value, setValue] = useState(0)
-  useMotionValueEvent(scrollProgress, 'change', setValue)
-  return (
-    <div
-      className="absolute bottom-4 right-4 z-[60] px-4 py-2 rounded-md font-mono text-base font-medium bg-black/85 text-white shadow-lg pointer-events-none select-none"
-      style={{ minWidth: '10rem', textAlign: 'center' }}
-    >
-      progress: {value.toFixed(3)}
-    </div>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════
    Schema item — icon + label + L-shaped border connector
    ═══════════════════════════════════════════════════════ */
 function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress, color, machineBox, isActive, onHover }) {
   /* Тайминги (доли scrollProgress):
      — Иконки появляются по кругу:   0.55 → 0.77  (по индексу)
      — Линии-коннекторы:             0.77 → 0.87  (после иконок)
-     Ромбы на машине — см. MachineDot. */
+     Ромбы на машине — см. MachineDot.
+     opacity для иконки и линии прокидываем в DOM императивно через
+     useMotionValueEvent — обход бага композитора Chromium (sticky +
+     scroll-driven MotionValue декларативно не дочитывается). */
   const iconStagger = index * (0.17 / total)
   const iconOpacity = useTransform(
     scrollYProgress,
@@ -474,9 +489,21 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
     [0.77 + lineStagger, 0.82 + lineStagger],
     [0, 1]
   )
-  /* Пока иконка не проявилась — не перехватываем курсор, иначе
-     невидимый спрайт ворует hover у кнопки в hero-блоке. */
-  const iconPointer = useTransform(iconOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
+
+  const iconRef = useRef(null)
+  const lineRef = useRef(null)
+  useMotionValueEvent(iconOpacity, 'change', (v) => {
+    const el = iconRef.current
+    if (!el) return
+    el.style.opacity = v
+    /* Пока иконка не проявилась — не перехватываем курсор, иначе
+       невидимый спрайт ворует hover у кнопки в hero-блоке. */
+    el.style.pointerEvents = v > 0.5 ? 'auto' : 'none'
+  })
+  useMotionValueEvent(lineOpacity, 'change', (v) => {
+    const el = lineRef.current
+    if (el) el.style.opacity = v
+  })
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineBox)
@@ -501,7 +528,8 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
   return (
     <>
       {/* L-shaped connector via transparent div borders */}
-      <motion.div
+      <div
+        ref={lineRef}
         className="absolute pointer-events-none z-[10]"
         style={{
           left: `${connLeft}%`,
@@ -512,20 +540,20 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
           borderRight: !compIsLeft ? border : 'none',
           borderBottom: compIsAbove ? border : 'none',
           borderTop: !compIsAbove ? border : 'none',
-          opacity: lineOpacity,
+          opacity: 0,
         }}
       />
 
       {/* Component icon + label */}
-      <motion.div
+      <div
+        ref={iconRef}
         className="absolute z-20 cursor-pointer"
         style={{
           left: `${position.left}%`,
           top: `${position.top}%`,
-          x: '-50%',
-          y: '-50%',
-          opacity: iconOpacity,
-          pointerEvents: iconPointer,
+          transform: 'translate(-50%, -50%)',
+          opacity: 0,
+          pointerEvents: 'none',
         }}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
@@ -541,7 +569,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
             <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
           </div>
         </div>
-      </motion.div>
+      </div>
     </>
   )
 }
@@ -550,28 +578,36 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
    Machine point marker (diamond dot)
    ═══════════════════════════════════════════════════════ */
 function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgress, color, isActive, onHover }) {
-  // Ромбы — финальная фаза, по той же круговой очерёдности, после линий
+  // Ромбы — финальная фаза, по той же круговой очерёдности, после линий.
+  // opacity ставится императивно — обход бага композитора Chromium.
   const stagger = index * (0.06 / total)
   const dotOpacity = useTransform(
     scrollYProgress,
     [0.87 + stagger, 0.92 + stagger],
     [0, 1]
   )
-  const dotPointer = useTransform(dotOpacity, (v) => (v > 0.5 ? 'auto' : 'none'))
+
+  const dotRef = useRef(null)
+  useMotionValueEvent(dotOpacity, 'change', (v) => {
+    const el = dotRef.current
+    if (!el) return
+    el.style.opacity = v
+    el.style.pointerEvents = v > 0.5 ? 'auto' : 'none'
+  })
 
   const mp = dotOverride || comp.machinePoint || [50, 50]
   const target = machineToVP(mp[0], mp[1], machineBox)
 
   return (
-    <motion.div
+    <div
+      ref={dotRef}
       className="absolute z-[15] cursor-pointer"
       style={{
         left: `${target.x}%`,
         top: `${target.y}%`,
-        x: '-50%',
-        y: '-50%',
-        opacity: dotOpacity,
-        pointerEvents: dotPointer,
+        transform: 'translate(-50%, -50%)',
+        opacity: 0,
+        pointerEvents: 'none',
       }}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
@@ -581,7 +617,7 @@ function MachineDot({ comp, dotOverride, machineBox, index, total, scrollYProgre
                     ${isActive ? 'scale-[2.2]' : 'hover:scale-[1.6]'}`}
         style={{ backgroundColor: color }}
       />
-    </motion.div>
+    </div>
   )
 }
 
