@@ -18,6 +18,11 @@ const ACCENT_BORDER = {
 }
 
 const EASE = [0.25, 0.1, 0.25, 1]
+/* Ease для автоскролл-доводки колёсиком: резкий старт, мягкое
+   торможение. У стандартного EASE медленный разгон в первые ~150 мс,
+   из-за чего после wheel-перехвата кажется, что страница «зависла»
+   перед началом анимации. */
+const EASE_SCROLL = [0, 0, 0.25, 1]
 
 /*
  * ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -220,8 +225,8 @@ export default function HeroRingSection({ product }) {
       e.preventDefault()
       isAnimatingRef.current = true
       animation = animate(window.scrollY, targetY, {
-        duration: 1.2,
-        ease: EASE,
+        duration: 0.9,
+        ease: EASE_SCROLL,
         onUpdate: (v) => window.scrollTo(0, v),
         onComplete: () => {
           // короткая пауза гасит инерцию трекпада после доводки
@@ -291,12 +296,12 @@ export default function HeroRingSection({ product }) {
      style.opacity, посчитанный декларативно (DOM-атрибут залипает на
      стартовом значении, хотя сам MotionValue считается верно). Прямая
      запись в element.style.* этот баг обходит. */
-  const machineLeft = useTransform(scrollProgress, [0, 0.25, 0.55], ['25%', '25%', '50%'])
-  const machineTop = useTransform(scrollProgress, [0, 0.25, 0.55], ['46%', '46%', '56%'])
-  const machineScale = useTransform(scrollProgress, [0.25, 0.55], [1, finalRingScale])
-  const heroOpacity = useTransform(scrollProgress, [0.18, 0.38], [1, 0])
-  const titleOpacity = useTransform(scrollProgress, [0.55, 0.68], [0, 1])
-  const bgOpacity = useTransform(scrollProgress, [0.35, 0.50], [0, 1])
+  const machineLeft = useTransform(scrollProgress, [0, 0.45], ['25%', '50%'])
+  const machineTop = useTransform(scrollProgress, [0, 0.45], ['46%', '56%'])
+  const machineScale = useTransform(scrollProgress, [0, 0.45], [1, finalRingScale])
+  const heroOpacity = useTransform(scrollProgress, [0, 0.25], [1, 0])
+  const titleOpacity = useTransform(scrollProgress, [0.50, 0.62], [0, 1])
+  const bgOpacity = useTransform(scrollProgress, [0.20, 0.40], [0, 1])
 
   /* Императивные рефы — см. комментарий выше */
   const machineScaleRef = useRef(null)
