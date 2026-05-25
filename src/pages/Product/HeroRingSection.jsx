@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence, animate, useMotionValueEvent } from 'framer-motion'
 import Button from '../../components/ui/Button'
 import logoKurs from '../../assets/images/logos/logo-kurs.png'
@@ -170,6 +170,25 @@ function clampPos(pos) {
 export default function HeroRingSection({ product }) {
   const containerRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(null)
+
+  /* ── Сброс скролла при переходе между продуктами ──
+     При навигации /bulldozer ↔ /excavator ↔ /grader React Router
+     unmount'ит старый ProductPage и mount'ит новый, но позиция
+     window.scrollY сохраняется. Если пользователь уже доскроллил
+     анимацию (scrollY ≈ высоте sticky-контейнера), новая секция
+     рендерится в финальном состоянии: useScroll сразу выдаёт
+     progress=1, наш rAF-байтчер пишет финальные opacity в DOM, и
+     пользователь видит собранную схему вместо hero-блока.
+
+     useLayoutEffect срабатывает синхронно после маунта, но ДО первого
+     paint, и `behavior: 'instant'` гарантирует, что scroll сбросится
+     к 0 в том же кадре. Тогда useScroll сразу измерит контейнер при
+     scrollY=0 и progress стартует с 0. */
+  useLayoutEffect(() => {
+    if (window.scrollY !== 0) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    }
+  }, [product.slug])
 
   /* Нативный прогресс прокрутки пиннутой секции (0..1) — скролл не перехватывается */
   const { scrollYProgress: scrollProgress } = useScroll({
