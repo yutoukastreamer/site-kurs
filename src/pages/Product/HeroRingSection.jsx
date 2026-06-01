@@ -328,25 +328,42 @@ export default function HeroRingSection({ product }) {
   }, [finalRingScale])
 
   /* ── Desktop scroll transforms (направляются ровно прогрессом скролла) ──
-     left/top машины оставлены на декларативном пути Framer Motion — они
-     корректно обновляются во всех браузерах. Все opacity/scale, наоборот,
-     прокидываются в DOM ИМПЕРАТИВНО через useMotionValueEvent ниже:
+     Всё прокидывается в DOM ИМПЕРАТИВНО через useMotionValueEvent ниже:
      Chromium в связке sticky + scroll-driven MotionValue не применяет
-     style.opacity, посчитанный декларативно (DOM-атрибут залипает на
-     стартовом значении, хотя сам MotionValue считается верно). Прямая
-     запись в element.style.* этот баг обходит. */
-  const machineLeft = useTransform(scrollProgress, [0, 0.45], ['25%', '50%'])
-  const machineTop = useTransform(scrollProgress, [0, 0.45], ['46%', '56%'])
+     style, посчитанный декларативно (DOM-атрибут залипает на стартовом
+     значении, хотя сам MotionValue считается верно). Прямая запись в
+     element.style.* этот баг обходит.
+
+     ВАЖНО: позиция машины раньше анимировалась через left/top (проценты).
+     В Chrome это форсит LAYOUT + PAINT на КАЖДОМ кадре (замерено трассой:
+     UpdateLayoutTree + Paint + Layerize + Commit ×185 за анимацию) → рваная,
+     «нерезкая» анимация. Safari/Firefox это вытягивают, Chrome — нет.
+     Перевели движение на transform: translate() — это только композитинг
+     на GPU, без layout/paint. translate в vw/vh даёт ту же раскладку, что
+     прежние left 25→50% / top 46→56%, и устойчив к ресайзу.
+     machineTX/TY — смещение в vw/vh (0 = финальная позиция по центру). */
+  const machineTX = useTransform(scrollProgress, [0, 0.45], [-25, 0])
+  const machineTY = useTransform(scrollProgress, [0, 0.45], [-10, 0])
   const machineScale = useTransform(scrollProgress, [0, 0.45], [1, finalRingScale])
   const heroOpacity = useTransform(scrollProgress, [0, 0.25], [1, 0])
   const titleOpacity = useTransform(scrollProgress, [0.50, 0.62], [0, 1])
   const bgOpacity = useTransform(scrollProgress, [0.20, 0.40], [0, 1])
 
   /* Императивные рефы — см. комментарий выше */
+  const machinePosRef = useRef(null)
   const machineScaleRef = useRef(null)
   const heroTextRef = useRef(null)
   const titleRef = useRef(null)
   const bgRef = useRef(null)
+
+  /* Движение машины: translate(vw, vh) на внешнем контейнере (только GPU-
+     композитинг). Подписываемся на обе оси, пишем общий transform. */
+  const writeMachinePos = useCallback(() => {
+    const el = machinePosRef.current
+    if (el) el.style.transform = `translate(${machineTX.get()}vw, ${machineTY.get()}vh)`
+  }, [machineTX, machineTY])
+  useMotionValueEvent(machineTX, 'change', writeMachinePos)
+  useMotionValueEvent(machineTY, 'change', writeMachinePos)
 
   useMotionValueEvent(machineScale, 'change', (v) => {
     const el = machineScaleRef.current
@@ -383,10 +400,14 @@ export default function HeroRingSection({ product }) {
             style={{ opacity: 0 }}
           />
 
-          {/* Machine image — scroll-linked position & scale */}
-          <motion.div
+          {/* Machine image — scroll-linked position & scale.
+              Позиция фиксирована (left/top), движение — через transform
+              translate (имперически, см. writeMachinePos): только GPU-
+              композитинг, без layout/paint каждый кадр. */}
+          <div
+            ref={machinePosRef}
             className="absolute z-[5] pointer-events-none"
-            style={{ left: machineLeft, top: machineTop }}
+            style={{ left: '50%', top: '56%', transform: 'translate(-25vw, -10vh)', willChange: 'transform' }}
           >
             <div ref={machineBoxRef} className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
               {/* Холодный старт scroll-анимации раньше давал ≈300 мс фриз на
@@ -406,7 +427,7 @@ export default function HeroRingSection({ product }) {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Hero text — всегда в DOM (без ремоунта), управляется opacity.
               opacity и pointer-events ставятся императивно (см. выше). */}
