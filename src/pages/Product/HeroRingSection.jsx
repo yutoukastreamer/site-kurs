@@ -389,12 +389,20 @@ export default function HeroRingSection({ product }) {
             style={{ left: machineLeft, top: machineTop }}
           >
             <div ref={machineBoxRef} className="-translate-x-1/2 -translate-y-1/2" style={{ width: `${imgVW}vw`, maxWidth: `${Math.round(imgVW * 16.25)}px` }}>
-              <div ref={machineScaleRef} className="origin-center" style={{ transform: 'scale(1)' }}>
+              {/* Холодный старт scroll-анимации раньше давал ≈300 мс фриз на
+                  scrollProgress≈7% (замерено в Chrome, CPU×6): при первом scale
+                  Chromium растеризовал тяжёлый PNG машины ВМЕСТЕ с CSS-фильтром
+                  drop-shadow, который обводит альфа-канал картинки — дорого.
+                  Тень уже запечена в сам PNG, поэтому CSS-фильтр drop-shadow
+                  убран совсем (первопричина устранена). will-change: transform
+                  дополнительно держит масштаб на GPU-слое, чтобы картинка не
+                  перерастеризовывалась на промежуточных scale во время скролла. */}
+              <div ref={machineScaleRef} className="origin-center" style={{ transform: 'scale(1)', willChange: 'transform' }}>
                 <img
                   src={product.heroImage}
                   alt={product.name}
                   decoding="async"
-                  className="w-full h-auto object-contain drop-shadow-lg animate-fade-in"
+                  className="w-full h-auto object-contain animate-fade-in"
                 />
               </div>
             </div>
