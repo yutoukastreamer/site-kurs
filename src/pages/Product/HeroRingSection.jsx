@@ -266,7 +266,12 @@ export default function HeroRingSection({ product }) {
       animation = animate(window.scrollY, targetY, {
         duration: 0.9,
         ease: EASE_SCROLL,
-        onUpdate: (v) => window.scrollTo(0, v),
+        /* behavior:'instant' ОБЯЗАТЕЛЬНО: глобальный html{scroll-behavior:smooth}
+           (для якорей) иначе запускает СВОЮ плавную прокрутку на КАЖДЫЙ из 60
+           scrollTo/сек — анимация поверх анимации. Браузер отстаёт (кажется,
+           что «тормозит»), а в конце одним рывком догоняет финальную точку.
+           Сглаживание даёт framer через EASE_SCROLL, скролл должен быть мгновенным. */
+        onUpdate: (v) => window.scrollTo({ top: v, left: 0, behavior: 'instant' }),
         onComplete: () => {
           // короткая пауза гасит инерцию трекпада после доводки
           releaseTimer = setTimeout(() => { isAnimatingRef.current = false }, 120)
