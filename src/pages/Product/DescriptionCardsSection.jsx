@@ -72,7 +72,7 @@ export default function DescriptionCardsSection({ product }) {
         <div className="sticky top-0 h-screen overflow-hidden bg-bg">
           <motion.div className="flex h-full" style={{ x }}>
             {/* Panel 1 — О системе */}
-            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
+            <div className="w-screen h-full shrink-0 flex items-center pt-20 bg-bg">
               <div className="container-luxury">
                 <div className="grid grid-cols-2 gap-24 items-center">
                   <SectionReveal>
@@ -102,7 +102,7 @@ export default function DescriptionCardsSection({ product }) {
             </div>
 
             {/* Panel 2 — Компоненты системы */}
-            <div className="w-screen h-full shrink-0 flex items-center bg-bg">
+            <div className="w-screen h-full shrink-0 flex items-center pt-20 bg-bg">
               <div className="container-luxury">
                 <div className="mb-8">
                   <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
