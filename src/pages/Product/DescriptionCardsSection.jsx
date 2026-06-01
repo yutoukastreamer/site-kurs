@@ -72,7 +72,7 @@ export default function DescriptionCardsSection({ product }) {
         <div className="sticky top-0 h-screen overflow-hidden bg-bg">
           <motion.div className="flex h-full" style={{ x }}>
             {/* Panel 1 — О системе */}
-            <div className="w-screen h-full shrink-0 flex items-center pt-20 bg-bg">
+            <div className="w-screen h-full shrink-0 flex items-center pt-20 pb-16 bg-bg">
               <div className="container-luxury">
                 <div className="grid grid-cols-2 gap-24 items-center">
                   <SectionReveal>
@@ -102,9 +102,9 @@ export default function DescriptionCardsSection({ product }) {
             </div>
 
             {/* Panel 2 — Компоненты системы */}
-            <div className="w-screen h-full shrink-0 flex items-center pt-20 bg-bg">
+            <div className="w-screen h-full shrink-0 flex items-center pt-20 pb-16 bg-bg">
               <div className="container-luxury">
-                <div className="mb-8">
+                <div className="mb-[clamp(1rem,3vh,2rem)]">
                   <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-text-secondary mb-3 whitespace-nowrap">
                     Оборудование
                   </p>
@@ -220,7 +220,7 @@ function CardDesktop({ comp, onSelect }) {
       onClick={onSelect}
       className="group text-left bg-bg-alt p-4 lg:p-5 cursor-pointer border border-transparent hover:border-border transition-colors duration-300"
     >
-      <div className="h-36 lg:h-40 flex items-center justify-center mb-3 p-3">
+      <div className="h-[clamp(4.5rem,14vh,9rem)] flex items-center justify-center mb-3 p-3">
         <img src={comp.image} alt={comp.name} className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
       </div>
       <p className="text-[11px] font-medium text-text-secondary group-hover:text-text transition-colors leading-tight tracking-wide">
