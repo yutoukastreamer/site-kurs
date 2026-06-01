@@ -190,6 +190,26 @@ export default function HeroRingSection({ product }) {
     }
   }, [product.slug])
 
+  /* ── Предекод тяжёлых PNG схемы ──
+     Иконки компонентов лежат в DOM с opacity:0 с самого маунта, но
+     Chromium откладывает ДЕКОДИРОВАНИЕ (распаковку пикселей) до момента,
+     когда элемент впервые нужно отрисовать — а это ~55% прогресса, в
+     разгар автоскролл-доводки. Декод полноразмерных PNG (до 1.4 МБ)
+     синхронно на main thread = фриз кадра ≈100 мс = видимый рывок.
+
+     Прогоняем img.decode() заранее, при загрузке секции: тяжёлая
+     распаковка проходит в свободное время, в кэш, и к моменту анимации
+     иконки рисуются мгновенно. Замер: фриз 100 мс → 0 (CPU ×6). */
+  useEffect(() => {
+    const srcs = [product.heroImage, ...product.diagramComponents.map((c) => c.image)]
+    srcs.forEach((src) => {
+      if (!src) return
+      const img = new Image()
+      img.src = src
+      img.decode?.().catch(() => {})
+    })
+  }, [product.slug, product.heroImage, product.diagramComponents])
+
   /* Нативный прогресс прокрутки пиннутой секции (0..1) — скролл не перехватывается */
   const { scrollYProgress: scrollProgress } = useScroll({
     target: containerRef,
@@ -373,6 +393,7 @@ export default function HeroRingSection({ product }) {
                 <img
                   src={product.heroImage}
                   alt={product.name}
+                  decoding="async"
                   className="w-full h-auto object-contain drop-shadow-lg animate-fade-in"
                 />
               </div>
@@ -590,7 +611,7 @@ function SchemaItem({ comp, position, dotOverride, index, total, scrollYProgress
                  width: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
                  maxHeight: comp.imageScale ? `${5 * comp.imageScale}rem` : '5rem',
                }}>
-            <img src={comp.image} alt={comp.name} className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
+            <img src={comp.image} alt={comp.name} decoding="async" className="max-w-full max-h-full h-auto object-contain drop-shadow-sm" />
           </div>
         </div>
       </div>
@@ -701,6 +722,7 @@ function HoverPanel({ comp, color, fromRight }) {
           <img
             src={comp.image}
             alt={comp.name}
+            decoding="async"
             className="relative object-contain"
             style={{
               maxWidth: `${65 * imgScale}%`,
@@ -756,8 +778,10 @@ function HeroText({ product }) {
       </div>
 
       <div className="flex items-center gap-6">
-        <img src={logoKurs} alt="Курс" className="h-7 w-auto shrink-0" />
-        <img src={logoRussia} alt="Сделано в России" className="h-7 w-auto shrink-0" />
+        {/* width/height = реальные пропорции (824×270, 1289×391) — браузер
+            резервирует место до загрузки, иначе layout-shift (CLS). */}
+        <img src={logoKurs} alt="Курс" width={85} height={28} decoding="async" className="h-7 w-auto shrink-0" />
+        <img src={logoRussia} alt="Сделано в России" width={92} height={28} decoding="async" className="h-7 w-auto shrink-0" />
       </div>
     </>
   )
@@ -817,6 +841,7 @@ function MobileRing({ product, color }) {
             <img
               src={product.heroImage}
               alt={product.name}
+              decoding="async"
               className="w-full h-auto object-contain"
             />
           </motion.div>
