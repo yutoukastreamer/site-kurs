@@ -13,7 +13,7 @@ const navLinks = [
   { to: '/#where-to-buy', label: 'Где купить' },
 ]
 
-export default function Header() {
+export default function Header({ errorPage = false }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [footerInView, setFooterInView] = useState(false)
@@ -39,7 +39,10 @@ export default function Header() {
     if (!footer) return
     const io = new IntersectionObserver(
       ([entry]) => setFooterInView(entry.isIntersecting),
-      { rootMargin: '0px 0px 0px 0px', threshold: 0 }
+      /* Отрицательный нижний отступ: футер считается «в зоне видимости»
+         только когда реально появляется при прокрутке, а не когда просто
+         касается нижней кромки экрана (важно для короткой страницы 404). */
+      { rootMargin: '0px 0px -120px 0px', threshold: 0 }
     )
     io.observe(footer)
     return () => io.disconnect()
@@ -49,10 +52,14 @@ export default function Header() {
   const isHome = pathname === '/'
   const isLight = isHome && !isScrolled
 
+  /* На странице 404 шапка «твёрдая» (белая) с самого верха, но при
+     долистывании до футера — плавно скрывается, как на остальных страницах. */
+  const solid = isScrolled || errorPage
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
+        solid
           ? 'bg-white/90 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.04)]'
           : 'bg-transparent'
       } ${footerInView ? '-translate-y-full opacity-0 pointer-events-none' : ''}`}

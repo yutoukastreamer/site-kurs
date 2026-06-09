@@ -1,5 +1,5 @@
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import Seo from '../../components/Seo'
 
 const EASE = [0.25, 0.1, 0.25, 1]
@@ -15,9 +15,20 @@ const item = {
 }
 
 /* ═══════════════════════════════════════════════════════
-   404 — standalone full-screen page (без Header / Footer)
+   404 — внутри общего Layout (с Header / Footer).
+   Светлая палитра «Arctic Precision», как весь сайт.
    ═══════════════════════════════════════════════════════ */
 export default function NotFoundPage() {
+  /* Скрываем плавающий виджет Битрикс24 ТОЛЬКО на странице 404.
+     При уходе на любую другую страницу стиль удаляется — виджет возвращается. */
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent =
+      '.b24-widget-button-wrapper,.b24-widget-button-popup,.b24-widget-button-shadow{display:none!important;}'
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, [])
+
   return (
     <>
       <Seo
@@ -26,35 +37,20 @@ export default function NotFoundPage() {
         path="/404"
       />
 
-      <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-bg-dark px-6">
-        {/* ── Мягкое размытое свечение в тон акцентных цветов техники ── */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-bg px-6 pt-20">
+        {/* ── Мягкое холодное свечение в тон акцентных цветов техники ── */}
         <div aria-hidden className="absolute inset-0 pointer-events-none">
           <motion.div
-            className="absolute -top-[15%] -left-[10%] w-[38rem] h-[38rem] rounded-full bg-bulldozer/25 blur-[140px]"
-            animate={{ scale: [1, 1.12, 1], opacity: [0.55, 0.85, 0.55] }}
+            className="absolute -top-[15%] -left-[10%] w-[38rem] h-[38rem] rounded-full bg-bulldozer/10 blur-[150px]"
+            animate={{ scale: [1, 1.12, 1], opacity: [0.5, 0.8, 0.5] }}
             transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
           />
           <motion.div
-            className="absolute top-[18%] -right-[12%] w-[34rem] h-[34rem] rounded-full bg-excavator/20 blur-[140px]"
-            animate={{ scale: [1.1, 1, 1.1], opacity: [0.45, 0.75, 0.45] }}
-            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute -bottom-[22%] left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] rounded-full bg-grader/20 blur-[150px]"
-            animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 17, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -bottom-[20%] right-[5%] w-[34rem] h-[34rem] rounded-full bg-grader/10 blur-[150px]"
+            animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.7, 0.4] }}
+            transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
           />
         </div>
-
-        {/* Лёгкая виньетка — углы остаются глубокими */}
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,0.55) 100%)',
-          }}
-        />
 
         {/* ── Контент ── */}
         <motion.div
@@ -63,12 +59,10 @@ export default function NotFoundPage() {
           initial="hidden"
           animate="show"
         >
-          {/* Крупное «404» — градиент из акцентных цветов техники */}
+          {/* Крупное «404» — один цвет */}
           <motion.div
             variants={item}
-            className="font-thin leading-none tracking-tight select-none
-                       text-transparent bg-clip-text
-                       bg-gradient-to-r from-bulldozer via-grader to-excavator"
+            className="font-thin leading-none tracking-tight select-none text-text"
             style={{ fontSize: 'clamp(7rem, 22vw, 16rem)' }}
           >
             404
@@ -77,7 +71,7 @@ export default function NotFoundPage() {
           {/* Заголовок */}
           <motion.h1
             variants={item}
-            className="font-light text-text-light mt-2"
+            className="font-light text-text mt-2"
             style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)' }}
           >
             Страница не найдена
@@ -86,46 +80,19 @@ export default function NotFoundPage() {
           {/* Тонкий акцентный разделитель */}
           <motion.div
             variants={item}
-            className="my-8 h-px w-20 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+            className="my-8 h-px w-20 bg-gradient-to-r from-transparent via-border to-transparent"
           />
 
           {/* Описание */}
           <motion.p
             variants={item}
-            className="text-base font-light leading-relaxed text-white/35 max-w-md"
+            className="text-base font-light leading-relaxed text-text-secondary max-w-md"
           >
             Возможно, страница была перемещена или больше не существует.
-            Проверьте адрес или вернитесь на главную, чтобы продолжить.
+            Проверьте адрес, чтобы продолжить.
           </motion.p>
-
-          {/* Кнопка возврата на главную */}
-          <motion.div variants={item} className="mt-12">
-            <Link
-              to="/"
-              className="group inline-flex items-center gap-3 px-8 py-3.5 border border-white/25
-                         text-white text-[11px] font-medium tracking-[0.15em] uppercase
-                         transition-all duration-300 hover:bg-white hover:text-bg-dark"
-            >
-              <svg
-                width="16"
-                height="10"
-                viewBox="0 0 16 10"
-                fill="none"
-                className="transition-transform duration-300 group-hover:-translate-x-1"
-              >
-                <path
-                  d="M5 1L1 5l4 4M1 5h14"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              На главную
-            </Link>
-          </motion.div>
         </motion.div>
-      </main>
+      </section>
     </>
   )
 }

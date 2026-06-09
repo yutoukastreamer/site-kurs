@@ -16,8 +16,10 @@ export default function AppRouter() {
         <Route path="/news" element={<NewsPage />} />
       </Route>
 
-      {/* 404 — вне Layout, открывается на весь экран без Header / Footer */}
-      <Route path="*" element={<NotFoundPage />} />
+      {/* 404 — Layout с шапкой и подвалом, но без блока «Обратная связь» */}
+      <Route element={<Layout hideContact errorPage />}>
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
     </Routes>
   )
 }
