@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Seo from '../../components/Seo'
+import video404 from '../../assets/videos/404-bulldozer.mp4'
 
 const EASE = [0.25, 0.1, 0.25, 1]
 
@@ -16,9 +17,17 @@ const item = {
 
 /* ═══════════════════════════════════════════════════════
    404 — внутри общего Layout (с Header / Footer).
-   Светлая палитра «Arctic Precision», как весь сайт.
+   Зацикленное фоновое видео (бульдозер) + затемнение,
+   поверх — «404» и текст белым. Схема как у Hero на главной.
    ═══════════════════════════════════════════════════════ */
 export default function NotFoundPage() {
+  /* Замедляем фоновое видео. playbackRate — свойство элемента (не атрибут),
+     поэтому задаём через ref. 0.8 = чуть медленнее оригинала. */
+  const videoRef = useRef(null)
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = 0.8
+  }, [])
+
   /* Скрываем плавающий виджет Битрикс24 ТОЛЬКО на странице 404.
      При уходе на любую другую страницу стиль удаляется — виджет возвращается. */
   useEffect(() => {
@@ -37,20 +46,23 @@ export default function NotFoundPage() {
         path="/404"
       />
 
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-bg px-6 pt-20">
-        {/* ── Мягкое холодное свечение в тон акцентных цветов техники ── */}
-        <div aria-hidden className="absolute inset-0 pointer-events-none">
-          <motion.div
-            className="absolute -top-[15%] -left-[10%] w-[38rem] h-[38rem] rounded-full bg-bulldozer/10 blur-[150px]"
-            animate={{ scale: [1, 1.12, 1], opacity: [0.5, 0.8, 0.5] }}
-            transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.div
-            className="absolute -bottom-[20%] right-[5%] w-[34rem] h-[34rem] rounded-full bg-grader/10 blur-[150px]"
-            animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-          />
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-bg-dark px-6 pt-20">
+        {/* ── Фоновое видео (зацикленное, без звука) ── */}
+        <div aria-hidden className="absolute inset-0 z-0">
+          <video
+            ref={videoRef}
+            autoPlay muted loop playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src={video404} type="video/mp4" />
+          </video>
         </div>
+
+        {/* ── Затемнение, чтобы текст читался поверх видео ── */}
+        <div
+          aria-hidden
+          className="absolute inset-0 z-[1] bg-gradient-to-t from-bg-dark/90 via-bg-dark/55 to-bg-dark/75"
+        />
 
         {/* ── Контент ── */}
         <motion.div
@@ -59,10 +71,10 @@ export default function NotFoundPage() {
           initial="hidden"
           animate="show"
         >
-          {/* Крупное «404» — один цвет */}
+          {/* Крупное «404» */}
           <motion.div
             variants={item}
-            className="font-thin leading-none tracking-tight select-none text-text"
+            className="font-thin leading-none tracking-tight select-none text-white drop-shadow-[0_2px_30px_rgba(0,0,0,0.5)]"
             style={{ fontSize: 'clamp(7rem, 22vw, 16rem)' }}
           >
             404
@@ -71,7 +83,7 @@ export default function NotFoundPage() {
           {/* Заголовок */}
           <motion.h1
             variants={item}
-            className="font-light text-text mt-2"
+            className="font-light text-white mt-2"
             style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)' }}
           >
             Страница не найдена
@@ -80,13 +92,13 @@ export default function NotFoundPage() {
           {/* Тонкий акцентный разделитель */}
           <motion.div
             variants={item}
-            className="my-8 h-px w-20 bg-gradient-to-r from-transparent via-border to-transparent"
+            className="my-8 h-px w-20 bg-gradient-to-r from-transparent via-white/40 to-transparent"
           />
 
           {/* Описание */}
           <motion.p
             variants={item}
-            className="text-base font-light leading-relaxed text-text-secondary max-w-md"
+            className="text-base font-light leading-relaxed text-white/60 max-w-md"
           >
             Возможно, страница была перемещена или больше не существует.
             Проверьте адрес, чтобы продолжить.

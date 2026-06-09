@@ -48,13 +48,14 @@ export default function Header({ errorPage = false }) {
     return () => io.disconnect()
   }, [pathname])
 
-  /* Light mode: on homepage, before scroll — white text/logos over video */
+  /* Light mode: белый текст/лого над тёмным фоном. На главной — поверх
+     hero-видео до прокрутки; на странице 404 — всегда (фон везде тёмный). */
   const isHome = pathname === '/'
-  const isLight = isHome && !isScrolled
+  const isLight = errorPage || (isHome && !isScrolled)
 
-  /* На странице 404 шапка «твёрдая» (белая) с самого верха, но при
-     долистывании до футера — плавно скрывается, как на остальных страницах. */
-  const solid = isScrolled || errorPage
+  /* Прозрачная шапка наверху, при прокрутке — белая «твёрдая».
+     На 404 шапка остаётся прозрачной всегда — фон тёмный по всей странице. */
+  const solid = isScrolled && !errorPage
 
   return (
     <header
