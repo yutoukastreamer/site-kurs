@@ -97,7 +97,7 @@ export default function Footer() {
                 href="tel:+78007775714"
                 className="text-sm text-white/50 hover:text-white transition-colors whitespace-nowrap"
               >
-                8 800 777 57 14
+                8 499 371 04 25
               </a>
               <a
                 href="mailto:info@kurs3d.ru"

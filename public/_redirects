@@ -1,1 +1,8 @@
-/*    /index.html   200
+# Известные маршруты → index.html (200). Если добавится новый путь — допиши сюда.
+/bulldozer   /index.html   200
+/excavator   /index.html   200
+/grader      /index.html   200
+/news        /index.html   200
+/            /index.html   200
+# Всё остальное не существует → 404.html со статусом 404.
+/*           /404.html     404

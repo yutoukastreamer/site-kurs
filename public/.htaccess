@@ -1,10 +1,24 @@
-# SPA-fallback для Apache: любой неизвестный путь отдаёт index.html,
-# чтобы React Router работал при прямом заходе и обновлении страницы.
+# SPA-маршрутизация для React Router + КОРРЕКТНЫЙ статус 404.
+# Известные маршруты отдают index.html (200), всё остальное — 404.html (404).
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+
+  # 1. Реальные файлы и папки (css, js, картинки, pdf и т.д.) — отдаём как есть.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 2. Известные маршруты приложения → index.html со статусом 200.
+  #    Если в React Router добавится новый путь — допиши его в этот список.
+  RewriteRule ^(bulldozer|excavator|grader|news)/?$ index.html [L]
+  RewriteRule ^$ index.html [L]
+
+  # 3. Любой другой путь не существует → возвращаем настоящий статус 404.
+  #    Apache затем подставит страницу из ErrorDocument ниже (404.html),
+  #    которая загрузит то же приложение и React Router нарисует нашу 404.
+  RewriteRule ^ - [L,R=404]
 </IfModule>
+
+# 404.html — копия index.html (создаётся при сборке), статус остаётся 404.
+ErrorDocument 404 /404.html

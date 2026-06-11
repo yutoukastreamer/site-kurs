@@ -68,6 +68,18 @@
     return digits;
   }
 
+  /* ---- Проверки заполненности (чтобы не слать мусор в Calltouch) ----------
+     Поле телефона Bitrix24 предзаполнено маской «+7», поэтому проверки
+     «непустая строка» мало — это давало мусорные заявки на каждый сабмит,
+     в т.ч. при проваленной валидации. Телефон считаем валидным только при
+     полном числе цифр (РФ = 11), email — при наличии «@» и точки. */
+  function isValidPhone(phone) {
+    return !!phone && phone.length >= 11;
+  }
+  function isValidEmail(email) {
+    return /.+@.+\..+/.test(email || '');
+  }
+
   /* ---- Чтение полей формы (эвристика по type / name / placeholder) -------- */
   function scrapeForm(form) {
     var data = { fio: '', phoneNumber: '', email: '' };
@@ -150,12 +162,17 @@
 
     var data = scrapeForm(form);
 
-    // Если нет ни телефона, ни email — это, скорее всего, чужая форма (поиск
-    // и т.п.). Пропускаем, чтобы не слать пустые заявки.
-    if (!data.phoneNumber && !data.email) {
-      console.log(LOG, 'Форма без телефона и email — пропускаю.');
+    // Шлём только если есть валидный телефон (≥11 цифр) ИЛИ валидный email.
+    // Иначе это чужая форма, незаполненная форма или проваленная валидация
+    // (маска «+7» даёт телефон из одной цифры) — мусор в Calltouch не нужен.
+    if (!isValidPhone(data.phoneNumber) && !isValidEmail(data.email)) {
+      console.log(LOG, 'Нет валидного телефона/email — пропускаю.', data);
       return;
     }
+
+    // Чистим невалидные огрызки (например, телефон-маска «+7» → «7»).
+    if (!isValidPhone(data.phoneNumber)) data.phoneNumber = '';
+    if (!isValidEmail(data.email))       data.email = '';
 
     if (productInterest) {
       data.subject = 'Получить предложение: ' + productInterest;

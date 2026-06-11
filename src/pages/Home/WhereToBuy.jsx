@@ -37,7 +37,7 @@ export default function WhereToBuy() {
                   href="tel:88007775714"
                   className="font-medium text-text underline underline-offset-4 decoration-border hover:decoration-text transition-colors"
                 >
-                  8 800 777 57 14
+                  8 499 371 04 25
                 </a>
               </p>
             </div>
