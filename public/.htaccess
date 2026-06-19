@@ -4,6 +4,10 @@
   RewriteEngine On
   RewriteBase /
 
+  # Перенаправление с HTTP на HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+
   # 1. Реальные файлы и папки (css, js, картинки, pdf и т.д.) — отдаём как есть.
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d

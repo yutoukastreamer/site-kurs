@@ -3,16 +3,25 @@
    Сайт: kurs-gsi.ru
    ----------------------------------------------------------------------------
    Что делает:
-   1. Перехватывает отправку формы обратной связи (Bitrix24) и кнопки
-      «Получить предложение» по всему сайту.
-   2. Собирает имя / телефон / email из полей формы.
+   1. Перехватывает отправку формы обратной связи Bitrix24 через ОФИЦИАЛЬНОЕ
+      событие «b24:form:submit» и шлёт заявку ТОЛЬКО если сам Битрикс пометил
+      форму как валидную (form.validated === true).
+   2. Собирает имя / телефон / email из полей формы (LEAD_*/CONTACT_*).
    3. Для кнопок «Получить предложение» определяет продукт по URL и кладёт
       его название в subject/comment.
    4. Подтягивает sessionId Calltouch и utm-метки из URL.
    5. Отправляет заявку в Calltouch REST API (чистый fetch, без jQuery).
    6. Логирует каждый шаг в консоль для отладки.
 
-   Работает в SPA (React): слушатели висят на document (делегирование),
+   ПОЧЕМУ b24:form:submit, а не DOM-событие submit:
+   Раньше скрипт слушал родное событие «submit» и сам угадывал валидность
+   (длина телефона, regex email). Наша эвристика ≠ валидация Битрикса, поэтому
+   заявка могла улетать на каждый клик по кнопке, даже когда форма невалидна, —
+   отсюда дубли. Событие b24:form:submit + флаг form.validated дают точный
+   ответ самого Битрикса, поэтому заявка уходит ровно один раз и только когда
+   форма реально прошла валидацию.
+
+   Работает в SPA (React): слушатели висят на window/document (делегирование),
    поэтому переживают перерисовку и переходы между страницами.
    ========================================================================== */
 (function () {
@@ -63,40 +72,32 @@
   /* ---- Нормализация телефона к виду 79000000000 --------------------------- */
   function normalizePhone(raw) {
     if (!raw) return '';
-    var digits = raw.replace(/\D/g, '');
+    var digits = String(raw).replace(/\D/g, '');
     if (digits.length === 11 && digits.charAt(0) === '8') digits = '7' + digits.slice(1);
     return digits;
   }
 
-  /* ---- Проверки заполненности (чтобы не слать мусор в Calltouch) ----------
-     Поле телефона Bitrix24 предзаполнено маской «+7», поэтому проверки
-     «непустая строка» мало — это давало мусорные заявки на каждый сабмит,
-     в т.ч. при проваленной валидации. Телефон считаем валидным только при
-     полном числе цифр (РФ = 11), email — при наличии «@» и точки. */
-  function isValidPhone(phone) {
-    return !!phone && phone.length >= 11;
-  }
-  function isValidEmail(email) {
-    return /.+@.+\..+/.test(email || '');
-  }
+  /* ---- Чтение полей формы Bitrix24 (form.getFields()) ---------------------
+     В формах Б24 значение поля — это функция: el.value() возвращает строку.
+     Имена полей стандартные: LEAD_*/CONTACT_*/DEAL_*. */
+  function readB24Form(form) {
+    var data = { fio: '', phoneNumber: '', email: '', comment: '' };
+    if (typeof form.getFields !== 'function') return data;
 
-  /* ---- Чтение полей формы (эвристика по type / name / placeholder) -------- */
-  function scrapeForm(form) {
-    var data = { fio: '', phoneNumber: '', email: '' };
-    var fields = form.querySelectorAll('input, textarea');
+    form.getFields().forEach(function (el) {
+      var name = el.name;
+      var value = (typeof el.value === 'function') ? el.value() : el.value;
+      value = (value == null ? '' : String(value)).trim();
+      if (!value) return;
 
-    fields.forEach(function (el) {
-      var type = (el.type || '').toLowerCase();
-      var hint = ((el.name || '') + ' ' + (el.placeholder || '') + ' ' + (el.getAttribute('autocomplete') || '')).toLowerCase();
-      var value = (el.value || '').trim();
-      if (!value || type === 'hidden' || type === 'submit' || type === 'checkbox') return;
-
-      if (type === 'email' || /mail|почт|email/.test(hint)) {
-        data.email = value;
-      } else if (type === 'tel' || /phone|tel|телефон|\bтел\b/.test(hint)) {
-        data.phoneNumber = normalizePhone(value);
-      } else if (/name|fio|имя|фио|контакт/.test(hint) || (type === 'text' && !data.fio)) {
+      if (name === 'LEAD_NAME' || name === 'CONTACT_NAME') {
         data.fio = value;
+      } else if (name === 'LEAD_PHONE' || name === 'CONTACT_PHONE') {
+        data.phoneNumber = normalizePhone(value);
+      } else if (name === 'LEAD_EMAIL' || name === 'CONTACT_EMAIL') {
+        data.email = value;
+      } else if (name === 'LEAD_COMMENTS' || name === 'DEAL_COMMENTS' || name === 'CONTACT_COMMENTS') {
+        data.comment = value;
       }
     });
 
@@ -155,37 +156,41 @@
     }
   }, true);
 
-  /* ---- Отправка любой формы на сайте (включая Bitrix24) ------------------- */
-  document.addEventListener('submit', function (e) {
-    var form = e.target;
-    if (!(form instanceof HTMLFormElement)) return;
-
-    var data = scrapeForm(form);
-
-    // Шлём только если есть валидный телефон (≥11 цифр) ИЛИ валидный email.
-    // Иначе это чужая форма, незаполненная форма или проваленная валидация
-    // (маска «+7» даёт телефон из одной цифры) — мусор в Calltouch не нужен.
-    if (!isValidPhone(data.phoneNumber) && !isValidEmail(data.email)) {
-      console.log(LOG, 'Нет валидного телефона/email — пропускаю.', data);
+  /* ---- Отправка формы Bitrix24 (официальное событие) ----------------------
+     b24:form:submit срабатывает при сабмите формы Б24. event.detail.object —
+     объект формы с флагом .validated и методами .getFields()/.title.
+     Шлём в Calltouch ТОЛЬКО при form.validated === true → нет дублей и нет
+     заявок при невалидной форме. */
+  window.addEventListener('b24:form:submit', function (e) {
+    var form = e.detail && e.detail.object;
+    if (!form) {
+      console.warn(LOG, 'b24:form:submit без объекта формы — пропускаю.', e);
       return;
     }
 
-    // Чистим невалидные огрызки (например, телефон-маска «+7» → «7»).
-    if (!isValidPhone(data.phoneNumber)) data.phoneNumber = '';
-    if (!isValidEmail(data.email))       data.email = '';
+    if (!form.validated) {
+      console.log(LOG, 'Форма Б24 не прошла валидацию — заявку не шлём.');
+      return;
+    }
+
+    var data = readB24Form(form);
+
+    if (!data.phoneNumber && !data.email) {
+      console.log(LOG, 'В валидной форме нет телефона/email — пропускаю.', data);
+      return;
+    }
 
     if (productInterest) {
       data.subject = 'Получить предложение: ' + productInterest;
-      data.comment = data.subject;
+      if (!data.comment) data.comment = data.subject;
       productInterest = ''; // сбрасываем после использования
     } else {
-      data.subject = 'Форма обратной связи (kurs-gsi.ru)';
-      data.comment = data.subject;
+      data.subject = form.title || ('Форма обратной связи (' + location.hostname + ')');
+      if (!data.comment) data.comment = data.subject;
     }
 
     sendToCalltouch(data);
-    // НЕ вызываем e.preventDefault() — даём Bitrix24 штатно обработать форму.
-  }, true);
+  });
 
-  console.log(LOG, 'Скрипт отслеживания форм инициализирован.');
+  console.log(LOG, 'Скрипт отслеживания форм инициализирован (b24:form:submit).');
 })();
